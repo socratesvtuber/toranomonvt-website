@@ -228,12 +228,21 @@
   </footer>
 
   <script>
+    const voiceMap = {
+      sokrates: '../audio/voice/スーパーファン感謝_20251111_1.m4a'
+    };
+
     document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
       element.addEventListener('click', function() {
         const voiceFile = this.dataset.voice || this.closest('.illustration-box').querySelector('.voice-play-btn').dataset.voice;
-        // 音声ファイルが用意されたら実装
-        // const audio = new Audio(`../voices/${voiceFile}.mp3`);
-        // audio.play();
+        const src = voiceMap[voiceFile];
+        if (src) {
+          const audio = new Audio(src);
+          audio.play().catch(() => {
+            console.warn('Audio playback failed. User interaction may be required.');
+          });
+          return;
+        }
         alert('音声ファイルはまだ用意されていません');
       });
     });
