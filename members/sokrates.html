@@ -228,9 +228,9 @@
   </footer>
 
   <script>
-    document.querySelectorAll('.voice-play-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const voiceFile = this.dataset.voice;
+    document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
+      element.addEventListener('click', function() {
+        const voiceFile = this.dataset.voice || this.closest('.illustration-box').querySelector('.voice-play-btn').dataset.voice;
         // 音声ファイルが用意されたら実装
         // const audio = new Audio(`../voices/${voiceFile}.mp3`);
         // audio.play();
