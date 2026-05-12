@@ -245,18 +245,51 @@
 
     // Current playing audio reference
     let currentMemberAudio = null;
+    let isPlaying = false;
+  
+    // Function to update button icon
+    function updateButtonIcon(playing) {
+      const btn = document.querySelector('.voice-play-btn i');
+      if (btn) {
+        if (playing) {
+          btn.classList.remove('fa-play');
+          btn.classList.add('fa-pause');
+        } else {
+          btn.classList.remove('fa-pause');
+          btn.classList.add('fa-play');
+        }
+      }
+    }
   
     document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
       element.addEventListener('click', function() {
-        const voiceFile = this.dataset.voice || this.closest('.illustration-box').querySelector('.voice-play-btn').dataset.voice;
+        const btn = document.querySelector('.voice-play-btn');
+        const voiceFile = this.dataset.voice || btn.dataset.voice;
         const src = voiceMap[voiceFile];
         if (src) {
-          // Stop current audio if playing
+          // Toggle pause/play
+          if (currentMemberAudio && isPlaying) {
+            // Pause
+            currentMemberAudio.pause();
+            isPlaying = false;
+            updateButtonIcon(false);
+            return;
+          }
+          
+          if (currentMemberAudio && !isPlaying) {
+            // Resume
+            currentMemberAudio.play().catch(() => {
+              console.warn('Audio playback failed.');
+            });
+            isPlaying = true;
+            updateButtonIcon(true);
+            return;
+          }
+          
+          // Stop previous audio if any
           if (currentMemberAudio) {
             currentMemberAudio.pause();
             currentMemberAudio.currentTime = 0;
-            currentMemberAudio = null;
-            return;
           }
           
           // Create and play new audio at 50% volume
@@ -264,14 +297,18 @@
           audio.volume = 0.5;
           audio.preload = 'auto';
           currentMemberAudio = audio;
+          isPlaying = true;
+          updateButtonIcon(true);
           
           audio.play().catch(() => {
             console.warn('Audio playback failed. User interaction may be required.');
           });
           
-          // Reset reference when audio ends
+          // Reset when audio ends
           audio.onended = () => {
             currentMemberAudio = null;
+            isPlaying = false;
+            updateButtonIcon(false);
           };
           
           return;
