@@ -589,3 +589,140 @@
     justify-content: center;
   }
 }
+
+/* Favorite Button */
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.favorite-btn:hover {
+  background: rgba(255, 68, 102, 0.15);
+  border-color: rgba(255, 68, 102, 0.3);
+  color: #ff4466;
+}
+
+.favorite-btn.active {
+  background: rgba(255, 68, 102, 0.2);
+  border-color: rgba(255, 68, 102, 0.5);
+  color: #ff4466;
+}
+
+.favorite-btn i {
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.favorite-btn.active i {
+  color: #ff4466;
+}
+
+/* Policy Pages */
+.policy-page {
+  min-height: 100vh;
+  padding: calc(var(--site-header-height) + 40px) clamp(24px, 4vw, 60px) 60px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.policy-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.policy-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0 0 10px;
+  background: linear-gradient(135deg, #ffb84d, #ff8b61);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.policy-subtitle {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.last-updated {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.policy-content {
+  display: grid;
+  gap: 24px;
+}
+
+.policy-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.policy-section h2 {
+  margin: 0 0 16px;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+
+.policy-section h3 {
+  margin: 16px 0 10px;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.policy-section p {
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.policy-section ul {
+  color: var(--muted);
+  line-height: 1.8;
+  padding-left: 20px;
+}
+
+.policy-section li {
+  margin-bottom: 8px;
+}
+
+.policy-section .contact-info {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 184, 77, 0.1);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+}
+
+.policy-section .contact-info p {
+  margin: 4px 0;
+  color: var(--text);
+}
+
+.policy-section.note {
+  background: rgba(159, 87, 255, 0.1);
+  border-color: rgba(159, 87, 255, 0.3);
+}
+
+@media (max-width: 600px) {
+  .policy-page {
+    padding: calc(var(--site-header-height) + 20px) 16px 40px;
+  }
+  
+  .policy-section {
+    padding: 16px;
+  }
+}

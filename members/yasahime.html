@@ -31,10 +31,14 @@
   </header>
 
   <main class="member-page">
-    <section class="member-header">
-      <h1>夜叉姫</h1>
-      <p class="member-subtitle">Yasahime</p>
-    </section>
+  <section class="member-header">
+    <h1>夜叉姫</h1>
+    <p class="member-subtitle">Yasahime</p>
+    <button class="favorite-btn" data-member="yasahime" data-name="夜叉姫" data-url="../members/yasahime.html" data-image="../img/夜叉さんアイコン_1080_1080.jpeg">
+      <i class="far fa-heart"></i>
+      <span>お気に入り</span>
+    </button>
+  </section>
 
     <div class="member-content">
       <aside class="member-sidebar">
@@ -231,6 +235,7 @@
     <p>&copy; 2026 虎ノ門VT Community. All rights reserved.</p>
   </footer>
 
+  <script src="../audio-voice-player.js"></script>
   <script>
     const voiceMap = {
       yasahime: '../audio/voice/夜叉さんセリフ1.m4a',
@@ -238,20 +243,86 @@
       sokrates: '../audio/voice/スーパーファン感謝_20251111_1.m4a'
     };
 
+    // Current playing audio reference
+    let currentMemberAudio = null;
+  
     document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
       element.addEventListener('click', function() {
         const voiceFile = this.dataset.voice || this.closest('.illustration-box').querySelector('.voice-play-btn').dataset.voice;
         const src = voiceMap[voiceFile];
         if (src) {
+          // Stop current audio if playing
+          if (currentMemberAudio) {
+            currentMemberAudio.pause();
+            currentMemberAudio.currentTime = 0;
+            currentMemberAudio = null;
+            return;
+          }
+          
+          // Create and play new audio at 50% volume
           const audio = new Audio(src);
+          audio.volume = 0.5;
+          audio.preload = 'auto';
+          currentMemberAudio = audio;
+          
           audio.play().catch(() => {
             console.warn('Audio playback failed. User interaction may be required.');
           });
+          
+          // Reset reference when audio ends
+          audio.onended = () => {
+            currentMemberAudio = null;
+          };
+          
           return;
         }
         alert('音声ファイルはまだ用意されていません');
       });
     });
-  </script>
-</body>
-</html>
+  
+    // Favorite button functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const favoriteBtn = document.querySelector('.favorite-btn');
+      if (!favoriteBtn) return;
+  
+      const memberData = {
+        id: favoriteBtn.dataset.member,
+        name: favoriteBtn.dataset.name,
+        url: favoriteBtn.dataset.url,
+        image: favoriteBtn.dataset.image
+      };
+  
+      // Load favorites from localStorage
+      let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
+      
+      // Check if already favorited
+      const isFavorited = favorites.some(fav => fav.id === memberData.id);
+      if (isFavorited) {
+        favoriteBtn.classList.add('active');
+        favoriteBtn.querySelector('i').classList.remove('far');
+        favoriteBtn.querySelector('i').classList.add('fas');
+      }
+  
+      favoriteBtn.addEventListener('click', function() {
+        const index = favorites.findIndex(fav => fav.id === memberData.id);
+        
+        if (index !== -1) {
+          // Remove from favorites
+          favorites.splice(index, 1);
+          this.classList.remove('active');
+          this.querySelector('i').classList.remove('fas');
+          this.querySelector('i').classList.add('far');
+        } else {
+          // Add to favorites
+          favorites.push(memberData);
+          this.classList.add('active');
+          this.querySelector('i').classList.remove('far');
+          this.querySelector('i').classList.add('fas');
+        }
+        
+        localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
+      });
+    });
+    </script>
+    </body>
+    </html>
