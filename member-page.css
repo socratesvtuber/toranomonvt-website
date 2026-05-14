@@ -19,19 +19,21 @@
   left: 0;
   right: 0;
   z-index: 20;
-  background: #ffffff;
-  backdrop-filter: none;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px) saturate(180%);
   padding: 18px 0 10px;
-  border-bottom: none;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 }
 
 .member-header h1 {
   font-size: clamp(2rem, 4vw, 3rem);
   margin: 0 0 10px;
-  background: linear-gradient(135deg, #ffb84d, #ff8b61);
+  background: linear-gradient(135deg, #ffb84d 0%, #ff9f66 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -0.01em;
 }
 
 .member-subtitle {
