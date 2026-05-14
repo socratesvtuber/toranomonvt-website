@@ -5,6 +5,12 @@
   color: inherit;
 }
 
+/* Premium enhancements */
+.member-page {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .member-page {
   min-height: 100vh;
   padding: calc(var(--site-header-height) + 66px) clamp(24px, 4vw, 60px) 40px;
@@ -19,21 +25,26 @@
   left: 0;
   right: 0;
   z-index: 20;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(200%);
   padding: 18px 0 10px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 184, 77, 0.15);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    0 8px 24px rgba(0, 0, 0, 0.04),
+    0 0 40px rgba(255, 184, 77, 0.06);
 }
 
 .member-header h1 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  margin: 0 0 10px;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  margin: 0 0 12px;
   background: linear-gradient(135deg, #ffb84d 0%, #ff9f66 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  text-shadow: 0 0 60px rgba(255, 184, 77, 0.3);
 }
 
 .member-subtitle {
@@ -115,9 +126,9 @@
 
 .illustration-box {
   position: relative;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #faf9f8 100%);
+  border: 1px solid rgba(255, 184, 77, 0.08);
+  border-radius: var(--radius-md);
   overflow: visible;
   width: 100%;
   min-height: 432px;
@@ -174,10 +185,21 @@
 
 .member-section {
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
-  padding: 32px;
+  border: 1px solid rgba(255, 184, 77, 0.08);
+  border-radius: var(--radius-md);
+  padding: 36px;
   scroll-margin-top: calc(var(--site-header-height) + 24px);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.member-section:hover {
+  box-shadow:
+    var(--shadow),
+    0 0 40px rgba(255, 184, 77, 0.08);
+  transform: translateY(-2px);
 }
 
 .member-section:first-of-type {
