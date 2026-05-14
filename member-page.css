@@ -19,7 +19,7 @@
   left: 0;
   right: 0;
   z-index: 20;
-  background: #050b16;
+  background: #ffffff;
   backdrop-filter: none;
   padding: 18px 0 10px;
   border-bottom: none;
@@ -71,8 +71,8 @@
 }
 
 .costume-nav {
-  background: rgba(15, 27, 47, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #f5f5f5;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   padding: 16px;
   width: auto;
@@ -113,8 +113,8 @@
 
 .illustration-box {
   position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   overflow: visible;
   width: 100%;
@@ -171,8 +171,8 @@
 }
 
 .member-section {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   padding: 32px;
   scroll-margin-top: calc(var(--site-header-height) + 24px);
@@ -666,8 +666,8 @@
 }
 
 .policy-section {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   padding: 24px;
 }
