@@ -1,114 +1,120 @@
-# Firebase Setup Guide for Shared Milestone Counter
+# Firebase 設定ガイド - 共通ミリ秒カウンター用
 
-This guide explains how to set up Firebase for the shared visitor counter that works across all users.
+このガイドでは、全ユーザーで共有される訪問者カウンターに Firebase を使用する設定方法を説明します。
 
-## Overview
+## 概要
 
-The website now uses Firebase Firestore to store a shared visitor count that is consistent for all users. If Firebase is not configured, the system falls back to local storage (per-user counter).
+この Web サイトでは Firebase Firestore を使用して、全ユーザーで共有される訪問者カウンターを実装しています。Firebase が設定されていない場合は、ローカルストレージ（ユーザーごと）にフェルバックします。
 
-## Step 1: Create a Firebase Project
+## ステップ 1: Firebase プロジェクトの作成
 
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Add a project" or "Create a project"
-3. Enter a project name (e.g., "toranomon-vt")
-4. Follow the setup wizard:
-   - Enable Google Analytics (optional)
-   - Accept the terms
-5. Click "Create project"
+1. [Firebase コンソール](https://console.firebase.google.com/) にアクセス
+2. 「プロジェクトを追加」をクリック
+3. プロジェクト名を入力（例："toranomon-vt"）
+4. ウィザードに従って設定：
+   - Google アナリティクスを有効化（任意）
+   - 利用規約に同意
+5. 「プロジェクトを作成」をクリック
 
-## Step 2: Create a Firestore Database
+## ステップ 2: Firestore データベースの作成
 
-1. In the Firebase Console, click "Firestore Database" in the left sidebar
-2. Click "Create database"
-3. Choose **Production mode** or **Test mode** (Test mode is fine for development)
-4. Select a location (choose one closest to your users, e.g., "asia-northeast1" for Japan)
-5. Click "Enable"
+1. Firebase コンソールの左サイドバーで「Firestore Database」をクリック
+2. 「データベースを作成」をクリック
+3. **プロダクションモード** または **テストモード** を選択（開発中はテストモードで問題ありません）
+4. ロケーションを選択（日本からのアクセスがメインの場合は「asia-northeast1（東京）」を推奨）
+5. 「有効」をクリック
 
-## Step 3: Get Your Firebase Config
+## ステップ 3: Firebase 設定情報の取得
 
-1. In the Firebase Console, click the gear icon ⚙️ next to "Project Overview"
-2. Select "Project settings"
-3. Scroll down to "Your apps" section
-4. Click the web icon (`</>`) to add a web app
-5. Register your app with a name (e.g., "toranomon-website")
-6. Copy the `firebaseConfig` object values
+1. Firebase コンソールで、プロジェクト概要の横にある歯車アイコン ⚙️ をクリック
+2. 「プロジェクトの設定」を選択
+3. 「マイアプリ」セクションまでスクロール
+4. Web アイコングル `</>` をクリックして Web アプリを追加
+5. アプリ名を入力（例："toranomon-website"）
+6. 表示された `firebaseConfig` オブジェクトの値をコピー
 
-## Step 4: Update firebase-config.js
+## ステップ 4: firebase-config.js の設定
 
-Open `firebase-config.js` and replace the placeholder values:
+`firebase-config.js` ファイルを開き、以下の値を実際のものに書き換えてください：
 
 ```javascript
 config: {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // Your actual API key
-  authDomain: "toranomon-vt.firebaseapp.com", // Your project ID
-  projectId: "toranomon-vt", // Your project ID
+  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // ← あなたの API キー
+  authDomain: "toranomon-vt.firebaseapp.com", // ← あなたのプロジェクト ID
+  projectId: "toranomon-vt", // ← あなたのプロジェクト ID
   storageBucket: "toranomon-vt.appspot.com",
-  messagingSenderId: "123456789012", // Your sender ID
-  appId: "1:123456789012:web:abcdef123456" // Your app ID
+  messagingSenderId: "123456789012", // ← あなたの送信者 ID
+  appId: "1:123456789012:web:abcdef123456" // ← あなたのアプリ ID
 }
 ```
 
-## Step 5: Set Up Firestore Security Rules
+**重要な注意：**
+- 静的な Web サイトでは `.env` ファイルから自動的に設定値を読み込むことができません
+- `firebase-config.js` を直接編集して、実際の Firebase 設定値を記述してください
+- `.env.example` はテンプレートとして用意しています。必要に応じて `.env` としてコピーし、設定値を控えるためにお使いください
 
-In the Firebase Console, go to "Firestore Database" → "Rules" tab and set:
+## ステップ 5: Firestore セキュリティルール設定
+
+Firebase コンソールで「Firestore Database」→「ルール」タブに移動し、以下を設定：
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read/write access to the counters collection
+    // counters コレクションへの読み取り/書き込みを許可
     match /counters/{counterId} {
-      allow read, write: if true; // For development; restrict in production
+      allow read, write: if true; // 開発用。本番環境では制限を強化してください
     }
   }
 }
 ```
 
-**Note:** For production, you should restrict access more carefully.
+**注意：** 本番環境では、より厳格なセキュリティルールを設定することをお勧めします。
 
-## Step 6: Test the Setup
+## ステップ 6: 動作確認
 
-1. Open your website in a browser
-2. Visit the homepage - the counter should increment
-3. Open the browser console (F12) to see any errors
-4. Check the Firebase Console → Firestore Database to see the counter document
+1. Web サイトをブラウザで開く
+2. トップページにアクセス - カウンターがインクリメントされるはずです
+3. ブラウザのコンソール（F12）でエラーが出ていないか確認
+4. Firebase コンソール → Firestore データベースでカウンタードキュメントを確認
 
-## Troubleshooting
+## トラブルシューティング
 
-### Counter not incrementing
-- Check browser console for errors
-- Verify your Firebase config values are correct
-- Ensure Firestore is enabled in your Firebase project
+### カウンターがインクリメントされない
+- ブラウザのコンソールでエラーを確認
+- Firebase の設定値が正しいか確認
+- Firestore がプロジェクトで有効になっているか確認
 
-### "Firebase initialization failed" message
-- This is expected if Firebase is not configured
-- The system will fall back to local storage
+### 「Firebase initialization failed」というメッセージ
+- Firebase の設定が正しくない場合に表示されます
+- ローカルストレージにフェルバックします
+- `firebase-config.js` の設定値を再確認
 
-### Permission denied errors
-- Check your Firestore security rules
-- Make sure the rules allow read/write access to the `counters` collection
+### Permission denied エラー
+- Firestore のセキュリティルールを確認
+- `counters` コレクションへの読み取り/書き込みが許可されているか確認
 
-## Cost Considerations
+## 料金について
 
-Firebase offers a generous free tier:
-- 50,000 reads/day
-- 20,000 writes/day
-- 1 GB storage
+Firebase には無料枠があります：
+- 1 日 50,000 回の読み取り
+- 1 日 20,000 回の書き込み
+- 1 GB のストレージ
 
-For a typical website, this should be more than sufficient. Monitor usage in the Firebase Console.
+通常の Web サイトであれば、これで十分です。Firebase コンソールで使用状況を確認できます。
 
-## Production Recommendations
+## 本番環境での推奨事項
 
-1. **Restrict security rules** to only allow specific operations
-2. **Enable Firebase App Check** to prevent abuse
-3. **Set up billing alerts** to monitor costs
-4. **Consider rate limiting** for the counter endpoint
+1. **セキュリティルールを制限** - 特定の操作のみ許可
+2. **Firebase App Check の有効化** - 不正利用を防止
+3. **請求アラートの設定** - 使用状況を監視
+4. **レート制限の検討** - カウンターエンドポイントの保護
 
-## Alternative: Using a Different Backend
+## 代替手段
 
-If you prefer not to use Firebase, you can:
-- Use Supabase (open-source Firebase alternative)
-- Create a simple Node.js/Python backend with a database
-- Use a serverless function (AWS Lambda, Cloud Functions)
+Firebase を使用したくない場合は、以下が代替手段です：
+- Supabase（オープンソースの Firebase 代替）
+- Node.js/Python バックエンドとデータベース
+- サーバーレス関数（AWS Lambda、Cloud Functions）
 
-The code is designed to fall back to local storage if Firebase is not available.
+コードは Firebase が利用できない場合、ローカルストレージにフェルバックするように設計されています。

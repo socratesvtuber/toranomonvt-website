@@ -1,33 +1,54 @@
 // Firebase Configuration and Shared Counter
-// Replace the placeholder config values with your actual Firebase project config
+// Uses Cloudflare Pages Functions to fetch Firebase config securely
+// Environment variables are managed via Cloudflare Dashboard
+
 const FirebaseConfig = {
   firebase: null,
   db: null,
-  
-  // Initialize Firebase - YOU MUST REPLACE THESE VALUES WITH YOUR OWN
-  // Get these from Firebase Console: https://console.firebase.google.com/
-  config: {
-    apiKey: "YOUR_API_KEY", // Replace with your API key
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // Replace with your project ID
-    projectId: "YOUR_PROJECT_ID", // Replace with your project ID
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID", // Replace with your sender ID
-    appId: "YOUR_APP_ID" // Replace with your app ID
+  config: null,
+  initialized: false,
+
+  // Fetch config from Cloudflare Pages Functions
+  async fetchConfig() {
+    try {
+      const response = await fetch('/api/firebase-config');
+      if (!response.ok) {
+        throw new Error('Failed to fetch Firebase config');
+      }
+      this.config = await response.json();
+      return this.config;
+    } catch (error) {
+      console.warn('Failed to fetch Firebase config from server:', error);
+      return null;
+    }
   },
 
   async init() {
+    // Try to fetch config from Cloudflare Pages Functions first
+    const serverConfig = await this.fetchConfig();
+    
+    if (!serverConfig || !serverConfig.apiKey || serverConfig.apiKey === '') {
+      console.warn('⚠️ Firebase config not available. Using local fallback.');
+      console.warn('Please set up environment variables in Cloudflare Pages Dashboard.');
+      return false;
+    }
+
+    this.config = serverConfig;
+
     // Load Firebase SDK from CDN
     if (typeof firebase === 'undefined') {
       await this.loadFirebaseSDK();
     }
-    
+
     // Initialize Firebase
     try {
       firebase.initializeApp(this.config);
       this.db = firebase.firestore();
+      this.initialized = true;
+      console.log('✅ Firebase initialized successfully');
       return true;
     } catch (error) {
-      console.warn('Firebase initialization failed. Using local fallback:', error);
+      console.warn('❌ Firebase initialization failed. Using local fallback:', error);
       return false;
     }
   },
@@ -50,14 +71,14 @@ const FirebaseConfig = {
 
   // Shared counter functions
   async incrementVisitCount() {
-    if (!this.db) {
+    if (!this.db || !this.initialized) {
       // Fallback to local storage
       return this.localIncrement();
     }
 
     try {
       const counterRef = this.db.collection('counters').doc('visitor_count');
-      
+
       // Use Firebase transaction for atomic increment
       await counterRef.transaction(async (transaction) => {
         const doc = await transaction.get(counterRef);
@@ -67,7 +88,7 @@ const FirebaseConfig = {
           return { count: 1, lastUpdated: Date.now() };
         }
       });
-      
+
       return this.getVisitCount();
     } catch (error) {
       console.warn('Firebase increment failed, using local fallback:', error);
@@ -76,7 +97,7 @@ const FirebaseConfig = {
   },
 
   async getVisitCount() {
-    if (!this.db) {
+    if (!this.db || !this.initialized) {
       // Fallback to local storage
       return this.localGetCount();
     }
@@ -84,7 +105,7 @@ const FirebaseConfig = {
     try {
       const counterRef = this.db.collection('counters').doc('visitor_count');
       const doc = await counterRef.get();
-      
+
       if (doc.exists) {
         return doc.data().count;
       } else {
@@ -112,7 +133,7 @@ const FirebaseConfig = {
 
   // Listen for real-time updates
   onCountUpdate(callback) {
-    if (!this.db) {
+    if (!this.db || !this.initialized) {
       // Fallback: poll local storage
       let lastCount = this.localGetCount();
       const interval = setInterval(() => {
@@ -131,7 +152,7 @@ const FirebaseConfig = {
         callback(doc.data().count);
       }
     });
-    
+
     return unsubscribe;
   }
 };
