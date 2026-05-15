@@ -8,20 +8,29 @@ const MilestoneCounter = {
   firebaseEnabled: false,
 
   async init() {
+    console.log('MilestoneCounter.init() called');
+    
     // Initialize Firebase for shared counter
     if (typeof FirebaseCounter !== 'undefined') {
       this.firebaseEnabled = await FirebaseCounter.init();
+      console.log('Firebase initialized:', this.firebaseEnabled);
     }
 
     // Only run on homepage
+    console.log('Is home page:', this.isHomePage());
     if (!this.isHomePage()) return;
 
     // Only increment if this is the first visit in this session
+    console.log('Has visited this session:', this.hasVisitedThisSession());
     if (!this.hasVisitedThisSession()) {
+      console.log('Incrementing count...');
       await this.incrementCount();
       this.setHasVisitedThisSession();
+      console.log('Count incremented and session flag set');
+    } else {
+      console.log('Skipping increment - already visited this session');
     }
-    
+
     await this.updateDisplay();
     this.checkMilestone();
   },
