@@ -88,12 +88,15 @@ const FirebaseConfig = {
       const counterRef = this.db.collection('counters').doc('visitor_count');
 
       // Use Firebase transaction for atomic increment
-      await counterRef.transaction(async (transaction) => {
+      await this.db.runTransaction(async (transaction) => {
         const doc = await transaction.get(counterRef);
         if (doc.exists) {
-          return { count: doc.data().count + 1, lastUpdated: Date.now() };
+          const newCount = doc.data().count + 1;
+          transaction.update(counterRef, { count: newCount, lastUpdated: Date.now() });
+          return newCount;
         } else {
-          return { count: 1, lastUpdated: Date.now() };
+          transaction.set(counterRef, { count: 1, lastUpdated: Date.now() });
+          return 1;
         }
       });
 
