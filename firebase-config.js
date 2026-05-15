@@ -1,38 +1,47 @@
 // Firebase Configuration and Shared Counter
-// ============================================
-// IMPORTANT: Replace the placeholder values below with your actual Firebase project config.
-// To get your Firebase config:
-// 1. Go to Firebase Console: https://console.firebase.google.com/
-// 2. Select your project (or create a new one)
-// 3. Click the gear icon ⚙️ next to "Project Overview" → "Project settings"
-// 4. Scroll to "Your apps" section → Click "</>" (Web) to add a web app
-// 5. Copy the firebaseConfig values and paste them below
+// Uses Cloudflare Pages Functions to fetch Firebase config securely
+// Environment variables are managed via Cloudflare Dashboard
 
 const FirebaseConfig = {
   firebase: null,
   db: null,
-  config: {
-    // ============================================
-    // 🔧 FIREBASE CONFIGURATION - REPLACE THESE VALUES
-    // ============================================
-    apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // ← Replace with your API key
-    authDomain: "your-project-id.firebaseapp.com", // ← Replace with your project ID
-    projectId: "your-project-id", // ← Replace with your project ID
-    storageBucket: "your-project-id.appspot.com", // ← Replace with your project ID
-    messagingSenderId: "123456789012", // ← Replace with your sender ID
-    appId: "1:123456789012:web:abcdef1234567890" // ← Replace with your app ID
-    // ============================================
-  },
+  config: null,
   initialized: false,
 
+  // Fetch config from Cloudflare Pages Functions
+  async fetchConfig() {
+    try {
+      const response = await fetch('/api/firebase-config');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Firebase config: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      
+      // Validate the response
+      if (!data.apiKey || data.apiKey.includes('YOUR_')) {
+        throw new Error('Invalid API key in response');
+      }
+      
+      this.config = data;
+      return this.config;
+    } catch (error) {
+      console.warn('Failed to fetch Firebase config from server:', error);
+      return null;
+    }
+  },
+
   async init() {
-    // Check if config is properly set
-    const cfg = this.config;
-    if (!cfg.apiKey || cfg.apiKey.includes('YOUR_') || cfg.apiKey === 'AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') {
-      console.warn('⚠️ Firebase config not set. Using local fallback.');
-      console.warn('Please replace placeholder values in firebase-config.js with your actual Firebase config.');
+    // Try to fetch config from Cloudflare Pages Functions first
+    const serverConfig = await this.fetchConfig();
+    
+    if (!serverConfig || !serverConfig.apiKey) {
+      console.warn('⚠️ Firebase config not available. Using local fallback.');
+      console.warn('Please ensure Cloudflare Pages environment variables are set correctly.');
+      console.warn('See CLOUDFLARE_DETAILED_SETUP.md for instructions.');
       return false;
     }
+
+    this.config = serverConfig;
 
     // Load Firebase SDK from CDN
     if (typeof firebase === 'undefined') {
