@@ -1,0 +1,35 @@
+{
+  "milestoneInterval": 100,
+  "specialMilestones": [
+    {
+      "count": 1,
+      "voice": "audio/voice/スーパーファン感謝_20251111_1.m4a",
+      "message": "🎉 初訪問ありがとうございます！"
+    },
+    {
+      "count": 100,
+      "voice": "audio/voice/kaka ちゃんセリフ 1.m4a",
+      "message": "🎊 100 回記念！ありがとうございます！"
+    },
+    {
+      "count": 500,
+      "voice": "audio/voice/夜叉さんセリフ 1.m4a",
+      "message": "🎊 500 回記念！ありがとうございます！"
+    },
+    {
+      "count": 1000,
+      "voice": "audio/voice/スーパーファン感謝_20251111_1.m4a",
+      "message": "🎊 1000 回記念！ありがとうございます！"
+    },
+    {
+      "count": 5000,
+      "voice": "audio/voice/kaka ちゃんセリフ 1.m4a",
+      "message": "🎊 5000 回記念！ありがとうございます！"
+    },
+    {
+      "count": 10000,
+      "voice": "audio/voice/夜叉さんセリフ 1.m4a",
+      "message": "🎊 10000 回記念！ありがとうございます！"
+    }
+  ]
+}

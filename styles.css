@@ -626,6 +626,36 @@ button, .button {
   font-size: 0.95rem;
 }
 
+/* Special milestone notification with enhanced styling */
+.milestone-notification-special .milestone-notification-content {
+  background: linear-gradient(135deg, rgba(255, 100, 150, 0.95), rgba(255, 50, 100, 0.95));
+  box-shadow: 0 20px 80px rgba(255, 100, 150, 0.6);
+  animation: pulse-glow 1s ease-in-out infinite alternate;
+}
+
+.milestone-notification-special .milestone-notification-icon {
+  font-size: 2rem;
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 20px 60px rgba(255, 100, 150, 0.4);
+  }
+  100% {
+    box-shadow: 0 20px 80px rgba(255, 100, 150, 0.8);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
 .site-footer {
   padding: 48px clamp(24px, 4vw, 60px);
   text-align: center;

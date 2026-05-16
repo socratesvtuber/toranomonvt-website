@@ -1,15 +1,56 @@
 // Milestone Counter - Tracks visitor count and plays voice on milestones
 // Uses Firebase for shared counter across all users
 const MilestoneCounter = {
-  milestoneInterval: 100, // Play voice every 100 visitors
+  // Default milestone interval (every 100 visitors)
+  milestoneInterval: 100,
+
+  // Special milestones with custom voices - loaded from config file
+  specialMilestones: [],
+
   storageKey: 'toranomon_visitor_count',
   milestoneStorageKey: 'toranomon_last_milestone',
   visitedKey: 'toranomon_has_visited',
   firebaseEnabled: false,
+  configLoaded: false,
+
+  // Load milestone configuration from JSON file
+  async loadConfig() {
+    if (this.configLoaded) return;
+
+    try {
+      const response = await fetch('/milestone-config.json');
+      if (!response.ok) {
+        throw new Error('Failed to load milestone config');
+      }
+      const config = await response.json();
+
+      this.milestoneInterval = config.milestoneInterval || 100;
+      this.specialMilestones = config.specialMilestones || [];
+      this.configLoaded = true;
+
+      console.log('Milestone config loaded:', config);
+    } catch (error) {
+      console.warn('Failed to load milestone config, using defaults:', error);
+      // Use default values if config fails
+      this.milestoneInterval = 100;
+      this.specialMilestones = [
+        { count: 1, voice: 'audio/voice/スーパーファン感謝_20251111_1.m4a', message: '🎉 初訪問ありがとうございます！' },
+        { count: 100, voice: 'audio/voice/kaka ちゃんセリフ 1.m4a', message: '🎊 100 回記念！ありがとうございます！' },
+        { count: 500, voice: 'audio/voice/夜叉さんセリフ 1.m4a', message: '🎊 500 回記念！ありがとうございます！' },
+        { count: 1000, voice: 'audio/voice/スーパーファン感謝_20251111_1.m4a', message: '🎊 1000 回記念！ありがとうございます！' },
+        { count: 5000, voice: 'audio/voice/kaka ちゃんセリフ 1.m4a', message: '🎊 5000 回記念！ありがとうございます！' },
+        { count: 10000, voice: 'audio/voice/夜叉さんセリフ 1.m4a', message: '🎊 10000 回記念！ありがとうございます！' }
+      ];
+      this.configLoaded = true;
+    }
+  },
 
   async init() {
     console.log('MilestoneCounter.init() called');
-    
+
+    // Load milestone configuration
+    await this.loadConfig();
+
     // Initialize Firebase for shared counter
     if (typeof FirebaseCounter !== 'undefined') {
       this.firebaseEnabled = await FirebaseCounter.init();
@@ -44,9 +85,9 @@ const MilestoneCounter = {
   },
 
   isHomePage() {
-    return window.location.pathname === '/' || 
-           window.location.pathname.endsWith('index.html') || 
-           window.location.pathname === '';
+    return window.location.pathname === '/' ||
+    window.location.pathname.endsWith('index.html') ||
+    window.location.pathname === '';
   },
 
   async getCount() {
@@ -104,11 +145,32 @@ const MilestoneCounter = {
     const lastMilestone = this.getLastMilestone();
     const currentMilestone = Math.floor(count / this.milestoneInterval) * this.milestoneInterval;
 
-    // Check if we've reached a new milestone
+    // Check for special milestones
+    const specialMilestone = this.specialMilestones.find(m => m.count === count);
+    if (specialMilestone && lastMilestone !== specialMilestone.count) {
+      this.celebrateSpecialMilestone(specialMilestone);
+      this.setLastMilestone(specialMilestone.count);
+      return;
+    }
+
+    // Check if we've reached a new regular milestone
     if (currentMilestone > 0 && currentMilestone !== lastMilestone) {
       this.celebrateMilestone(currentMilestone);
       this.setLastMilestone(currentMilestone);
     }
+  },
+
+  celebrateSpecialMilestone(milestone) {
+    const counterEl = document.getElementById('milestone-counter');
+
+    // Add celebration animation
+    if (counterEl) {
+      counterEl.classList.add('milestone-celebration');
+      setTimeout(() => counterEl.classList.remove('milestone-celebration'), 500);
+    }
+
+    // Play special voice
+    this.playSpecialVoice(milestone.voice, milestone.message);
   },
 
   celebrateMilestone(milestone) {
@@ -122,6 +184,35 @@ const MilestoneCounter = {
 
     // Play milestone voice
     this.playMilestoneVoice(milestone);
+  },
+
+  playSpecialVoice(voiceFile, message) {
+    // Create and play audio
+    const audio = new Audio(voiceFile);
+    audio.preload = 'auto';
+
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log('Special milestone voice playback prevented:', error.message);
+
+        // Try to play on user interaction
+        const playOnInteraction = () => {
+          audio.play().catch(e => console.log('Special milestone voice playback failed:', e));
+          document.removeEventListener('click', playOnInteraction);
+          document.removeEventListener('keydown', playOnInteraction);
+          document.removeEventListener('touchstart', playOnInteraction);
+        };
+
+        document.addEventListener('click', playOnInteraction, { once: true });
+        document.addEventListener('keydown', playOnInteraction, { once: true });
+        document.addEventListener('touchstart', playOnInteraction, { once: true });
+      });
+    }
+
+    // Show special notification
+    this.showSpecialMilestoneNotification(message);
   },
 
   playMilestoneVoice(milestone) {
@@ -162,6 +253,31 @@ const MilestoneCounter = {
 
     // Show notification
     this.showMilestoneNotification(milestone);
+  },
+
+  showSpecialMilestoneNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'milestone-notification milestone-notification-special';
+    notification.innerHTML = `
+      <div class="milestone-notification-content">
+        <span class="milestone-notification-icon">🎊</span>
+        <span class="milestone-notification-text">${message}</span>
+      </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      notification.classList.add('milestone-notification-show');
+    });
+
+    // Remove after animation
+    setTimeout(() => {
+      notification.classList.remove('milestone-notification-show');
+      setTimeout(() => notification.remove(), 300);
+    }, 5000);
   },
 
   showMilestoneNotification(milestone) {
