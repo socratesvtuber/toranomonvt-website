@@ -1,0 +1,41 @@
+/**
+ * Configuration file for Google Form to Firebase integration
+ * Copy this file to config.gs and fill in your actual values
+ * 
+ * IMPORTANT: Never commit config.gs with real values to version control
+ */
+
+// ============================================
+// Firebase Configuration
+// ============================================
+
+// Firebase Realtime Database URL (without trailing slash)
+// Format: https://YOUR_PROJECT_ID.firebaseio.com
+var FIREBASE_DB_URL = 'https://your-project-id.firebaseio.com';
+
+// Firebase Project ID
+var FIREBASE_PROJECT_ID = 'your-project-id';
+
+// ============================================
+// Google Drive Configuration
+// ============================================
+
+// Google Drive Folder ID for storing uploaded files
+// This is the folder where form file uploads will be stored
+var GOOGLE_DRIVE_FOLDER_ID = 'your-drive-folder-id-here';
+
+// ============================================
+// How to get Firebase Database URL:
+// 1. Go to Firebase Console (https://console.firebase.google.com/)
+// 2. Select your project
+// 3. Go to Build > Realtime Database
+// 4. Click on the "Rules" tab to see your database URL
+// 5. Copy the URL (without the trailing slash)
+//
+// How to get Google Drive Folder ID:
+// 1. Go to Google Drive (https://drive.google.com/)
+// 2. Create a new folder or select existing one
+// 3. The folder ID is the part after /folders/ in the URL
+// 4. Example: https://drive.google.com/drive/folders/1ABC123...xyz
+//    Folder ID: 1ABC123...xyz
+// ============================================

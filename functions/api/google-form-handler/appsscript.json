@@ -1,0 +1,27 @@
+{
+  "runtimeVersion": "V8",
+  "timeZone": "Asia/Tokyo",
+  "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "DriveApi",
+        "service": "drive",
+        "version": "v3"
+      },
+      {
+        "userSymbol": "FirebaseApi",
+        "service": "firebaserules",
+        "version": "v1"
+      }
+    ]
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/forms",
+    "https://www.googleapis.com/auth/forms.current",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.scriptapp",
+    "https://www.googleapis.com/auth/firebase"
+  ]
+}

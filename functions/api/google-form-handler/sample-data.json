@@ -1,0 +1,88 @@
+{
+  "_comment": "これは Firebase に保存されるデータのサンプル構造です",
+  "form_submissions": {
+    "-XYZ123abc": {
+      "_comment": "各提出物はユニークな ID で管理されます",
+      "name_select": "虎ノ門太郎",
+      "name_hiragana": "とらのもんたろう",
+      "name_romaji": "Toranomon Taro",
+      "sns_link": "https://twitter.com/example",
+      "birthday": "2024-01-01",
+      "first_stream_date": "2024-04-01",
+      "height": "160cm",
+      "image_color": "赤、青",
+      "sushi_mark": "🐯",
+      "streaming_language": "日本語、英語",
+      "unit_project_name": "虎ノ門ナイト",
+      "illustrator": "山田さん",
+      "modeler_2d": "佐藤さん",
+      "modeler_3d": "鈴木さん",
+      "fan_name": "虎の子",
+      "official_hashtag": "#虎ノ門 VT",
+      "streaming_schedule": "毎週水曜日 21:00〜",
+      "recommended_video": "https://youtube.com/watch?v=example",
+      "announcement_event": "5 月 20 日ライブ配信予定",
+      "goods_music_link": "https://example.com/goods",
+      "message_to_fans": "いつもありがとうございます！",
+      "qa": "Q: 趣味は？ A: ゲームです！",
+      "headerImageUrl": "https://drive.google.com/file/d/HEADER_FILE_ID/view",
+      "fullbodyImageUrl": "https://drive.google.com/file/d/FULLBODY_FILE_ID/view",
+      "voiceAudioUrls": [
+        "https://drive.google.com/file/d/VOICE1_FILE_ID/view",
+        "https://drive.google.com/file/d/VOICE2_FILE_ID/view"
+      ],
+      "videoUrl": "https://drive.google.com/file/d/VIDEO_FILE_ID/view",
+      "public_flag": "する",
+      "submittedAt": "2024-05-17T10:00:00.000Z",
+      "formSubmissionId": "1234567890abcdef",
+      "formResponseId": "anonymous",
+      "timestamp": 1715943600000
+    },
+    "-XYZ456def": {
+      "_comment": "2 件目のデータ例（音声ファイルなしの場合）",
+      "name_select": "虎ノ門花子",
+      "name_hiragana": "とらのもんはなこ",
+      "name_romaji": "Toranomon Hanako",
+      "sns_link": null,
+      "birthday": null,
+      "first_stream_date": null,
+      "height": null,
+      "image_color": "ピンク",
+      "sushi_mark": "🌸",
+      "streaming_language": "日本語",
+      "unit_project_name": null,
+      "illustrator": null,
+      "modeler_2d": null,
+      "modeler_3d": null,
+      "fan_name": "花組",
+      "official_hashtag": "#虎ノ門花子",
+      "streaming_schedule": "未定",
+      "recommended_video": null,
+      "announcement_event": null,
+      "goods_music_link": null,
+      "message_to_fans": "はじめまして！",
+      "qa": null,
+      "headerImageUrl": "https://drive.google.com/file/d/HEADER2_FILE_ID/view",
+      "fullbodyImageUrl": "https://drive.google.com/file/d/FULLBODY2_FILE_ID/view",
+      "voiceAudioUrls": [],
+      "videoUrl": null,
+      "public_flag": "する",
+      "submittedAt": "2024-05-17T11:00:00.000Z",
+      "formSubmissionId": "0987654321fedcba",
+      "formResponseId": "user@example.com",
+      "timestamp": 1715947200000
+    }
+  },
+  "form_errors": {
+    "_comment": "エラーログはここに保存されます",
+    "-ERROR123": {
+      "error": "Error: Something went wrong",
+      "errorStack": "at onFormSubmit (Code.gs:100)",
+      "timestamp": "2024-05-17T10:00:00.000Z",
+      "eventData": {
+        "responseId": "1234567890abcdef",
+        "values": ["2024/05/17 19:00:00", "value1", "value2"]
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "rules": {
+    "form_submissions": {
+      ".read": true,
+      ".write": false,
+      "$submissionId": {
+        ".read": true,
+        ".write": false,
+        "name_hiragana": {
+          ".validate": "newData.isString()"
+        },
+        "name_romaji": {
+          ".validate": "newData.isString()"
+        },
+        "public_flag": {
+          ".validate": "newData.isString()"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber()"
+        }
+      }
+    },
+    "form_errors": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "public_members": {
+      ".read": true,
+      ".write": false,
+      "$memberId": {
+        ".read": true,
+        ".indexOn": ["timestamp", "public_flag"]
+      }
+    }
+  }
+}
