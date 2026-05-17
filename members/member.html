@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>メンバー - 虎ノ門</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../member-page.css">
+</head>
+<body>
+<header class="site-header">
+<a href="../" class="brand-link">
+<div class="brand">
+<div class="brand-mark"><img src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" class="brand-logo"></div>
+<div>
+<p class="eyebrow">配信者コミュニティ</p>
+<h1>虎ノ門 〜Vtuber を仕事にしよう！〜</h1>
+</div>
+</div>
+</a>
+<nav class="site-nav">
+<a href="../#about">About</a>
+<a href="../#members">Members</a>
+<a href="../#projects">Projects</a>
+<a href="../#contact">Contact</a>
+</nav>
+</header>
+
+<main class="member-page">
+<!-- Loading state -->
+<div id="loading-state" class="loading-container">
+<div class="loading-spinner"></div>
+<p>データを読み込んでいます...</p>
+</div>
+
+<!-- Error state -->
+<div id="error-state" class="error-container" style="display: none;">
+<div class="error-icon">
+<i class="fas fa-exclamation-triangle"></i>
+</div>
+<p>エラーが発生しました</p>
+<p id="error-message" class="error-detail"></p>
+</div>
+
+<!-- Member content (dynamically rendered) -->
+<div id="member-root" style="display: none;">
+<section class="member-header">
+<h1 id="member-name-display">メンバー名</h1>
+<p class="member-subtitle" id="member-name-romaji">Member Name</p>
+<button class="favorite-btn" id="favorite-btn">
+<i class="far fa-heart"></i>
+<span>お気に入り</span>
+</button>
+</section>
+
+<div class="member-content">
+<aside class="member-sidebar">
+<div class="illustration-container">
+<div class="costume-nav">
+<h4>衣装・資料</h4>
+<ul>
+<li><a href="#profile">プロフィール</a></li>
+<li><a href="#schedule">配信予定</a></li>
+<li><a href="#message">メッセージ</a></li>
+</ul>
+</div>
+<div class="illustration-box">
+<img id="member-avatar" src="" alt="メンバー画像" class="standing-illustration" onerror="this.src='../img/虎ノ門ロゴ大本.png'">
+<button class="voice-play-btn" id="voice-play-btn">
+<i class="fas fa-play"></i>
+</button>
+<div id="voice-buttons-container" class="voice-buttons-container">
+<!-- Voice buttons will be inserted here -->
+</div>
+</div>
+</div>
+</aside>
+
+<article class="member-main">
+<section class="member-section" id="profile">
+<h2>SNS・リンク</h2>
+<div class="sns-links" id="sns-links">
+<!-- SNS links will be inserted here -->
+</div>
+</section>
+
+<section class="member-section">
+<h2>基本情報</h2>
+<dl class="member-info-grid" id="member-info-grid">
+<!-- Basic info will be inserted here -->
+</dl>
+</section>
+
+<section class="member-section">
+<h2>キャッチコピー</h2>
+<div class="section-content">
+<p id="member-catchcopy">キャッチコピーが表示されます</p>
+</div>
+</section>
+
+<section class="member-section">
+<h2>夢・目標</h2>
+<p id="member-dream">夢・目標が表示されます</p>
+</section>
+
+<section class="member-section">
+<h2>推しマーク</h2>
+<p id="member-sushi-mark">推しマーク</p>
+</section>
+
+<section class="member-section">
+<h2>配信用語</h2>
+<ul class="term-list" id="streaming-terms">
+<!-- Streaming terms will be inserted here -->
+</ul>
+</section>
+
+<section class="member-section">
+<h2>ユニット・プロジェクト</h2>
+<p id="member-unit-project">ユニット・プロジェクト</p>
+</section>
+
+<section class="member-section">
+<h2>クリエイター情報</h2>
+<dl class="creator-info" id="creator-info">
+<!-- Creator info will be inserted here -->
+</dl>
+</section>
+
+<section class="member-section">
+<h2>ファン・コミュニティ</h2>
+<dl class="community-info" id="community-info">
+<!-- Fan name and hashtag -->
+</dl>
+</section>
+
+<section class="member-section" id="schedule">
+<h2>配信予定</h2>
+<div class="schedule-info" id="schedule-info">
+<p>配信予定が表示されます</p>
+</div>
+</section>
+
+<section class="member-section">
+<h2>オススメ動画</h2>
+<ul class="video-list" id="recommended-videos">
+<!-- Video links -->
+</ul>
+</section>
+
+<section class="member-section">
+<h2>お知らせ・イベント予定</h2>
+<div class="announcement-box" id="announcement-box">
+<p>お知らせが表示されます</p>
+</div>
+</section>
+
+<section class="member-section">
+<h2>グッズ・音楽リンク</h2>
+<div class="links-grid" id="goods-music-links">
+<!-- Links -->
+</div>
+</section>
+
+<section class="member-section" id="message">
+<h2>ファンへ一言</h2>
+<blockquote class="message-box" id="message-box">
+ファンへのメッセージ
+</blockquote>
+</section>
+
+<section class="member-section">
+<h2>Q＆A</h2>
+<div class="qa-section" id="qa-section">
+<!-- Q&A items -->
+</div>
+</section>
+
+</article>
+</div>
+
+<div class="member-nav" id="member-nav">
+<!-- Navigation buttons will be inserted here -->
+</div>
+</div>
+</main>
+
+<footer class="site-footer">
+<p>&copy; 2026 虎ノ門 VT Community. All rights reserved.</p>
+</footer>
+
+<script src="../firebase-config.js"></script>
+<script src="../script.js"></script>
+<script src="../audio-voice-player.js"></script>
+<script src="../firebase-member-loader.js"></script>
+<script>
+// Voice playback functionality
+let currentMemberAudio = null;
+let isPlaying = false;
+
+function updateButtonIcon(playing) {
+const btn = document.querySelector('.voice-play-btn i');
+if (btn) {
+if (playing) {
+btn.classList.remove('fa-play');
+btn.classList.add('fa-pause');
+} else {
+btn.classList.remove('fa-pause');
+btn.classList.add('fa-play');
+}
+}
+}
+
+function playVoice(src) {
+if (currentMemberAudio && isPlaying) {
+currentMemberAudio.pause();
+isPlaying = false;
+updateButtonIcon(false);
+if (currentMemberAudio.src === src) {
+return;
+}
+}
+
+if (currentMemberAudio && !isPlaying && currentMemberAudio.src === src) {
+currentMemberAudio.play().catch(() => {
+console.warn('Audio playback failed.');
+});
+isPlaying = true;
+updateButtonIcon(true);
+return;
+}
+
+if (currentMemberAudio) {
+currentMemberAudio.pause();
+currentMemberAudio.currentTime = 0;
+}
+
+const audio = new Audio(src);
+audio.volume = 0.5;
+audio.preload = 'auto';
+currentMemberAudio = audio;
+isPlaying = true;
+updateButtonIcon(true);
+
+audio.play().catch(() => {
+console.warn('Audio playback failed. User interaction may be required.');
+});
+
+audio.onended = () => {
+currentMemberAudio = null;
+isPlaying = false;
+updateButtonIcon(false);
+};
+}
+
+// Initialize voice buttons
+document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
+element.addEventListener('click', function(e) {
+e.stopPropagation();
+const randomIndex = Math.floor(Math.random() * window.memberVoiceFiles.length);
+playVoice(window.memberVoiceFiles[randomIndex]);
+});
+});
+
+document.querySelectorAll('.voice-individual-btn').forEach(button => {
+button.addEventListener('click', function(e) {
+e.stopPropagation();
+const index = parseInt(this.dataset.voiceIndex);
+if (window.memberVoiceFiles[index]) {
+playVoice(window.memberVoiceFiles[index]);
+}
+});
+});
+
+// Favorite button functionality
+document.addEventListener('DOMContentLoaded', function() {
+const favoriteBtn = document.getElementById('favorite-btn');
+if (!favoriteBtn) return;
+
+const memberData = {
+id: favoriteBtn.dataset.memberId || '',
+name: favoriteBtn.dataset.name || '',
+url: window.location.href,
+image: favoriteBtn.dataset.image || ''
+};
+
+let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
+const isFavorited = favorites.some(fav => fav.id === memberData.id);
+
+if (isFavorited) {
+favoriteBtn.classList.add('active');
+favoriteBtn.querySelector('i').classList.remove('far');
+favoriteBtn.querySelector('i').classList.add('fas');
+}
+
+favoriteBtn.addEventListener('click', function() {
+const index = favorites.findIndex(fav => fav.id === memberData.id);
+
+if (index !== -1) {
+favorites.splice(index, 1);
+this.classList.remove('active');
+this.querySelector('i').classList.remove('fas');
+this.querySelector('i').classList.add('far');
+} else {
+favorites.push(memberData);
+this.classList.add('active');
+this.querySelector('i').classList.remove('far');
+this.querySelector('i').classList.add('fas');
+}
+
+localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
+});
+});
+</script>
+</body>
+</html>
