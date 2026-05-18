@@ -43,13 +43,24 @@ const FirebaseMemberLoader = {
     console.log('FirebaseMemberLoader: Firebase URL:', this.firebaseUrl);
     
     // Check URL pattern to determine page type
-    const memberMatch = window.location.pathname.match(/members\/member\.html/);
+    // Match both member.html?name=... and direct member pages like 夜叉姫.html
+    const memberMatch = window.location.pathname.match(/members\/(.+)\.html$/);
     const nameParam = this.getQueryParam('name');
     
+    // Extract member name from URL path (e.g., "夜叉姫" from "members/夜叉姫.html")
+    let pathMemberName = null;
+    if (memberMatch && memberMatch[1] && memberMatch[1] !== 'member') {
+      pathMemberName = decodeURIComponent(memberMatch[1]);
+    }
+  
     if (memberMatch && nameParam) {
-      // Dynamic member page with name parameter
-      console.log('FirebaseMemberLoader: Loading member by name:', nameParam);
+      // Dynamic member page with name parameter (member.html?name=...)
+      console.log('FirebaseMemberLoader: Loading member by query param:', nameParam);
       await this.loadMemberByName(nameParam);
+    } else if (pathMemberName) {
+      // Direct member page (e.g., 夜叉姫.html)
+      console.log('FirebaseMemberLoader: Loading member from path:', pathMemberName);
+      await this.loadMemberByName(pathMemberName);
     } else if (memberMatch) {
       // Member page without name - show error or redirect
       console.log('FirebaseMemberLoader: No member name specified');
@@ -64,11 +75,11 @@ const FirebaseMemberLoader = {
    * @returns {string|null} Firebase URL
    */
   getFirebaseUrl() {
-    // Try global config first
-    if (typeof FIREBASE_DB_URL !== 'undefined') {
+    // Try global config first (set by firebase-config.js)
+    if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL) {
       return FIREBASE_DB_URL;
     }
-    
+
     // Try meta tag
     const metaTag = document.querySelector('meta[name="env:FIREBASE_STORAGE_BUCKET"]');
     if (metaTag) {
@@ -76,12 +87,17 @@ const FirebaseMemberLoader = {
       const projectId = bucket.replace('.firebaseio.com', '').replace('.appspot.com', '');
       return `https://${projectId}.firebaseio.com`;
     }
-    
+
     // Try firebase-config.js global
     if (typeof FirebaseCounter !== 'undefined' && FirebaseCounter.db) {
       return FirebaseCounter.db;
     }
-    
+
+    // Fallback: try to get from FirebaseConfig if available
+    if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.config && FirebaseConfig.config.projectId) {
+      return `https://${FirebaseConfig.config.projectId}.firebaseio.com`;
+    }
+
     return null;
   },
   

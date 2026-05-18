@@ -2,6 +2,18 @@
 // Uses Cloudflare Pages Functions to fetch Firebase config securely
 // Environment variables are managed via Cloudflare Dashboard
 
+// ============================================
+// Firebase Project Configuration
+// ============================================
+// Set your Firebase project ID here for Realtime Database
+// Example: 'toranomon-vt' for https://toranomon-vt.firebaseapp.com
+const FIREBASE_PROJECT_ID = 'your-project-id'; // ← Replace with your actual project ID
+// ============================================
+
+// Firebase Realtime Database URL (for member data)
+// This will be set after config is loaded
+window.FIREBASE_DB_URL = null;
+
 const FirebaseConfig = {
   firebase: null,
   db: null,
@@ -16,12 +28,12 @@ const FirebaseConfig = {
         throw new Error(`Failed to fetch Firebase config: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
-      
+
       // Validate the response
       if (!data.apiKey || data.apiKey.includes('YOUR_')) {
         throw new Error('Invalid API key in response');
       }
-      
+
       this.config = data;
       return this.config;
     } catch (error) {
@@ -33,15 +45,30 @@ const FirebaseConfig = {
   async init() {
     // Try to fetch config from Cloudflare Pages Functions first
     const serverConfig = await this.fetchConfig();
-    
+
     if (!serverConfig || !serverConfig.apiKey) {
       console.warn('⚠️ Firebase config not available. Using local fallback.');
       console.warn('Please ensure Cloudflare Pages environment variables are set correctly.');
       console.warn('See CLOUDFLARE_DETAILED_SETUP.md for instructions.');
+      
+      // Fallback: Use FIREBASE_PROJECT_ID if defined
+      if (FIREBASE_PROJECT_ID && FIREBASE_PROJECT_ID !== 'your-project-id') {
+        window.FIREBASE_DB_URL = `https://${FIREBASE_PROJECT_ID}.firebaseio.com`;
+        console.log('🔗 Firebase Realtime Database URL set from FIREBASE_PROJECT_ID:', window.FIREBASE_DB_URL);
+        return true;
+      }
       return false;
     }
 
     this.config = serverConfig;
+
+    // Set FIREBASE_DB_URL for Realtime Database
+    // Extract project ID from apiKey or use projectId from config
+    const projectId = serverConfig.projectId;
+    if (projectId) {
+      window.FIREBASE_DB_URL = `https://${projectId}.firebaseio.com`;
+      console.log('🔗 Firebase Realtime Database URL set:', window.FIREBASE_DB_URL);
+    }
 
     // Load Firebase SDK from CDN
     if (typeof firebase === 'undefined') {

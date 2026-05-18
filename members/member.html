@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../member-page.css">
+<!-- Firebase Configuration -->
+<script src="../firebase-config.js"></script>
 </head>
 <body>
 <header class="site-header">
@@ -314,6 +316,20 @@ this.querySelector('i').classList.add('fas');
 
 localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
 });
+});
+</script>
+
+<!-- Firebase Member Loader Script -->
+<script src="../firebase-member-loader.js"></script>
+<script>
+// Initialize Firebase config and Member Loader
+document.addEventListener('DOMContentLoaded', async function() {
+  // Initialize Firebase config first to set FIREBASE_DB_URL
+  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+    await FirebaseConfig.init();
+  }
+  // Then initialize the member loader
+  FirebaseMemberLoader.init();
 });
 </script>
 </body>

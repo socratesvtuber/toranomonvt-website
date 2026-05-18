@@ -194,13 +194,20 @@ if (secretTrigger) {
 <script src="audio-voice-player.js"></script>
 <script src="firebase-member-loader.js"></script>
 <script>
+// Initialize Firebase config first to set FIREBASE_DB_URL
+(async function initFirebase() {
+  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+    await FirebaseConfig.init();
+  }
+})();
+
 // Firebase Member List Loader for index page
 const FirebaseMemberListLoader = {
   firebaseUrl: null,
-  
+
   async init() {
     console.log('FirebaseMemberListLoader: Initializing...');
-    
+
     // Get Firebase URL
     this.firebaseUrl = this.getFirebaseUrl();
     
