@@ -7,7 +7,7 @@
 // ============================================
 // Set your Firebase project ID here for Realtime Database
 // Example: 'toranomon-vt' for https://toranomon-vt.firebaseapp.com
-const FIREBASE_PROJECT_ID = 'your-project-id'; // ← Replace with your actual project ID
+const FIREBASE_PROJECT_ID = toranomonvt-website; // ← Replace with your actual project ID
 // ============================================
 
 // Firebase Realtime Database URL (for member data)
