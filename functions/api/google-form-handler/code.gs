@@ -76,11 +76,15 @@ function onFormSubmit(e) {
     // Wait for lock to prevent concurrent executions
     lock.waitLock(30000);
     
+    Logger.log('========================================');
     Logger.log('=== Form Submission Started ===');
     Logger.log('Timestamp: ' + new Date().toISOString());
+    Logger.log('========================================');
     
     // Validate event object
     if (!e || !e.response) {
+      Logger.log('ERROR: Invalid event object - e or e.response is null/undefined');
+      Logger.log('Event object: ' + JSON.stringify(e));
       throw new Error('Invalid event object');
     }
     
@@ -88,7 +92,9 @@ function onFormSubmit(e) {
     var formResponse = e.response;
     var itemResponses = formResponse.getItemResponses();
     
+    Logger.log('Form Response ID: ' + formResponse.getId());
     Logger.log('Number of item responses: ' + itemResponses.length);
+    Logger.log('========================================');
     
     // Initialize result object with all fields as null
     var result = initializeResultObject();
@@ -101,26 +107,33 @@ function onFormSubmit(e) {
       var responseType = item.getType();
       var response = itemResponse.getResponse();
       
-      Logger.log('Processing item ' + i + ': ' + title);
-      Logger.log('Response type: ' + responseType);
+      Logger.log('--- Processing Item ' + (i + 1) + ' ---');
+      Logger.log('  Title: ' + title);
+      Logger.log('  Response Type: ' + responseType);
+      Logger.log('  Response: ' + (response ? (response.length > 100 ? response.substring(0, 100) + '...' : response) : 'null'));
       
       // Use indexOf to find matching field
       var matchedField = findMatchingField(title);
       
       if (matchedField) {
-        Logger.log('Matched field: ' + matchedField);
+        Logger.log('  Matched Field: ' + matchedField);
         
         // Handle file uploads separately
         if (isFileUploadField(matchedField)) {
+          Logger.log('  Handling as file upload field');
           handleFileUpload(result, matchedField, item, formResponse);
         } else {
           // Handle regular text responses
           result[matchedField] = formatResponse(response);
+          Logger.log('  Set value: ' + result[matchedField]);
         }
       } else {
-        Logger.log('No matching field found for: ' + title);
+        Logger.log('  WARNING: No matching field found for this title');
       }
     }
+    
+    Logger.log('========================================');
+    Logger.log('=== Parsed Data Summary ===');
     
     // Add metadata
     result.submittedAt = new Date().toISOString();
@@ -128,13 +141,39 @@ function onFormSubmit(e) {
     result.formResponseId = formResponse.getRespondentEmail() || 'anonymous';
     result.timestamp = Date.now();
     
-    Logger.log('Parsed data: ' + JSON.stringify(result, null, 2));
+    // Log key fields
+    Logger.log('Name (Hiragana): ' + result.name_hiragana);
+    Logger.log('Name (Romaji): ' + result.name_romaji);
+    Logger.log('Public Flag: ' + result.public_flag);
+    Logger.log('Header Image URL: ' + (result.headerImageUrl ? 'Set' : 'Not set'));
+    Logger.log('Fullbody Image URL: ' + (result.fullbodyImageUrl ? 'Set' : 'Not set'));
+    Logger.log('Voice Audio Count: ' + (result.voiceAudioUrls ? result.voiceAudioUrls.length : 0));
+    Logger.log('Video URL: ' + (result.videoUrl ? 'Set' : 'Not set'));
+    
+    // Check required fields
+    Logger.log('========================================');
+    Logger.log('=== Required Fields Check ===');
+    var missingRequired = [];
+    if (!result.name_hiragana) missingRequired.push('name_hiragana');
+    if (!result.name_romaji) missingRequired.push('name_romaji');
+    if (!result.public_flag) missingRequired.push('public_flag');
+    
+    if (missingRequired.length > 0) {
+      Logger.log('WARNING: Missing required fields: ' + missingRequired.join(', '));
+    } else {
+      Logger.log('All required fields are present');
+    }
     
     // Store in Firebase
+    Logger.log('========================================');
+    Logger.log('=== Storing in Firebase ===');
     var firebaseResult = storeInFirebase(result);
     
+    Logger.log('========================================');
     Logger.log('=== Form Submission Completed Successfully ===');
     Logger.log('Firebase ID: ' + firebaseResult.id);
+    Logger.log('Firebase URL: ' + FIREBASE_DB_URL + '/form_submissions/' + firebaseResult.id);
+    Logger.log('========================================');
     
     return {
       success: true,
@@ -143,17 +182,19 @@ function onFormSubmit(e) {
     };
     
   } catch (error) {
-    Logger.log('=== ERROR ===');
+    Logger.log('========================================');
+    Logger.log('=== ERROR OCCURRED ===');
     Logger.log('Error: ' + error.toString());
-    Logger.log('Stack: ' + error.getStackTrace());
+    Logger.log('Stack: ' + (error.stack || 'No stack trace available'));
+    Logger.log('========================================');
     
-    // Store error in Firebase for debugging
+    // store error in Firebase for debugging
     storeErrorInFirebase(error, e);
     
     return {
       success: false,
       error: error.toString(),
-      stack: error.getStackTrace()
+      stack: error.stack || 'No stack trace available'
     };
     
   } finally {
@@ -275,11 +316,15 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
               var file = DriveApp.getFileById(fileId);
               result.voiceAudioUrls.push(file.getShareUrl());
             }
+            Logger.log('  Processed ' + result.voiceAudioUrls.length + ' voice audio files');
           } else {
             // Handle single file uploads
             var fileId = response[0].getId();
             var file = DriveApp.getFileById(fileId);
             var shareUrl = file.getShareUrl();
+            
+            Logger.log('  File ID: ' + fileId);
+            Logger.log('  Share URL: ' + shareUrl);
             
             if (fieldKey === 'header_image') {
               result.headerImageUrl = shareUrl;
@@ -294,7 +339,8 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
       }
     }
   } catch (error) {
-    Logger.log('Error handling file upload for ' + fieldKey + ': ' + error.toString());
+    Logger.log('ERROR handling file upload for ' + fieldKey + ': ' + error.toString());
+    throw error;
   }
 }
 
@@ -306,6 +352,17 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
 function storeInFirebase(data) {
   var url = FIREBASE_DB_URL + '/form_submissions.json';
   
+  Logger.log('Firebase URL: ' + url);
+  Logger.log('Checking Firebase configuration...');
+  Logger.log('  FIREBASE_DB_URL: ' + FIREBASE_DB_URL);
+  
+  // Validate Firebase URL
+  if (!FIREBASE_DB_URL || FIREBASE_DB_URL.indexOf('YOUR_') !== -1 || FIREBASE_DB_URL.indexOf('your-') !== -1) {
+    Logger.log('ERROR: Firebase URL is not configured properly!');
+    Logger.log('Please copy config.gs.example to config.gs and fill in your Firebase credentials.');
+    throw new Error('Firebase URL not configured. Please check config.gs file.');
+  }
+  
   var options = {
     'method': 'post',
     'contentType': 'application/json',
@@ -313,16 +370,24 @@ function storeInFirebase(data) {
     'muteHttpExceptions': true
   };
   
-  Logger.log('Storing data in Firebase: ' + url);
+  Logger.log('Sending POST request to Firebase...');
   
   var response = UrlFetchApp.fetch(url, options);
   var responseCode = response.getResponseCode();
+  var responseText = response.getContentText();
+  
+  Logger.log('Firebase Response Code: ' + responseCode);
   
   if (responseCode >= 400) {
-    throw new Error('Firebase error: ' + responseCode + ' - ' + response.getContentText());
+    Logger.log('ERROR: Firebase returned error code ' + responseCode);
+    Logger.log('Response: ' + responseText);
+    throw new Error('Firebase error: ' + responseCode + ' - ' + responseText);
   }
   
-  var result = JSON.parse(response.getContentText());
+  var result = JSON.parse(responseText);
+  
+  Logger.log('Successfully stored in Firebase');
+  Logger.log('Response name (ID): ' + result.name);
   
   return {
     id: result.name,
@@ -339,7 +404,7 @@ function storeErrorInFirebase(error, e) {
   try {
     var errorData = {
       error: error.toString(),
-      errorStack: error.getStackTrace ? error.getStackTrace() : 'No stack trace available',
+      errorStack: error.stack || 'No stack trace available',
       timestamp: new Date().toISOString(),
       eventData: e ? {
         responseId: e.response ? e.response.getId() : null,
@@ -356,6 +421,7 @@ function storeErrorInFirebase(error, e) {
       'muteHttpExceptions': true
     };
     
+    Logger.log('Storing error in Firebase: ' + url);
     UrlFetchApp.fetch(url, options);
   } catch (storeError) {
     Logger.log('Failed to store error in Firebase: ' + storeError.toString());
@@ -367,18 +433,43 @@ function storeErrorInFirebase(error, e) {
  * @returns {Object} Test result
  */
 function testFirebaseConnection() {
+  Logger.log('=== Testing Firebase Connection ===');
+  
+  // Check configuration
+  if (!FIREBASE_DB_URL || FIREBASE_DB_URL.indexOf('YOUR_') !== -1 || FIREBASE_DB_URL.indexOf('your-') !== -1) {
+    Logger.log('ERROR: Firebase URL is not configured!');
+    Logger.log('Current FIREBASE_DB_URL: ' + FIREBASE_DB_URL);
+    return {
+      success: false,
+      message: 'Firebase URL not configured. Please check config.gs file.',
+      firebaseUrl: FIREBASE_DB_URL
+    };
+  }
+  
   var testData = {
     test: true,
     timestamp: new Date().toISOString(),
     message: 'Firebase connection test from Toranomon VT Google Form Handler'
   };
   
-  var result = storeInFirebase(testData);
-  return {
-    success: true,
-    message: 'Connection successful',
-    firebaseId: result.id
-  };
+  try {
+    var result = storeInFirebase(testData);
+    Logger.log('=== Firebase Connection Test Successful ===');
+    return {
+      success: true,
+      message: 'Connection successful',
+      firebaseId: result.id,
+      firebaseUrl: FIREBASE_DB_URL
+    };
+  } catch (error) {
+    Logger.log('=== Firebase Connection Test Failed ===');
+    Logger.log('Error: ' + error.toString());
+    return {
+      success: false,
+      message: 'Connection failed: ' + error.toString(),
+      firebaseUrl: FIREBASE_DB_URL
+    };
+  }
 }
 
 /**
