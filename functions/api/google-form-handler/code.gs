@@ -1,10 +1,7 @@
 /**
  * Google Form Submission Handler for Toranomon VT Website
  * Stores form responses in Firebase Realtime Database
- * 
- * This script uses indexOf() for field identification to handle
- * multi-line text responses and partial matches.
- * 
+ *
  * Setup Instructions:
  * 1. Copy config.gs.example to config.gs
  * 2. Fill in your Firebase and Google Drive credentials
@@ -23,7 +20,8 @@ var FIELD_DEFINITIONS = {
   'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
   'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
   'public_flag': 'Web ページへの公開可否フラグ',
-  
+  'public_flag_alt': '公開', // Alternative for public_flag matching
+
   // Optional fields (任意項目)
   'sns_link': 'SNS リンク',
   'birthday': '誕生日',
@@ -71,34 +69,34 @@ var FILE_UPLOAD_FIELDS = {
  */
 function onFormSubmit(e) {
   var lock = LockService.getScriptLock();
-  
+
   try {
     // Wait for lock to prevent concurrent executions
     lock.waitLock(30000);
-    
+
     Logger.log('========================================');
     Logger.log('=== Form Submission Started ===');
     Logger.log('Timestamp: ' + new Date().toISOString());
     Logger.log('========================================');
-    
+
     // Validate event object
     if (!e || !e.response) {
       Logger.log('ERROR: Invalid event object - e or e.response is null/undefined');
       Logger.log('Event object: ' + JSON.stringify(e));
       throw new Error('Invalid event object');
     }
-    
+
     // Get form response
     var formResponse = e.response;
     var itemResponses = formResponse.getItemResponses();
-    
+
     Logger.log('Form Response ID: ' + formResponse.getId());
     Logger.log('Number of item responses: ' + itemResponses.length);
     Logger.log('========================================');
-    
+
     // Initialize result object with all fields as null
     var result = initializeResultObject();
-    
+
     // Parse each item response using indexOf matching
     for (var i = 0; i < itemResponses.length; i++) {
       var itemResponse = itemResponses[i];
@@ -106,41 +104,41 @@ function onFormSubmit(e) {
       var title = item.getTitle();
       var responseType = item.getType();
       var response = itemResponse.getResponse();
-      
+
       Logger.log('--- Processing Item ' + (i + 1) + ' ---');
-      Logger.log('  Title: ' + title);
-      Logger.log('  Response Type: ' + responseType);
-      Logger.log('  Response: ' + (response ? (response.length > 100 ? response.substring(0, 100) + '...' : response) : 'null'));
-      
+      Logger.log(' Title: ' + title);
+      Logger.log(' Response Type: ' + responseType);
+      Logger.log(' Response: ' + (response ? (response.length > 100 ? response.substring(0, 100) + '...' : response) : 'null'));
+
       // Use indexOf to find matching field
       var matchedField = findMatchingField(title);
-      
+
       if (matchedField) {
-        Logger.log('  Matched Field: ' + matchedField);
-        
+        Logger.log(' Matched Field: ' + matchedField);
+
         // Handle file uploads separately
         if (isFileUploadField(matchedField)) {
-          Logger.log('  Handling as file upload field');
+          Logger.log(' Handling as file upload field');
           handleFileUpload(result, matchedField, item, formResponse);
         } else {
           // Handle regular text responses
           result[matchedField] = formatResponse(response);
-          Logger.log('  Set value: ' + result[matchedField]);
+          Logger.log(' Set value: ' + result[matchedField]);
         }
       } else {
-        Logger.log('  WARNING: No matching field found for this title');
+        Logger.log(' WARNING: No matching field found for this title');
       }
     }
-    
+
     Logger.log('========================================');
     Logger.log('=== Parsed Data Summary ===');
-    
+
     // Add metadata
     result.submittedAt = new Date().toISOString();
     result.formSubmissionId = formResponse.getId();
     result.formResponseId = formResponse.getRespondentEmail() || 'anonymous';
     result.timestamp = Date.now();
-    
+
     // Log key fields
     Logger.log('Name (Hiragana): ' + result.name_hiragana);
     Logger.log('Name (Romaji): ' + result.name_romaji);
@@ -149,7 +147,7 @@ function onFormSubmit(e) {
     Logger.log('Fullbody Image URL: ' + (result.fullbodyImageUrl ? 'Set' : 'Not set'));
     Logger.log('Voice Audio Count: ' + (result.voiceAudioUrls ? result.voiceAudioUrls.length : 0));
     Logger.log('Video URL: ' + (result.videoUrl ? 'Set' : 'Not set'));
-    
+
     // Check required fields
     Logger.log('========================================');
     Logger.log('=== Required Fields Check ===');
@@ -157,46 +155,46 @@ function onFormSubmit(e) {
     if (!result.name_hiragana) missingRequired.push('name_hiragana');
     if (!result.name_romaji) missingRequired.push('name_romaji');
     if (!result.public_flag) missingRequired.push('public_flag');
-    
+
     if (missingRequired.length > 0) {
       Logger.log('WARNING: Missing required fields: ' + missingRequired.join(', '));
     } else {
       Logger.log('All required fields are present');
     }
-    
+
     // Store in Firebase
     Logger.log('========================================');
     Logger.log('=== Storing in Firebase ===');
     var firebaseResult = storeInFirebase(result);
-    
+
     Logger.log('========================================');
     Logger.log('=== Form Submission Completed Successfully ===');
     Logger.log('Firebase ID: ' + firebaseResult.id);
     Logger.log('Firebase URL: ' + FIREBASE_DB_URL + '/form_submissions/' + firebaseResult.id);
     Logger.log('========================================');
-    
+
     return {
       success: true,
       firebaseId: firebaseResult.id,
       message: 'Data stored successfully in Firebase'
     };
-    
+
   } catch (error) {
     Logger.log('========================================');
     Logger.log('=== ERROR OCCURRED ===');
     Logger.log('Error: ' + error.toString());
     Logger.log('Stack: ' + (error.stack || 'No stack trace available'));
     Logger.log('========================================');
-    
+
     // store error in Firebase for debugging
     storeErrorInFirebase(error, e);
-    
+
     return {
       success: false,
       error: error.toString(),
       stack: error.stack || 'No stack trace available'
     };
-    
+
   } finally {
     lock.releaseLock();
   }
@@ -208,18 +206,18 @@ function onFormSubmit(e) {
  */
 function initializeResultObject() {
   var result = {};
-  
+
   // Set all field keys to null initially
   for (var key in FIELD_DEFINITIONS) {
     result[key] = null;
   }
-  
+
   // Add file URL fields
   result.headerImageUrl = null;
   result.fullbodyImageUrl = null;
   result.voiceAudioUrls = [];
   result.videoUrl = null;
-  
+
   return result;
 }
 
@@ -230,35 +228,35 @@ function initializeResultObject() {
  */
 function findMatchingField(title) {
   if (!title) return null;
-  
+
   var titleStr = String(title).trim();
-  
+
   // Iterate through field definitions
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
-    
+
     // Use indexOf for matching (handles partial matches)
     // Check both directions for flexibility
     if (titleStr.indexOf(fieldTitle) !== -1 || fieldTitle.indexOf(titleStr) !== -1) {
       return fieldKey;
     }
   }
-  
+
   // Additional check: character-by-character indexOf matching
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
-    
+
     // Check if form title contains the field title
     if (titleStr.indexOf(fieldTitle) !== -1) {
       return fieldKey;
     }
-    
+
     // Check if field title contains the form title (for truncated titles)
     if (fieldTitle.indexOf(titleStr) !== -1) {
       return fieldKey;
     }
   }
-  
+
   return null;
 }
 
@@ -280,11 +278,11 @@ function formatResponse(response) {
   if (response === null || response === undefined || response === '') {
     return null;
   }
-  
+
   if (response instanceof Array) {
     return response.join(', ');
   }
-  
+
   return String(response);
 }
 
@@ -320,6 +318,16 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
                 var fileId = response[j].getId();
                 var file = DriveApp.getFileById(fileId);
                 result.voiceAudioUrls.push(file.getShareUrl());
+              } else if (response[j] && typeof response[j] === 'string') {
+                // Handle string file ID directly
+                var fileId = response[j];
+                Logger.log(' String file ID detected: ' + fileId);
+                try {
+                  var file = DriveApp.getFileById(fileId);
+                  result.voiceAudioUrls.push(file.getShareUrl());
+                } catch (e) {
+                  Logger.log(' Error getting file: ' + e.toString());
+                }
               } else {
                 Logger.log(' Warning: response[j] is not a valid file object: ' + JSON.stringify(response[j]));
               }
@@ -342,6 +350,26 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
               } else if (fieldKey === 'video') {
                 result.videoUrl = shareUrl;
               }
+            } else if (response[0] && typeof response[0] === 'string') {
+              // Handle string file ID directly
+              var fileId = response[0];
+              Logger.log(' String file ID detected: ' + fileId);
+              try {
+                var file = DriveApp.getFileById(fileId);
+                var shareUrl = file.getShareUrl();
+                Logger.log(' File ID: ' + fileId);
+                Logger.log(' Share URL: ' + shareUrl);
+
+                if (fieldKey === 'header_image') {
+                  result.headerImageUrl = shareUrl;
+                } else if (fieldKey === 'fullbody_image') {
+                  result.fullbodyImageUrl = shareUrl;
+                } else if (fieldKey === 'video') {
+                  result.videoUrl = shareUrl;
+                }
+              } catch (e) {
+                Logger.log(' Error getting file: ' + e.toString());
+              }
             } else {
               Logger.log(' Warning: response[0] is not a valid file object: ' + JSON.stringify(response[0]));
             }
@@ -363,44 +391,44 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
  */
 function storeInFirebase(data) {
   var url = FIREBASE_DB_URL + '/form_submissions.json';
-  
+
   Logger.log('Firebase URL: ' + url);
   Logger.log('Checking Firebase configuration...');
-  Logger.log('  FIREBASE_DB_URL: ' + FIREBASE_DB_URL);
-  
+  Logger.log(' FIREBASE_DB_URL: ' + FIREBASE_DB_URL);
+
   // Validate Firebase URL
   if (!FIREBASE_DB_URL || FIREBASE_DB_URL.indexOf('YOUR_') !== -1 || FIREBASE_DB_URL.indexOf('your-') !== -1) {
     Logger.log('ERROR: Firebase URL is not configured properly!');
     Logger.log('Please copy config.gs.example to config.gs and fill in your Firebase credentials.');
     throw new Error('Firebase URL not configured. Please check config.gs file.');
   }
-  
+
   var options = {
     'method': 'post',
     'contentType': 'application/json',
     'payload': JSON.stringify(data),
     'muteHttpExceptions': true
   };
-  
+
   Logger.log('Sending POST request to Firebase...');
-  
+
   var response = UrlFetchApp.fetch(url, options);
   var responseCode = response.getResponseCode();
   var responseText = response.getContentText();
-  
+
   Logger.log('Firebase Response Code: ' + responseCode);
-  
+
   if (responseCode >= 400) {
     Logger.log('ERROR: Firebase returned error code ' + responseCode);
     Logger.log('Response: ' + responseText);
     throw new Error('Firebase error: ' + responseCode + ' - ' + responseText);
   }
-  
+
   var result = JSON.parse(responseText);
-  
+
   Logger.log('Successfully stored in Firebase');
   Logger.log('Response name (ID): ' + result.name);
-  
+
   return {
     id: result.name,
     data: result
@@ -423,16 +451,16 @@ function storeErrorInFirebase(error, e) {
         values: e.values
       } : null
     };
-    
+
     var url = FIREBASE_DB_URL + '/form_errors.json';
-    
+
     var options = {
       'method': 'post',
       'contentType': 'application/json',
       'payload': JSON.stringify(errorData),
       'muteHttpExceptions': true
     };
-    
+
     Logger.log('Storing error in Firebase: ' + url);
     UrlFetchApp.fetch(url, options);
   } catch (storeError) {
@@ -446,7 +474,7 @@ function storeErrorInFirebase(error, e) {
  */
 function testFirebaseConnection() {
   Logger.log('=== Testing Firebase Connection ===');
-  
+
   // Check configuration
   if (!FIREBASE_DB_URL || FIREBASE_DB_URL.indexOf('YOUR_') !== -1 || FIREBASE_DB_URL.indexOf('your-') !== -1) {
     Logger.log('ERROR: Firebase URL is not configured!');
@@ -457,13 +485,13 @@ function testFirebaseConnection() {
       firebaseUrl: FIREBASE_DB_URL
     };
   }
-  
+
   var testData = {
     test: true,
     timestamp: new Date().toISOString(),
     message: 'Firebase connection test from Toranomon VT Google Form Handler'
   };
-  
+
   try {
     var result = storeInFirebase(testData);
     Logger.log('=== Firebase Connection Test Successful ===');
@@ -490,12 +518,12 @@ function testFirebaseConnection() {
  */
 function getAllSubmissions() {
   var url = FIREBASE_DB_URL + '/form_submissions.json';
-  
+
   var options = {
     'method': 'get',
     'muteHttpExceptions': true
   };
-  
+
   var response = UrlFetchApp.fetch(url, options);
   return JSON.parse(response.getContentText());
 }
@@ -507,12 +535,12 @@ function getAllSubmissions() {
  */
 function getSubmissionById(id) {
   var url = FIREBASE_DB_URL + '/form_submissions/' + id + '.json';
-  
+
   var options = {
     'method': 'get',
     'muteHttpExceptions': true
   };
-  
+
   var response = UrlFetchApp.fetch(url, options);
   return JSON.parse(response.getContentText());
 }
@@ -524,12 +552,12 @@ function getSubmissionById(id) {
  */
 function deleteSubmission(id) {
   var url = FIREBASE_DB_URL + '/form_submissions/' + id + '.json';
-  
+
   var options = {
     'method': 'delete',
     'muteHttpExceptions': true
   };
-  
+
   var response = UrlFetchApp.fetch(url, options);
   return {
     success: response.getResponseCode() === 200,
@@ -545,7 +573,7 @@ function deleteSubmission(id) {
 function testOnFormSubmit() {
   Logger.log('=== TEST MODE: Running testOnFormSubmit ===');
   Logger.log('This is a test function. Do not use in production.');
-  
+
   // Create a dummy event object for testing
   var dummyEvent = {
     response: {
@@ -573,7 +601,7 @@ function testOnFormSubmit() {
       }
     }
   };
-  
+
   try {
     // Call onFormSubmit with dummy event
     var result = onFormSubmit(dummyEvent);
