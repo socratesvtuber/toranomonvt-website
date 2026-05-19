@@ -116,9 +116,9 @@ const MemberDataLoader = {
     
     for (const id in submissions) {
       const member = submissions[id];
-      
-      // Check if member should be displayed
-      if (member.public_flag === 'する' || member.public_flag === true || member.public_flag === 'true') {
+  
+      // Check if member should be displayed: "公開" means public, "非公開" means private
+      if (member.public_flag === '公開' || member.public_flag === true || member.public_flag === 'true') {
         publicMembers.push({
           id,
           ...member

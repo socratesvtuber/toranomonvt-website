@@ -1,6 +1,6 @@
 // Firebase Configuration and Shared Counter
 // Uses Cloudflare Pages Functions to fetch Firebase config securely
-// Environment variables are managed via Cloudflare Dashboard
+// Environment variables are managed via Cloudflare Pages
 
 // Prevent duplicate initialization
 if (window.firebaseConfigLoaded) {
@@ -23,189 +23,190 @@ if (window.firebaseConfigLoaded) {
   var FIREBASE_DB_URL = null;
 
   const FirebaseConfig = {
-  firebase: null,
-  db: null,
-  config: null,
-  initialized: false,
+    firebase: null,
+    db: null,
+    config: null,
+    initialized: false,
 
-  // Fetch config from Cloudflare Pages Functions
-  async fetchConfig() {
-    try {
-      const response = await fetch('/api/firebase-config');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch Firebase config: ${response.status} ${response.statusText}`);
+    // Fetch config from Cloudflare Pages Functions
+    async fetchConfig() {
+      try {
+        const response = await fetch('/api/firebase-config');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch Firebase config: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        // Validate the response
+        if (!data.apiKey || data.apiKey.includes('YOUR_')) {
+          throw new Error('Invalid API key in response');
+        }
+
+        this.config = data;
+        return this.config;
+      } catch (error) {
+        console.warn('Failed to fetch Firebase config from server:', error);
+        return null;
       }
-      const data = await response.json();
+    },
 
-      // Validate the response
-      if (!data.apiKey || data.apiKey.includes('YOUR_')) {
-        throw new Error('Invalid API key in response');
+    async init() {
+      // Try to fetch config from Cloudflare Pages Functions first
+      const serverConfig = await this.fetchConfig();
+
+      if (!serverConfig || !serverConfig.apiKey) {
+        console.warn('⚠️ Firebase config not available. Using local fallback.');
+        console.warn('Please ensure Cloudflare Pages environment variables are set correctly.');
+        console.warn('See CLOUDFLARE_DETAILED_SETUP.md for instructions.');
+
+        // Fallback: Use FIREBASE_PROJECT_ID if defined
+        if (FIREBASE_PROJECT_ID && FIREBASE_PROJECT_ID !== 'your-project-id') {
+          // Use the default regional URL format (asia-southeast1)
+          window.FIREBASE_DB_URL = `https://${FIREBASE_PROJECT_ID}-default-rtdb.asia-southeast1.firebasedatabase.app`;
+          FIREBASE_DB_URL = window.FIREBASE_DB_URL; // Update global var
+          console.log('🔗 Firebase Realtime Database URL set from FIREBASE_PROJECT_ID:', window.FIREBASE_DB_URL);
+          return true;
+        }
+        return false;
       }
 
-      this.config = data;
-      return this.config;
-    } catch (error) {
-      console.warn('Failed to fetch Firebase config from server:', error);
-      return null;
-    }
-  },
+      this.config = serverConfig;
 
-  async init() {
-    // Try to fetch config from Cloudflare Pages Functions first
-    const serverConfig = await this.fetchConfig();
-
-    if (!serverConfig || !serverConfig.apiKey) {
-      console.warn('⚠️ Firebase config not available. Using local fallback.');
-      console.warn('Please ensure Cloudflare Pages environment variables are set correctly.');
-      console.warn('See CLOUDFLARE_DETAILED_SETUP.md for instructions.');
-      
-      // Fallback: Use FIREBASE_PROJECT_ID if defined
-      if (FIREBASE_PROJECT_ID && FIREBASE_PROJECT_ID !== 'your-project-id') {
-      window.FIREBASE_DB_URL = `https://${FIREBASE_PROJECT_ID}.firebaseio.com`;
-      FIREBASE_DB_URL = window.FIREBASE_DB_URL; // Update global var
-      console.log('🔗 Firebase Realtime Database URL set from FIREBASE_PROJECT_ID:', window.FIREBASE_DB_URL);
-      return true;
+      // Set FIREBASE_DB_URL for Realtime Database
+      // Extract project ID from apiKey or use projectId from config
+      const projectId = serverConfig.projectId;
+      if (projectId) {
+        window.FIREBASE_DB_URL = `https://${projectId}-default-rtdb.asia-southeast1.firebasedatabase.app`;
+        FIREBASE_DB_URL = window.FIREBASE_DB_URL; // Update global var
+        console.log('🔗 Firebase Realtime Database URL set:', window.FIREBASE_DB_URL);
       }
-      return false;
-    }
 
-    this.config = serverConfig;
+      // Load Firebase SDK from CDN
+      if (typeof firebase === 'undefined') {
+        await this.loadFirebaseSDK();
+      }
 
-    // Set FIREBASE_DB_URL for Realtime Database
-    // Extract project ID from apiKey or use projectId from config
-    const projectId = serverConfig.projectId;
-    if (projectId) {
-    window.FIREBASE_DB_URL = `https://${projectId}.firebaseio.com`;
-    FIREBASE_DB_URL = window.FIREBASE_DB_URL; // Update global var
-    console.log('🔗 Firebase Realtime Database URL set:', window.FIREBASE_DB_URL);
-    }
+      // Initialize Firebase
+      try {
+        firebase.initializeApp(this.config);
+        this.db = firebase.firestore();
+        this.initialized = true;
+        console.log('✅ Firebase initialized successfully');
+        return true;
+      } catch (error) {
+        console.warn('❌ Firebase initialization failed. Using local fallback:', error);
+        return false;
+      }
+    },
 
-    // Load Firebase SDK from CDN
-    if (typeof firebase === 'undefined') {
-      await this.loadFirebaseSDK();
-    }
+    loadFirebaseSDK() {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+        script.onload = () => {
+          const firestore = document.createElement('script');
+          firestore.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
+          firestore.onload = resolve;
+          firestore.onerror = reject;
+          document.head.appendChild(firestore);
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    },
 
-    // Initialize Firebase
-    try {
-      firebase.initializeApp(this.config);
-      this.db = firebase.firestore();
-      this.initialized = true;
-      console.log('✅ Firebase initialized successfully');
-      return true;
-    } catch (error) {
-      console.warn('❌ Firebase initialization failed. Using local fallback:', error);
-      return false;
-    }
-  },
+    // Shared counter functions
+    async incrementVisitCount() {
+      if (!this.db || !this.initialized) {
+        // Fallback to local storage
+        return this.localIncrement();
+      }
 
-  loadFirebaseSDK() {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
-      script.onload = () => {
-        const firestore = document.createElement('script');
-        firestore.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
-        firestore.onload = resolve;
-        firestore.onerror = reject;
-        document.head.appendChild(firestore);
-      };
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  },
+      try {
+        const counterRef = this.db.collection('counters').doc('visitor_count');
 
-  // Shared counter functions
-  async incrementVisitCount() {
-    if (!this.db || !this.initialized) {
-      // Fallback to local storage
-      return this.localIncrement();
-    }
+        // Use Firebase transaction for atomic increment
+        await this.db.runTransaction(async (transaction) => {
+          const doc = await transaction.get(counterRef);
+          if (doc.exists) {
+            const newCount = doc.data().count + 1;
+            transaction.update(counterRef, { count: newCount, lastUpdated: Date.now() });
+            return newCount;
+          } else {
+            transaction.set(counterRef, { count: 1, lastUpdated: Date.now() });
+            return 1;
+          }
+        });
 
-    try {
-      const counterRef = this.db.collection('counters').doc('visitor_count');
+        return this.getVisitCount();
+      } catch (error) {
+        console.warn('Firebase increment failed, using local fallback:', error);
+        return this.localIncrement();
+      }
+    },
 
-      // Use Firebase transaction for atomic increment
-      await this.db.runTransaction(async (transaction) => {
-        const doc = await transaction.get(counterRef);
+    async getVisitCount() {
+      if (!this.db || !this.initialized) {
+        // Fallback to local storage
+        return this.localGetCount();
+      }
+
+      try {
+        const counterRef = this.db.collection('counters').doc('visitor_count');
+        const doc = await counterRef.get();
+
         if (doc.exists) {
-          const newCount = doc.data().count + 1;
-          transaction.update(counterRef, { count: newCount, lastUpdated: Date.now() });
-          return newCount;
+          return doc.data().count;
         } else {
-          transaction.set(counterRef, { count: 1, lastUpdated: Date.now() });
-          return 1;
+          // Initialize counter if it doesn't exist
+          await counterRef.set({ count: 0, lastUpdated: Date.now() });
+          return 0;
+        }
+      } catch (error) {
+        console.warn('Firebase get count failed, using local fallback:', error);
+        return this.localGetCount();
+      }
+    },
+
+    // Local storage fallback functions
+    localIncrement() {
+      const current = parseInt(localStorage.getItem('toranomon_visitor_count') || '0', 10);
+      const newCount = current + 1;
+      localStorage.setItem('toranomon_visitor_count', newCount.toString());
+      return newCount;
+    },
+
+    localGetCount() {
+      return parseInt(localStorage.getItem('toranomon_visitor_count') || '0', 10);
+    },
+
+    // Listen for real-time updates
+    onCountUpdate(callback) {
+      if (!this.db || !this.initialized) {
+        // Fallback: poll local storage
+        let lastCount = this.localGetCount();
+        const interval = setInterval(() => {
+          const currentCount = this.localGetCount();
+          if (currentCount !== lastCount) {
+            lastCount = currentCount;
+            callback(currentCount);
+          }
+        }, 1000);
+        return () => clearInterval(interval);
+      }
+
+      const counterRef = this.db.collection('counters').doc('visitor_count');
+      const unsubscribe = counterRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          callback(doc.data().count);
         }
       });
 
-      return this.getVisitCount();
-    } catch (error) {
-      console.warn('Firebase increment failed, using local fallback:', error);
-      return this.localIncrement();
+      return unsubscribe;
     }
-  },
+  };
 
-  async getVisitCount() {
-    if (!this.db || !this.initialized) {
-      // Fallback to local storage
-      return this.localGetCount();
-    }
-
-    try {
-      const counterRef = this.db.collection('counters').doc('visitor_count');
-      const doc = await counterRef.get();
-
-      if (doc.exists) {
-        return doc.data().count;
-      } else {
-        // Initialize counter if it doesn't exist
-        await counterRef.set({ count: 0, lastUpdated: Date.now() });
-        return 0;
-      }
-    } catch (error) {
-      console.warn('Firebase get count failed, using local fallback:', error);
-      return this.localGetCount();
-    }
-  },
-
-  // Local storage fallback functions
-  localIncrement() {
-    const current = parseInt(localStorage.getItem('toranomon_visitor_count') || '0', 10);
-    const newCount = current + 1;
-    localStorage.setItem('toranomon_visitor_count', newCount.toString());
-    return newCount;
-  },
-
-  localGetCount() {
-    return parseInt(localStorage.getItem('toranomon_visitor_count') || '0', 10);
-  },
-
-  // Listen for real-time updates
-  onCountUpdate(callback) {
-    if (!this.db || !this.initialized) {
-      // Fallback: poll local storage
-      let lastCount = this.localGetCount();
-      const interval = setInterval(() => {
-        const currentCount = this.localGetCount();
-        if (currentCount !== lastCount) {
-          lastCount = currentCount;
-          callback(currentCount);
-        }
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-
-    const counterRef = this.db.collection('counters').doc('visitor_count');
-    const unsubscribe = counterRef.onSnapshot((doc) => {
-      if (doc.exists) {
-        callback(doc.data().count);
-      }
-    });
-
-    return unsubscribe;
-  }
-};
-
-// Export for use in other scripts
-window.FirebaseCounter = FirebaseConfig;
+  // Export for use in other scripts
+  window.FirebaseCounter = FirebaseConfig;
 
 } // End of duplicate prevention block

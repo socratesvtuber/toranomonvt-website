@@ -11,27 +11,20 @@
 // ============================================
 // Field Mapping - Questions mapped by indexOf matching
 // The key is the field name, the value is the question text to match
+// Based on Google Form header: Timestamp, Email Address, and form fields
 // ============================================
 var FIELD_DEFINITIONS = {
-  // Required fields (必須項目)
-  'name_select': 'あなたの名前をプルダウンから選択して下さい。',
+  // Core identification fields
+  'name_select': 'あなたの名前をプルダウンから選択して下さい。 ※ここをミスるとデータが破壊されるので絶対間違えないで下さい！',
+  'sns_link': 'SNS リンク 自身が活動している SNS などの URL のみを記入。 複数ある場合は改行して追加すること。',
   'name_hiragana': '名前（ひらがな）',
   'name_romaji': '名前（ローマ字）',
-  'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
-  'header_image_alt': 'ヘッダー画像',
-  'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
-  'fullbody_image_alt': '全身画像',
-  'public_flag': 'Web ページへの公開可否フラグ',
-  'public_flag_response': 'Web ページに公開する',
-
-  // Optional fields (任意項目)
-  'sns_link': 'SNS リンク',
   'birthday': '誕生日',
   'first_stream_date': '初配信日',
   'height': '身長',
-  'image_color': 'イメージカラー',
+  'image_color': 'イメージカラー（カラーコードを記入）',
   'sushi_mark': '推しマーク',
-  'streaming_language': '配信用語',
+  'streaming_language': '配信用語 複数ある場合は改行して追加すること。',
   'unit_project_name': 'ユニット・プロジェクト名',
   'illustrator': 'イラストレーター',
   'modeler_2d': '2D モデラー',
@@ -39,16 +32,28 @@ var FIELD_DEFINITIONS = {
   'fan_name': 'ファンネーム',
   'official_hashtag': '公式ハッシュタグ',
   'streaming_schedule': '配信予定',
-  'recommended_video': 'オススメ動画',
-  'announcement_event': 'お知らせ・イベント予定',
-  'goods_music_link': 'グッズ・音楽配信サイトリンク',
+  'recommended_video': 'オススメ動画（投稿済みの動画サイトの URL を記入。）',
+  'announcement_event': 'お知らせ・イベント予定 複数ある場合は改行して追加すること。',
+  'goods_music_link': 'グッズ・音楽配信サイトリンク 複数ある場合は改行して追加すること',
   'message_to_fans': 'ファンへ一言',
-  'qa': 'Q＆A',
-  'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
-  'video': '自己紹介ページに動画を流したい場合はアップして下さい。'
+  'qa': 'Q＆A 質問と回答をそれぞれ一行で記入すること 質問の冒頭に「Q.」 回答の冒頭に「A.」をつけること 例： Q.他のメンバーとの関係は？ A.深い絆で結ばれた戦友たち。一緒に虎ノ門を盛り上げています。 複数質問がある場合は改行して追加すること',
+  
+  // File upload fields
+  'header_image': 'Web に公開するヘッダー画像をアップして下さい。 （1 ファイル 10MB まで）',
+  'header_image_alt': 'ヘッダー画像',
+  'fullbody_image': 'Web に公開する全身画像をアップして下さい。 （1 ファイル 10MB まで）',
+  'fullbody_image_alt': '全身画像',
+  'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。 1 番目にアップしたものが基本のボイスになります。 （1 ファイル 10MB まで）',
+  'video': '自己紹介ページに動画を流したい場合はアップして下さい。（1 ファイル 100MB まで）',
+  
+  // Public flag field
+  'public_flag': 'Web ページへの公開可否フラグ 外部に公開せず内容だけ予め他投稿したい場合は「非公開」、公開しても問題ない場合は「公開」を選択。 ※自己紹介ページの内容は Google フォームの編集用 URL から修正できます。予め内容を入力しておいてデビュー時に公開フラグだけ更新してもよいです。',
+  'public_flag_display': 'Web ページに公開する',
+  'public_flag_private': '非公開'
 };
 
-// Required fields list
+// Required fields list (必須項目)
+// Based on the form: name_hiragana, name_romaji, header_image, fullbody_image, public_flag are required
 var REQUIRED_FIELD_KEYS = [
   'name_hiragana',
   'name_romaji',
@@ -57,14 +62,14 @@ var REQUIRED_FIELD_KEYS = [
   'public_flag'
 ];
 
-// File upload fields
+// File upload fields - matches the exact question text in FIELD_DEFINITIONS
 var FILE_UPLOAD_FIELDS = {
-  'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
+  'header_image': 'Web に公開するヘッダー画像をアップして下さい。 （1 ファイル 10MB まで）',
   'header_image_alt': 'ヘッダー画像',
-  'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
+  'fullbody_image': 'Web に公開する全身画像をアップして下さい。 （1 ファイル 10MB まで）',
   'fullbody_image_alt': '全身画像',
-  'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
-  'video': '自己紹介ページに動画を流したい場合はアップして下さい。'
+  'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。 1 番目にアップしたものが基本のボイスになります。 （1 ファイル 10MB まで）',
+  'video': '自己紹介ページに動画を流したい場合はアップして下さい。（1 ファイル 100MB まで）'
 };
 
 /**
@@ -596,11 +601,11 @@ function testOnFormSubmit() {
     response: {
       getId: function() { return 'test-response-id'; },
       getItemResponses: function() {
-        // Return dummy item responses
+        // Return dummy item responses with exact question titles from FIELD_DEFINITIONS
         return [
           {
-            getItem: function() { return { getTitle: function() { return 'あなたの名前をプルダウンから選択して下さい。'; } }; },
-            getResponse: function() { return '夜叉姫'; }
+            getItem: function() { return { getTitle: function() { return 'あなたの名前をプルダウンから選択して下さい。 ※ここをミスるとデータが破壊されるので絶対間違えないで下さい！'; } }; },
+            getResponse: function() { return '001_夜叉姫'; }
           },
           {
             getItem: function() { return { getTitle: function() { return '名前（ひらがな）'; } }; },
@@ -611,8 +616,8 @@ function testOnFormSubmit() {
             getResponse: function() { return 'Yashahime'; }
           },
           {
-            getItem: function() { return { getTitle: function() { return 'Web ページへの公開可否フラグ'; } }; },
-            getResponse: function() { return 'する'; }
+            getItem: function() { return { getTitle: function() { return 'Web ページへの公開可否フラグ 外部に公開せず内容だけ予め他投稿したい場合は「非公開」、公開しても問題ない場合は「公開」を選択。 ※自己紹介ページの内容は Google フォームの編集用 URL から修正できます。予め内容を入力しておいてデビュー時に公開フラグだけ更新してもよいです。'; } }; },
+            getResponse: function() { return '公開'; }
           }
         ];
       }
