@@ -140,18 +140,23 @@ if (window.firebaseMemberLoaderLoaded) {
     const url = `${this.firebaseUrl}/form_submissions.json`;
     
     try {
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch data: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data) {
-        this.showError('メンバーデータが見つかりませんでした。');
-        return;
-      }
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+    if (response.status === 404) {
+    this.showError('メンバーデータがまだ登録されていないか、Firebase にデータが存在しません。Google フォームからのデータ送信を実行してください。');
+    } else {
+    throw new Error(`Failed to fetch data: ${response.status}`);
+    }
+    return;
+    }
+    
+    const data = await response.json();
+    
+    if (!data) {
+    this.showError('メンバーデータが見つかりませんでした。');
+    return;
+    }
       
       // Find member by name
       const member = this.findMemberByName(name, data);
@@ -170,8 +175,12 @@ if (window.firebaseMemberLoaderLoaded) {
       this.setupRealtimeListener(member.id);
       
     } catch (error) {
-      console.error('FirebaseMemberLoader: Error loading member:', error);
-      this.showError('データの読み込み中にエラーが発生しました：' + error.message);
+    console.error('FirebaseMemberLoader: Error loading member:', error);
+    if (error.message.includes('404')) {
+    this.showError('メンバーデータがまだ登録されていないか、Firebase にデータが存在しません。Google フォームからのデータ送信を実行してください。');
+    } else {
+    this.showError('データの読み込み中にエラーが発生しました：' + error.message);
+    }
     }
   },
   
