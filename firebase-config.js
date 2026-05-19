@@ -2,19 +2,25 @@
 // Uses Cloudflare Pages Functions to fetch Firebase config securely
 // Environment variables are managed via Cloudflare Dashboard
 
-// ============================================
-// Firebase Project Configuration
-// ============================================
-// Set your Firebase project ID here for Realtime Database
-// Example: 'toranomon-vt' for https://toranomon-vt.firebaseapp.com
-const FIREBASE_PROJECT_ID = toranomonvt-website; // ← Replace with your actual project ID
-// ============================================
+// Prevent duplicate initialization
+if (window.firebaseConfigLoaded) {
+  console.log('FirebaseConfig: Already loaded, skipping duplicate load');
+} else {
+  window.firebaseConfigLoaded = true;
 
-// Firebase Realtime Database URL (for member data)
-// This will be set after config is loaded
-window.FIREBASE_DB_URL = null;
+  // ============================================
+  // Firebase Project Configuration
+  // ============================================
+  // Set your Firebase project ID here for Realtime Database
+  // Example: 'toranomon-vt' for https://toranomon-vt.firebaseapp.com
+  const FIREBASE_PROJECT_ID = 'toranomonvt-website'; // ← Replace with your actual project ID
+  // ============================================
 
-const FirebaseConfig = {
+  // Firebase Realtime Database URL (for member data)
+  // This will be set after config is loaded
+  window.FIREBASE_DB_URL = null;
+
+  const FirebaseConfig = {
   firebase: null,
   db: null,
   config: null,
@@ -197,3 +203,5 @@ const FirebaseConfig = {
 
 // Export for use in other scripts
 window.FirebaseCounter = FirebaseConfig;
+
+} // End of duplicate prevention block
