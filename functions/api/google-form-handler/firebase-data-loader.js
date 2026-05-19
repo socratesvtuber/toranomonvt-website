@@ -136,27 +136,35 @@ const MemberDataLoader = {
   
   /**
    * Get member by name (hiragana or romaji)
+   * If multiple members have the same name, return the one with the latest timestamp
    * @param {string} name - Name to search for
    * @param {Object} submissions - All submissions
    * @returns {Object|null} Member data or null
    */
   getMemberByName(name, submissions) {
     if (!submissions || !name) return null;
-    
+  
     const normalizedName = name.toLowerCase().trim();
-    
+    let latestMember = null;
+    let latestTimestamp = 0;
+  
     for (const id in submissions) {
       const member = submissions[id];
-      
+  
       const hiragana = member.name_hiragana ? member.name_hiragana.toLowerCase().trim() : '';
       const romaji = member.name_romaji ? member.name_romaji.toLowerCase().trim() : '';
-      
+  
       if (hiragana === normalizedName || romaji === normalizedName) {
-        return { id, ...member };
+        // If multiple members have the same name, keep the one with the latest timestamp
+        const memberTimestamp = member.timestamp || 0;
+        if (memberTimestamp > latestTimestamp) {
+          latestTimestamp = memberTimestamp;
+          latestMember = { id, ...member };
+        }
       }
     }
-    
-    return null;
+  
+    return latestMember;
   },
   
   /**
