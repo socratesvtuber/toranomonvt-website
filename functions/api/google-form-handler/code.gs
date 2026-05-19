@@ -44,8 +44,8 @@ var FIELD_DEFINITIONS = {
   'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
   'video': '自己紹介ページに動画を流したい場合はアップして下さい。',
   
-  // Public flag field
-  'public_flag': 'Web ページへの公開可否フラグ'
+  // Public flag field - use longer unique text to avoid false matches
+  'public_flag': '公開可否フラグ'
 };
 
 // Required fields list (必須項目)
