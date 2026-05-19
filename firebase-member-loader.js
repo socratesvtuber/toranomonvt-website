@@ -17,7 +17,7 @@ if (window.firebaseMemberLoaderLoaded) {
   // Global voice files array for the current member
   window.memberVoiceFiles = [];
 
-  const FirebaseMemberLoader = {
+  window.FirebaseMemberLoader = {
   // Firebase Realtime Database base URL
   firebaseUrl: null,
   
@@ -628,7 +628,7 @@ if (window.firebaseMemberLoaderLoaded) {
 // Auto-initialize when DOM is ready
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
-    FirebaseMemberLoader.init();
+    window.FirebaseMemberLoader.init();
   });
 }
 
