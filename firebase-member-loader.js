@@ -51,12 +51,14 @@ if (window.firebaseMemberLoaderLoaded) {
     console.log('FirebaseMemberLoader: Current search:', window.location.search);
   
     // Check URL pattern to determine page type
-    // Match both member.html?name=... and direct member pages like 夜叉姫.html
+    // Match both member.html?id=... and direct member pages like yasahime.html
     // Also handle paths without .html extension (for dev servers/SPA routers)
     const memberMatch = window.location.pathname.match(/members\/([^/]+)(?:\.html)?$/);
-    const nameParam = this.getQueryParam('name');
+    const idParam = this.getQueryParam('id');
+    const nameParam = this.getQueryParam('name'); // Legacy support
     
     console.log('FirebaseMemberLoader: memberMatch:', memberMatch);
+    console.log('FirebaseMemberLoader: idParam:', idParam);
     console.log('FirebaseMemberLoader: nameParam:', nameParam);
     
     // Extract member name from URL path (e.g., "夜叉姫" from "members/夜叉姫.html" or "members/夜叉姫")
@@ -65,9 +67,13 @@ if (window.firebaseMemberLoaderLoaded) {
     pathMemberName = decodeURIComponent(memberMatch[1]);
     }
     
-    if (nameParam) {
-    // Dynamic member page with name parameter (member.html?name=... or member?name=...)
-    console.log('FirebaseMemberLoader: Loading member by query param:', nameParam);
+    if (idParam) {
+    // Dynamic member page with Firebase ID parameter (member.html?id=...)
+    console.log('FirebaseMemberLoader: Loading member by ID:', idParam);
+    await this.loadMemberById(idParam);
+    } else if (nameParam) {
+    // Legacy support: Load by name if ID not provided
+    console.log('FirebaseMemberLoader: Loading member by name (legacy):', nameParam);
     await this.loadMemberByName(nameParam);
     } else if (pathMemberName) {
     // Direct member page (e.g., 夜叉姫.html or 夜叉姫)
@@ -78,7 +84,7 @@ if (window.firebaseMemberLoaderLoaded) {
     console.log('FirebaseMemberLoader: No member page detected or no name specified');
     if (!memberMatch) {
     console.log('FirebaseMemberLoader: Not a member page');
-    } else if (!nameParam && !pathMemberName) {
+    } else if (!idParam && !nameParam && !pathMemberName) {
     this.showError('メンバーが指定されていません。');
     }
     }
@@ -128,60 +134,110 @@ if (window.firebaseMemberLoaderLoaded) {
   },
   
   /**
-   * Load member data by name (hiragana or romaji)
+   * Load member data by Firebase ID
+   * @param {string} memberId - Firebase ID to search for
+   */
+  async loadMemberById(memberId) {
+  if (!this.firebaseUrl) {
+  this.showError('Firebase が設定されていません。');
+  return;
+  }
+  
+  // Fetch specific member by ID directly
+  const url = `${this.firebaseUrl}/form_submissions/${memberId}.json`;
+  
+  try {
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+  if (response.status === 404) {
+  this.showError('メンバーデータが見つかりませんでした。ID: ' + memberId);
+  } else {
+  throw new Error(`Failed to fetch data: ${response.status}`);
+  }
+  return;
+  }
+  
+  const data = await response.json();
+  
+  if (!data) {
+  this.showError('メンバーデータが見つかりませんでした。');
+  return;
+  }
+  
+  // Store and render
+  const member = { id: memberId, ...data };
+  this.currentMember = member;
+  this.renderMemberPage(member);
+  
+  // Set up real-time listener for this member's data
+  this.setupRealtimeListener(memberId);
+  
+  } catch (error) {
+  console.error('FirebaseMemberLoader: Error loading member by ID:', error);
+  if (error.message.includes('404')) {
+  this.showError('メンバーデータが見つかりませんでした。ID: ' + memberId);
+  } else {
+  this.showError('データの読み込み中にエラーが発生しました：' + error.message);
+  }
+  }
+  },
+  
+  /**
+   * Load member data by name (hiragana or romaji) - Legacy support
    * @param {string} name - Member name to search for
    */
   async loadMemberByName(name) {
-    if (!this.firebaseUrl) {
-      this.showError('Firebase が設定されていません。');
-      return;
-    }
-    
-    const url = `${this.firebaseUrl}/form_submissions.json`;
-    
-    try {
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-    if (response.status === 404) {
-    this.showError('メンバーデータがまだ登録されていないか、Firebase にデータが存在しません。Google フォームからのデータ送信を実行してください。');
-    } else {
-    throw new Error(`Failed to fetch data: ${response.status}`);
-    }
-    return;
-    }
-    
-    const data = await response.json();
-    
-    if (!data) {
-    this.showError('メンバーデータが見つかりませんでした。');
-    return;
-    }
-      
-      // Find member by name
-      const member = this.findMemberByName(name, data);
-      
-      if (!member) {
-        this.showError(`メンバー「${name}」が見つかりませんでした。`);
-        return;
-      }
-      
-      // Store and render
-      this.currentMember = member;
-      this.allMembers = data;
-      this.renderMemberPage(member);
-      
-      // Set up real-time listener for this member's data
-      this.setupRealtimeListener(member.id);
-      
-    } catch (error) {
-    console.error('FirebaseMemberLoader: Error loading member:', error);
-    if (error.message.includes('404')) {
-    this.showError('メンバーデータがまだ登録されていないか、Firebase にデータが存在しません。Google フォームからのデータ送信を実行してください。');
-    } else {
-    this.showError('データの読み込み中にエラーが発生しました：' + error.message);
-    }
-    }
+  if (!this.firebaseUrl) {
+  this.showError('Firebase が設定されていません。');
+  return;
+  }
+  
+  const url = `${this.firebaseUrl}/form_submissions.json`;
+  
+  try {
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+  if (response.status === 404) {
+  this.showError('メンバーデータがまだ登録されていないか、Firebase にデータが存在しません。Google フォームからのデータ送信を実行してください。');
+  } else {
+  throw new Error(`Failed to fetch data: ${response.status}`);
+  }
+  return;
+  }
+  
+  const data = await response.json();
+  
+  if (!data) {
+  this.showError('メンバーデータが見つかりませんでした。');
+  return;
+  }
+  
+  // Find member by name
+  const member = this.findMemberByName(name, data);
+  
+  if (!member) {
+  this.showError(`メンバー「${name}」が見つかりませんでした。`);
+  return;
+  }
+  
+  // Store and render
+  this.currentMember = member;
+  this.allMembers = data;
+  this.renderMemberPage(member);
+  
+  // Set up real-time listener for this member's data
+  this.setupRealtimeListener(member.id);
+  
+  } catch (error) {
+  console.error('FirebaseMemberLoader: Error loading member:', error);
+  if (error.message.includes('404')) {
+  this.showError('メンバーデータがまだ登録されていないか、Firebase にデータが存在しません。Google フォームからのデータ送信を実行してください。');
+  } else {
+  this.showError('データの読み込み中にエラーが発生しました：' + error.message);
+  }
+  }
   },
   
   /**
@@ -569,14 +625,14 @@ if (window.firebaseMemberLoaderLoaded) {
     const nextMember = currentIndex < members.length - 1 ? members[currentIndex + 1] : members[0];
     
     container.innerHTML = `
-      <a href="member.html?name=${encodeURIComponent(prevMember.name_hiragana || prevMember.name_romaji || '')}" class="nav-button prev-member">
-        <i class="fas fa-arrow-right"></i>
-        <span>${this.escapeHtml(prevMember.name_hiragana || prevMember.name_romaji || '')}</span>
-      </a>
-      <a href="member.html?name=${encodeURIComponent(nextMember.name_hiragana || nextMember.name_romaji || '')}" class="nav-button next-member">
-        <span>${this.escapeHtml(nextMember.name_hiragana || nextMember.name_romaji || '')}</span>
-        <i class="fas fa-arrow-right"></i>
-      </a>
+    <a href="member.html?id=${encodeURIComponent(prevMember.id)}" class="nav-button prev-member">
+    <i class="fas fa-arrow-right"></i>
+    <span>${this.escapeHtml(prevMember.name_hiragana || prevMember.name_romaji || '')}</span>
+    </a>
+    <a href="member.html?id=${encodeURIComponent(nextMember.id)}" class="nav-button next-member">
+    <span>${this.escapeHtml(nextMember.name_hiragana || nextMember.name_romaji || '')}</span>
+    <i class="fas fa-arrow-right"></i>
+    </a>
     `;
   },
   
