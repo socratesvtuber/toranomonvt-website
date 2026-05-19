@@ -196,26 +196,39 @@ if (secretTrigger) {
 <script>
 // Initialize Firebase config first to set FIREBASE_DB_URL
 (async function initFirebase() {
-  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
-    await FirebaseConfig.init();
-  }
+if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+await FirebaseConfig.init();
+}
+// Initialize member list loader after Firebase config is ready
+FirebaseMemberListLoader.init();
 })();
 
 // Firebase Member List Loader for index page
 const FirebaseMemberListLoader = {
-  firebaseUrl: null,
+firebaseUrl: null,
 
-  async init() {
-    console.log('FirebaseMemberListLoader: Initializing...');
+async init() {
+console.log('FirebaseMemberListLoader: Initializing...');
 
-    // Get Firebase URL
-    this.firebaseUrl = this.getFirebaseUrl();
-    
-    if (!this.firebaseUrl) {
-      console.error('FirebaseMemberListLoader: Firebase URL not configured');
-      this.renderFallbackMembers();
-      return false;
-    }
+// Get Firebase URL
+this.firebaseUrl = this.getFirebaseUrl();
+
+if (!this.firebaseUrl) {
+console.log('FirebaseMemberListLoader: Firebase URL not ready, waiting...');
+// Wait a bit and retry if Firebase URL is not ready
+setTimeout(() => {
+this.firebaseUrl = this.getFirebaseUrl();
+if (!this.firebaseUrl) {
+console.error('FirebaseMemberListLoader: Firebase URL still not configured');
+this.renderFallbackMembers();
+return;
+}
+console.log('FirebaseMemberListLoader: Firebase URL:', this.firebaseUrl);
+this.loadMembers();
+this.setupRealtimeMonitoring();
+}, 100);
+return false;
+}
     
     console.log('FirebaseMemberListLoader: Firebase URL:', this.firebaseUrl);
     
