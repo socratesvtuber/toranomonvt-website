@@ -2,16 +2,22 @@
  * Firebase Member Loader for Toranomon VT Website
  * Fetches member data from Firebase Realtime Database and renders member pages dynamically.
  * Supports real-time updates via Firebase onValue listener.
- * 
+ *
  * Usage:
  * 1. Include this script after firebase-config.js
  * 2. The script auto-initializes based on URL pattern
  */
 
-// Global voice files array for the current member
-window.memberVoiceFiles = [];
+// Prevent duplicate loading
+if (window.firebaseMemberLoaderLoaded) {
+  console.log('FirebaseMemberLoader: Already loaded, skipping duplicate load');
+} else {
+  window.firebaseMemberLoaderLoaded = true;
 
-const FirebaseMemberLoader = {
+  // Global voice files array for the current member
+  window.memberVoiceFiles = [];
+
+  const FirebaseMemberLoader = {
   // Firebase Realtime Database base URL
   firebaseUrl: null,
   
@@ -625,3 +631,5 @@ if (typeof document !== 'undefined') {
     FirebaseMemberLoader.init();
   });
 }
+
+} // End of duplicate prevention block
