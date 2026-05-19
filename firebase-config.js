@@ -19,6 +19,8 @@ if (window.firebaseConfigLoaded) {
   // Firebase Realtime Database URL (for member data)
   // This will be set after config is loaded
   window.FIREBASE_DB_URL = null;
+  // Also define as global const for compatibility
+  var FIREBASE_DB_URL = null;
 
   const FirebaseConfig = {
   firebase: null,
@@ -59,9 +61,10 @@ if (window.firebaseConfigLoaded) {
       
       // Fallback: Use FIREBASE_PROJECT_ID if defined
       if (FIREBASE_PROJECT_ID && FIREBASE_PROJECT_ID !== 'your-project-id') {
-        window.FIREBASE_DB_URL = `https://${FIREBASE_PROJECT_ID}.firebaseio.com`;
-        console.log('🔗 Firebase Realtime Database URL set from FIREBASE_PROJECT_ID:', window.FIREBASE_DB_URL);
-        return true;
+      window.FIREBASE_DB_URL = `https://${FIREBASE_PROJECT_ID}.firebaseio.com`;
+      FIREBASE_DB_URL = window.FIREBASE_DB_URL; // Update global var
+      console.log('🔗 Firebase Realtime Database URL set from FIREBASE_PROJECT_ID:', window.FIREBASE_DB_URL);
+      return true;
       }
       return false;
     }
@@ -72,8 +75,9 @@ if (window.firebaseConfigLoaded) {
     // Extract project ID from apiKey or use projectId from config
     const projectId = serverConfig.projectId;
     if (projectId) {
-      window.FIREBASE_DB_URL = `https://${projectId}.firebaseio.com`;
-      console.log('🔗 Firebase Realtime Database URL set:', window.FIREBASE_DB_URL);
+    window.FIREBASE_DB_URL = `https://${projectId}.firebaseio.com`;
+    FIREBASE_DB_URL = window.FIREBASE_DB_URL; // Update global var
+    console.log('🔗 Firebase Realtime Database URL set:', window.FIREBASE_DB_URL);
     }
 
     // Load Firebase SDK from CDN

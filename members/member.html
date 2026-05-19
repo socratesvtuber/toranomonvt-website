@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../member-page.css">
 <!-- Firebase Configuration -->
 <script src="../firebase-config.js"></script>
+<script src="../firebase-member-loader.js"></script>
 </head>
 <body>
 <header class="site-header">
@@ -195,10 +196,8 @@
 <p>&copy; 2026 虎ノ門 VT Community. All rights reserved.</p>
 </footer>
 
-<script src="../firebase-config.js"></script>
 <script src="../script.js"></script>
 <script src="../audio-voice-player.js"></script>
-<script src="../firebase-member-loader.js"></script>
 <script>
 // Voice playback functionality
 let currentMemberAudio = null;
@@ -319,17 +318,30 @@ localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
 });
 </script>
 
-<!-- Firebase Member Loader Script -->
-<script src="../firebase-member-loader.js"></script>
 <script>
 // Initialize Firebase config and Member Loader
 document.addEventListener('DOMContentLoaded', async function() {
-  // Initialize Firebase config first to set FIREBASE_DB_URL
-  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
-    await FirebaseConfig.init();
-  }
-  // Then initialize the member loader
-  FirebaseMemberLoader.init();
+console.log('member.html: DOMContentLoaded - Starting initialization');
+
+// Initialize Firebase config first to set FIREBASE_DB_URL
+if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+console.log('member.html: Initializing FirebaseConfig...');
+await FirebaseConfig.init();
+console.log('member.html: FirebaseConfig initialized');
+} else {
+console.log('member.html: FirebaseConfig not available or no init method');
+}
+
+// Check if FirebaseMemberLoader is available
+if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
+console.log('member.html: Calling FirebaseMemberLoader.init()...');
+// Wait a bit to ensure Firebase URL is set
+setTimeout(() => {
+window.FirebaseMemberLoader.init();
+}, 100);
+} else {
+console.error('member.html: FirebaseMemberLoader not available');
+}
 });
 </script>
 </body>

@@ -625,11 +625,7 @@ if (window.firebaseMemberLoaderLoaded) {
   }
 };
 
-// Auto-initialize when DOM is ready
-if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    window.FirebaseMemberLoader.init();
-  });
-}
+// Note: Auto-initialization removed - initialization is now handled by member.html
+// This prevents race conditions with Firebase config loading
 
 } // End of duplicate prevention block
