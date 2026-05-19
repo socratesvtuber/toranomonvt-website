@@ -18,8 +18,11 @@ var FIELD_DEFINITIONS = {
   'name_hiragana': '名前（ひらがな）',
   'name_romaji': '名前（ローマ字）',
   'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
+  'header_image_alt': 'ヘッダー画像',
   'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
+  'fullbody_image_alt': '全身画像',
   'public_flag': 'Web ページへの公開可否フラグ',
+  'public_flag_response': 'Web ページに公開する',
 
   // Optional fields (任意項目)
   'sns_link': 'SNS リンク',
@@ -36,7 +39,7 @@ var FIELD_DEFINITIONS = {
   'fan_name': 'ファンネーム',
   'official_hashtag': '公式ハッシュタグ',
   'streaming_schedule': '配信予定',
-  'recommended_video': 'オススメ動画（投稿済みの動画サイトの URL を記入。）',
+  'recommended_video': 'オススメ動画',
   'announcement_event': 'お知らせ・イベント予定',
   'goods_music_link': 'グッズ・音楽配信サイトリンク',
   'message_to_fans': 'ファンへ一言',
@@ -57,7 +60,9 @@ var REQUIRED_FIELD_KEYS = [
 // File upload fields
 var FILE_UPLOAD_FIELDS = {
   'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
+  'header_image_alt': 'ヘッダー画像',
   'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
+  'fullbody_image_alt': '全身画像',
   'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
   'video': '自己紹介ページに動画を流したい場合はアップして下さい。'
 };
