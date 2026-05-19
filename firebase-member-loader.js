@@ -52,34 +52,35 @@ if (window.firebaseMemberLoaderLoaded) {
   
     // Check URL pattern to determine page type
     // Match both member.html?name=... and direct member pages like 夜叉姫.html
-    const memberMatch = window.location.pathname.match(/members\/([^/]+)\.html$/);
+    // Also handle paths without .html extension (for dev servers/SPA routers)
+    const memberMatch = window.location.pathname.match(/members\/([^/]+)(?:\.html)?$/);
     const nameParam = this.getQueryParam('name');
-  
+    
     console.log('FirebaseMemberLoader: memberMatch:', memberMatch);
     console.log('FirebaseMemberLoader: nameParam:', nameParam);
-  
-    // Extract member name from URL path (e.g., "夜叉姫" from "members/夜叉姫.html")
+    
+    // Extract member name from URL path (e.g., "夜叉姫" from "members/夜叉姫.html" or "members/夜叉姫")
     let pathMemberName = null;
     if (memberMatch && memberMatch[1] && memberMatch[1] !== 'member') {
-      pathMemberName = decodeURIComponent(memberMatch[1]);
+    pathMemberName = decodeURIComponent(memberMatch[1]);
     }
-  
-    if (memberMatch && nameParam) {
-      // Dynamic member page with name parameter (member.html?name=...)
-      console.log('FirebaseMemberLoader: Loading member by query param:', nameParam);
-      await this.loadMemberByName(nameParam);
+    
+    if (nameParam) {
+    // Dynamic member page with name parameter (member.html?name=... or member?name=...)
+    console.log('FirebaseMemberLoader: Loading member by query param:', nameParam);
+    await this.loadMemberByName(nameParam);
     } else if (pathMemberName) {
-      // Direct member page (e.g., 夜叉姫.html)
-      console.log('FirebaseMemberLoader: Loading member from path:', pathMemberName);
-      await this.loadMemberByName(pathMemberName);
+    // Direct member page (e.g., 夜叉姫.html or 夜叉姫)
+    console.log('FirebaseMemberLoader: Loading member from path:', pathMemberName);
+    await this.loadMemberByName(pathMemberName);
     } else {
-      // No member page detected or no name specified
-      console.log('FirebaseMemberLoader: No member page detected or no name specified');
-      if (!memberMatch) {
-        console.log('FirebaseMemberLoader: Not a member page');
-      } else if (!nameParam && !pathMemberName) {
-        this.showError('メンバーが指定されていません。');
-      }
+    // No member page detected or no name specified
+    console.log('FirebaseMemberLoader: No member page detected or no name specified');
+    if (!memberMatch) {
+    console.log('FirebaseMemberLoader: Not a member page');
+    } else if (!nameParam && !pathMemberName) {
+    this.showError('メンバーが指定されていません。');
+    }
     }
   
     return true;
