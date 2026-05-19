@@ -298,40 +298,52 @@ function formatResponse(response) {
 function handleFileUpload(result, fieldKey, item, formResponse) {
   try {
     var itemResponses = formResponse.getItemResponses();
-    
+
     for (var i = 0; i < itemResponses.length; i++) {
       var itemResponse = itemResponses[i];
       var responseItem = itemResponse.getItem();
-      
+
       // Match item using indexOf
       if (responseItem.getTitle() && responseItem.getTitle().indexOf(FILE_UPLOAD_FIELDS[fieldKey]) !== -1) {
         var response = itemResponse.getResponse();
-        
+
+        Logger.log(' Field: ' + fieldKey + ', Response type: ' + typeof response);
+        Logger.log(' Response: ' + JSON.stringify(response));
+
         if (response && response.length > 0) {
           if (fieldKey === 'voice_audio') {
             // Handle multiple audio files (0-10 files)
             result.voiceAudioUrls = [];
             for (var j = 0; j < response.length; j++) {
-              var fileId = response[j].getId();
-              var file = DriveApp.getFileById(fileId);
-              result.voiceAudioUrls.push(file.getShareUrl());
+              // Check if response[j] is an object with getId method
+              if (response[j] && typeof response[j] === 'object' && typeof response[j].getId === 'function') {
+                var fileId = response[j].getId();
+                var file = DriveApp.getFileById(fileId);
+                result.voiceAudioUrls.push(file.getShareUrl());
+              } else {
+                Logger.log(' Warning: response[j] is not a valid file object: ' + JSON.stringify(response[j]));
+              }
             }
-            Logger.log('  Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+            Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
           } else {
             // Handle single file uploads
-            var fileId = response[0].getId();
-            var file = DriveApp.getFileById(fileId);
-            var shareUrl = file.getShareUrl();
-            
-            Logger.log('  File ID: ' + fileId);
-            Logger.log('  Share URL: ' + shareUrl);
-            
-            if (fieldKey === 'header_image') {
-              result.headerImageUrl = shareUrl;
-            } else if (fieldKey === 'fullbody_image') {
-              result.fullbodyImageUrl = shareUrl;
-            } else if (fieldKey === 'video') {
-              result.videoUrl = shareUrl;
+            if (response[0] && typeof response[0] === 'object' && typeof response[0].getId === 'function') {
+              var fileId = response[0].getId();
+              var file = DriveApp.getFileById(fileId);
+              var shareUrl = file.getShareUrl();
+
+              Logger.log(' File ID: ' + fileId);
+              Logger.log(' Share URL: ' + shareUrl);
+
+              if (fieldKey === 'header_image') {
+                result.headerImageUrl = shareUrl;
+              } else if (fieldKey === 'fullbody_image') {
+                result.fullbodyImageUrl = shareUrl;
+              } else if (fieldKey === 'video') {
+                result.videoUrl = shareUrl;
+              }
+            } else {
+              Logger.log(' Warning: response[0] is not a valid file object: ' + JSON.stringify(response[0]));
             }
           }
         }
@@ -523,4 +535,53 @@ function deleteSubmission(id) {
     success: response.getResponseCode() === 200,
     message: 'Submission deleted'
   };
+}
+
+/**
+ * TEST FUNCTION: For manual testing only
+ * This creates a dummy event object for testing onFormSubmit
+ * DO NOT use in production - only for development/testing
+ */
+function testOnFormSubmit() {
+  Logger.log('=== TEST MODE: Running testOnFormSubmit ===');
+  Logger.log('This is a test function. Do not use in production.');
+  
+  // Create a dummy event object for testing
+  var dummyEvent = {
+    response: {
+      getId: function() { return 'test-response-id'; },
+      getItemResponses: function() {
+        // Return dummy item responses
+        return [
+          {
+            getItem: function() { return { getTitle: function() { return 'あなたの名前をプルダウンから選択して下さい。'; } }; },
+            getResponse: function() { return '夜叉姫'; }
+          },
+          {
+            getItem: function() { return { getTitle: function() { return '名前（ひらがな）'; } }; },
+            getResponse: function() { return 'やしゃひめ'; }
+          },
+          {
+            getItem: function() { return { getTitle: function() { return '名前（ローマ字）'; } }; },
+            getResponse: function() { return 'Yashahime'; }
+          },
+          {
+            getItem: function() { return { getTitle: function() { return 'Web ページへの公開可否フラグ'; } }; },
+            getResponse: function() { return 'する'; }
+          }
+        ];
+      }
+    }
+  };
+  
+  try {
+    // Call onFormSubmit with dummy event
+    var result = onFormSubmit(dummyEvent);
+    Logger.log('=== TEST RESULT: Success ===');
+    Logger.log('Result: ' + JSON.stringify(result));
+  } catch (error) {
+    Logger.log('=== TEST RESULT: Error ===');
+    Logger.log('Error: ' + error.toString());
+    Logger.log('Stack: ' + (error.stack || 'No stack trace available'));
+  }
 }
