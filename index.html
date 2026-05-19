@@ -194,15 +194,6 @@ if (secretTrigger) {
 <script src="audio-voice-player.js"></script>
 <script src="firebase-member-loader.js"></script>
 <script>
-// Initialize Firebase config first to set FIREBASE_DB_URL
-(async function initFirebase() {
-if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
-await FirebaseConfig.init();
-}
-// Initialize member list loader after Firebase config is ready
-FirebaseMemberListLoader.init();
-})();
-
 // Firebase Member List Loader for index page
 const FirebaseMemberListLoader = {
 firebaseUrl: null,
@@ -381,9 +372,14 @@ return false;
   }
 };
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  FirebaseMemberListLoader.init();
+// Initialize on DOM ready after Firebase config is loaded
+document.addEventListener('DOMContentLoaded', async () => {
+// First ensure Firebase config is initialized
+if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+await FirebaseConfig.init();
+}
+// Then initialize member list loader
+FirebaseMemberListLoader.init();
 });
 </script>
 </body>
