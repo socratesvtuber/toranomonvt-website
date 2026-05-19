@@ -20,7 +20,6 @@ var FIELD_DEFINITIONS = {
   'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
   'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
   'public_flag': 'Web ページへの公開可否フラグ',
-  'public_flag_alt': '公開', // Alternative for public_flag matching
 
   // Optional fields (任意項目)
   'sns_link': 'SNS リンク',
@@ -223,6 +222,7 @@ function initializeResultObject() {
 
 /**
  * Find matching field key using indexOf
+ * Prioritizes longer, more specific matches to avoid false positives
  * @param {String} title - Field title from form
  * @returns {String|null} Matching field key or null
  */
@@ -230,28 +230,51 @@ function findMatchingField(title) {
   if (!title) return null;
 
   var titleStr = String(title).trim();
+  var bestMatch = null;
+  var bestMatchLength = 0;
 
-  // Iterate through field definitions
+  // First pass: Look for exact or long matches (4+ chars)
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
+    
+    // Skip very short field titles (less than 4 chars) in first pass to avoid false matches
+    if (fieldTitle.length < 4) {
+      continue;
+    }
 
-    // Use indexOf for matching (handles partial matches)
-    // Check both directions for flexibility
-    if (titleStr.indexOf(fieldTitle) !== -1 || fieldTitle.indexOf(titleStr) !== -1) {
-      return fieldKey;
+    // Check if form title contains the field title (exact match preferred)
+    if (titleStr.indexOf(fieldTitle) !== -1) {
+      // Prefer longer matches
+      if (fieldTitle.length > bestMatchLength) {
+        bestMatch = fieldKey;
+        bestMatchLength = fieldTitle.length;
+      }
     }
   }
+  
+  if (bestMatch) {
+    return bestMatch;
+  }
 
-  // Additional check: character-by-character indexOf matching
+  // Second pass: Check short field titles only if no long match found
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
+    
+    // Only check short field titles
+    if (fieldTitle.length >= 4) {
+      continue;
+    }
 
     // Check if form title contains the field title
     if (titleStr.indexOf(fieldTitle) !== -1) {
       return fieldKey;
     }
+  }
 
-    // Check if field title contains the form title (for truncated titles)
+  // Third pass: Check if field title contains the form title (for truncated titles)
+  for (var fieldKey in FIELD_DEFINITIONS) {
+    var fieldTitle = FIELD_DEFINITIONS[fieldKey];
+
     if (fieldTitle.indexOf(titleStr) !== -1) {
       return fieldKey;
     }
@@ -313,33 +336,44 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
             // Handle multiple audio files (0-10 files)
             result.voiceAudioUrls = [];
             for (var j = 0; j < response.length; j++) {
-              // Check if response[j] is an object with getId method
+              var fileId = null;
+              var shareUrl = null;
+              
+              // Get file ID from response
               if (response[j] && typeof response[j] === 'object' && typeof response[j].getId === 'function') {
-                var fileId = response[j].getId();
-                var file = DriveApp.getFileById(fileId);
-                result.voiceAudioUrls.push(file.getShareUrl());
+                fileId = response[j].getId();
               } else if (response[j] && typeof response[j] === 'string') {
-                // Handle string file ID directly
-                var fileId = response[j];
+                fileId = response[j];
                 Logger.log(' String file ID detected: ' + fileId);
-                try {
-                  var file = DriveApp.getFileById(fileId);
-                  result.voiceAudioUrls.push(file.getShareUrl());
-                } catch (e) {
-                  Logger.log(' Error getting file: ' + e.toString());
-                }
               } else {
                 Logger.log(' Warning: response[j] is not a valid file object: ' + JSON.stringify(response[j]));
+                continue;
               }
+              
+              // Construct Google Drive share URL directly from file ID
+              shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+              Logger.log(' Constructed share URL: ' + shareUrl);
+              result.voiceAudioUrls.push(shareUrl);
             }
             Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
           } else {
             // Handle single file uploads
+            var fileId = null;
+            var shareUrl = null;
+            
+            // Get file ID from response
             if (response[0] && typeof response[0] === 'object' && typeof response[0].getId === 'function') {
-              var fileId = response[0].getId();
-              var file = DriveApp.getFileById(fileId);
-              var shareUrl = file.getShareUrl();
-
+              fileId = response[0].getId();
+            } else if (response[0] && typeof response[0] === 'string') {
+              fileId = response[0];
+              Logger.log(' String file ID detected: ' + fileId);
+            } else {
+              Logger.log(' Warning: response[0] is not a valid file object: ' + JSON.stringify(response[0]));
+            }
+            
+            if (fileId) {
+              // Construct Google Drive share URL directly from file ID
+              shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
               Logger.log(' File ID: ' + fileId);
               Logger.log(' Share URL: ' + shareUrl);
 
@@ -350,28 +384,6 @@ function handleFileUpload(result, fieldKey, item, formResponse) {
               } else if (fieldKey === 'video') {
                 result.videoUrl = shareUrl;
               }
-            } else if (response[0] && typeof response[0] === 'string') {
-              // Handle string file ID directly
-              var fileId = response[0];
-              Logger.log(' String file ID detected: ' + fileId);
-              try {
-                var file = DriveApp.getFileById(fileId);
-                var shareUrl = file.getShareUrl();
-                Logger.log(' File ID: ' + fileId);
-                Logger.log(' Share URL: ' + shareUrl);
-
-                if (fieldKey === 'header_image') {
-                  result.headerImageUrl = shareUrl;
-                } else if (fieldKey === 'fullbody_image') {
-                  result.fullbodyImageUrl = shareUrl;
-                } else if (fieldKey === 'video') {
-                  result.videoUrl = shareUrl;
-                }
-              } catch (e) {
-                Logger.log(' Error getting file: ' + e.toString());
-              }
-            } else {
-              Logger.log(' Warning: response[0] is not a valid file object: ' + JSON.stringify(response[0]));
             }
           }
         }
