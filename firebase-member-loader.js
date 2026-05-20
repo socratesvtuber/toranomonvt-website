@@ -652,8 +652,9 @@ if (window.firebaseMemberLoaderLoaded) {
     
     for (const id in this.allMembers) {
       const member = this.allMembers[id];
-      // Check if member should be displayed: "Web ページに公開する" means public
-      if (member.public_flag === 'Web ページに公開する' || member.public_flag === '公開' || member.public_flag === true || member.public_flag === 'true') {
+      // Check if member should be displayed: "Web ページに公開する" means public (with/without spaces)
+      const flag = member.public_flag || '';
+      if (flag === 'Web ページに公開する' || flag === 'Web ページに公開する' || flag === '公開' || flag === 'する' || flag === 'true' || flag === true) {
         members.push({ id, ...member });
       }
     }

@@ -286,11 +286,13 @@ getFirebaseUrl() {
       let publicCount = 0;
       for (const id in data) {
         const member = data[id];
-        if (member.public_flag === 'Web ページに公開する' || member.public_flag === '公開') {
+        // Check for various public flag values (with/without spaces)
+        const flag = member.public_flag || '';
+        if (flag === 'Web ページに公開する' || flag === 'Web ページに公開する' || flag === '公開' || flag === 'する' || flag === 'true' || flag === true) {
           publicCount++;
         }
       }
-      console.log('FirebaseMemberListLoader: Public members:', publicCount, 'of', Object.keys(data).length);
+      console.log('FirebaseMemberListLoader: Public members:', publicCount, 'of', Object.keys(data).length, '- Flag value:', data[Object.keys(data)[0]]?.public_flag);
 
       // Render members
       this.renderMembers(data);
@@ -310,8 +312,9 @@ getFirebaseUrl() {
   
   for (const id in submissions) {
     const member = submissions[id];
-    // Check if member should be displayed: "Web ページに公開する" means public
-    if (member.public_flag === 'Web ページに公開する' || member.public_flag === '公開' || member.public_flag === true || member.public_flag === 'true') {
+    // Check if member should be displayed: "Web ページに公開する" means public (with/without spaces)
+    const flag = member.public_flag || '';
+    if (flag === 'Web ページに公開する' || flag === 'Web ページに公開する' || flag === '公開' || flag === 'する' || flag === 'true' || flag === true) {
       members.push({ id, ...member });
     }
   }
