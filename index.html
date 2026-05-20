@@ -253,30 +253,44 @@ return false;
   
   async loadMembers() {
     if (!this.firebaseUrl) {
+      console.log('FirebaseMemberListLoader: No Firebase URL, using fallback');
       this.renderFallbackMembers();
       return;
     }
-    
+
     const url = `${this.firebaseUrl}/form_submissions.json`;
-    
+    console.log('FirebaseMemberListLoader: Fetching from:', url);
+
     try {
       const response = await fetch(url);
-      
+      console.log('FirebaseMemberListLoader: Response status:', response.status);
+
       if (!response.ok) {
         throw new Error(`Failed to fetch members: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+      console.log('FirebaseMemberListLoader: Data received:', data ? Object.keys(data).length : 'null', 'submissions');
+
       if (!data || Object.keys(data).length === 0) {
         console.log('No members found in Firebase');
         this.renderFallbackMembers();
         return;
       }
-      
+
+      // Count public members
+      let publicCount = 0;
+      for (const id in data) {
+        const member = data[id];
+        if (member.public_flag === 'Web ページに公開する' || member.public_flag === '公開') {
+          publicCount++;
+        }
+      }
+      console.log('FirebaseMemberListLoader: Public members:', publicCount, 'of', Object.keys(data).length);
+
       // Render members
       this.renderMembers(data);
-      
+
     } catch (error) {
       console.error('FirebaseMemberListLoader: Error loading members:', error);
       this.renderFallbackMembers();
