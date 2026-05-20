@@ -286,8 +286,12 @@ getFirebaseUrl() {
       let publicCount = 0;
       for (const id in data) {
         const member = data[id];
-        // Check for various public flag values (normalize by removing spaces)
-        const flag = (member.public_flag || '').toString().replace(/\s/g, '');
+        // Debug: show flag value and its char codes
+        const flagRaw = member.public_flag || '';
+        const flag = flagRaw.toString().replace(/\s/g, '');
+        const charCodes = flagRaw.split('').map(c => c.charCodeAt(0)).join(',');
+        console.log('DEBUG: flagRaw=' + flagRaw + ', flag=' + flag + ', charCodes=' + charCodes);
+        
         if (flag === 'Web ページに公開する' || flag === '公開する' || flag === '公開' || flag === 'する' || flag === 'true') {
           publicCount++;
         }
