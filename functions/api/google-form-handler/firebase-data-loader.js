@@ -117,9 +117,9 @@ const MemberDataLoader = {
     for (const id in submissions) {
       const member = submissions[id];
   
-      // Check if member should be displayed: "Web ページに公開する" means public (with/without spaces)
-      const flag = member.public_flag || '';
-      if (flag === 'Web ページに公開する' || flag === 'Web ページに公開する' || flag === '公開' || flag === 'する' || flag === 'true' || flag === true) {
+      // Check if member should be displayed: normalize by removing spaces
+      const flag = (member.public_flag || '').toString().replace(/\s/g, '');
+      if (flag === 'Web ページに公開する' || flag === '公開する' || flag === '公開' || flag === 'する' || flag === 'true') {
         publicMembers.push({
           id,
           ...member
