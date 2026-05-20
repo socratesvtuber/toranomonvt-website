@@ -292,7 +292,9 @@ getFirebaseUrl() {
         const charCodes = flagRaw.split('').map(c => c.charCodeAt(0)).join(',');
         console.log('DEBUG: flagRaw=' + flagRaw + ', flag=' + flag + ', charCodes=' + charCodes);
         
-        if (flag === 'Web ページに公開する' || flag === '公開する' || flag === '公開' || flag === 'する' || flag === 'true') {
+        // Use includes() for robust matching regardless of encoding differences
+        if (flag.includes('Web') && flag.includes('公開') ||
+            flag === '公開する' || flag === '公開' || flag === 'true') {
           publicCount++;
         }
       }
@@ -318,7 +320,9 @@ getFirebaseUrl() {
     const member = submissions[id];
     // Check if member should be displayed: normalize by removing spaces
     const flag = (member.public_flag || '').toString().replace(/\s/g, '');
-    if (flag === 'Web ページに公開する' || flag === '公開する' || flag === '公開' || flag === 'する' || flag === 'true') {
+    // Use includes() for robust matching regardless of encoding differences
+    if (flag.includes('Web') && flag.includes('公開') ||
+        flag === '公開する' || flag === '公開' || flag === 'true') {
       members.push({ id, ...member });
     }
   }

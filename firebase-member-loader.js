@@ -654,7 +654,9 @@ if (window.firebaseMemberLoaderLoaded) {
       const member = this.allMembers[id];
       // Check if member should be displayed: normalize by removing spaces
       const flag = (member.public_flag || '').toString().replace(/\s/g, '');
-      if (flag === 'Web ページに公開する' || flag === '公開する' || flag === '公開' || flag === 'する' || flag === 'true') {
+      // Use includes() for robust matching regardless of encoding differences
+      if (flag.includes('Web') && flag.includes('公開') ||
+          flag === '公開する' || flag === '公開' || flag === 'true') {
         members.push({ id, ...member });
       }
     }
