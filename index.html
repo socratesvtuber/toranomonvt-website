@@ -291,10 +291,11 @@ return false;
   const members = [];
   
   for (const id in submissions) {
-  const member = submissions[id];
-  if (member.public_flag === 'する' || member.public_flag === true || member.public_flag === 'true') {
-  members.push({ id, ...member });
-  }
+    const member = submissions[id];
+    // Check if member should be displayed: "公開" means public, "非公開" means private
+    if (member.public_flag === '公開' || member.public_flag === true || member.public_flag === 'true') {
+      members.push({ id, ...member });
+    }
   }
   
   // Sort by timestamp (newest first)
