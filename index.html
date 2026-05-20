@@ -199,57 +199,64 @@ const FirebaseMemberListLoader = {
 firebaseUrl: null,
 
 async init() {
-console.log('FirebaseMemberListLoader: Initializing...');
+  console.log('FirebaseMemberListLoader: Initializing...');
 
-// Get Firebase URL
-this.firebaseUrl = this.getFirebaseUrl();
+  // Get Firebase URL
+  this.firebaseUrl = this.getFirebaseUrl();
 
-if (!this.firebaseUrl) {
-console.log('FirebaseMemberListLoader: Firebase URL not ready, waiting...');
-// Wait a bit and retry if Firebase URL is not ready
-setTimeout(() => {
-this.firebaseUrl = this.getFirebaseUrl();
-if (!this.firebaseUrl) {
-console.error('FirebaseMemberListLoader: Firebase URL still not configured');
-this.renderFallbackMembers();
-return;
-}
-console.log('FirebaseMemberListLoader: Firebase URL:', this.firebaseUrl);
-this.loadMembers();
-this.setupRealtimeMonitoring();
-}, 100);
-return false;
-}
-    
-    console.log('FirebaseMemberListLoader: Firebase URL:', this.firebaseUrl);
-    
-    // Load members
-    await this.loadMembers();
-    
-    // Set up real-time monitoring
-    this.setupRealtimeMonitoring();
-    
-    return true;
-  },
-  
-  getFirebaseUrl() {
-    if (typeof FIREBASE_DB_URL !== 'undefined') {
-      return FIREBASE_DB_URL;
+  if (!this.firebaseUrl) {
+    console.log('FirebaseMemberListLoader: Firebase URL not ready, waiting...');
+    // Wait a bit and retry if Firebase URL is not ready
+    for (let i = 0; i < 10; i++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.firebaseUrl = this.getFirebaseUrl();
+      if (this.firebaseUrl) {
+        console.log('FirebaseMemberListLoader: Firebase URL ready:', this.firebaseUrl);
+        break;
+      }
     }
-    
-    const metaTag = document.querySelector('meta[name="env:FIREBASE_STORAGE_BUCKET"]');
-    if (metaTag) {
-      const bucket = metaTag.getAttribute('content');
+
+    if (!this.firebaseUrl) {
+      console.error('FirebaseMemberListLoader: Firebase URL still not configured after retries');
+      this.renderFallbackMembers();
+      return false;
+    }
+  }
+
+  console.log('FirebaseMemberListLoader: Firebase URL:', this.firebaseUrl);
+
+  // Load members
+  await this.loadMembers();
+
+  // Set up real-time monitoring
+  this.setupRealtimeMonitoring();
+
+  return true;
+},
+
+getFirebaseUrl() {
+  // Try global FIREBASE_DB_URL first (set by firebase-config.js)
+  if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL) {
+    return FIREBASE_DB_URL;
+  }
+
+  // Try meta tag
+  const metaTag = document.querySelector('meta[name="env:FIREBASE_STORAGE_BUCKET"]');
+  if (metaTag) {
+    const bucket = metaTag.getAttribute('content');
+    if (bucket && bucket.indexOf('YOUR_') === -1) {
       const projectId = bucket.replace('.firebaseio.com', '').replace('.appspot.com', '');
       return `https://${projectId}.firebaseio.com`;
     }
-    
-    if (typeof FirebaseCounter !== 'undefined' && FirebaseCounter.db) {
-      return FirebaseCounter.db;
-    }
-    
-    return null;
-  },
+  }
+
+  // Try FirebaseCounter if available
+  if (typeof FirebaseCounter !== 'undefined' && FirebaseCounter.db) {
+    return FirebaseCounter.db;
+  }
+
+  return null;
+},
   
   async loadMembers() {
     if (!this.firebaseUrl) {
