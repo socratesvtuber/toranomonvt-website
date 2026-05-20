@@ -201,26 +201,23 @@ firebaseUrl: null,
 async init() {
   console.log('FirebaseMemberListLoader: Initializing...');
 
-  // Get Firebase URL
-  this.firebaseUrl = this.getFirebaseUrl();
-
-  if (!this.firebaseUrl) {
-    console.log('FirebaseMemberListLoader: Firebase URL not ready, waiting...');
-    // Wait a bit and retry if Firebase URL is not ready
-    for (let i = 0; i < 10; i++) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      this.firebaseUrl = this.getFirebaseUrl();
-      if (this.firebaseUrl) {
-        console.log('FirebaseMemberListLoader: Firebase URL ready:', this.firebaseUrl);
-        break;
-      }
+  // Wait for Firebase config to be ready
+  let retries = 0;
+  while (retries < 20) {
+    this.firebaseUrl = this.getFirebaseUrl();
+    if (this.firebaseUrl && this.firebaseUrl.indexOf('%') === -1) {
+      console.log('FirebaseMemberListLoader: Firebase URL ready:', this.firebaseUrl);
+      break;
     }
+    retries++;
+    console.log('FirebaseMemberListLoader: Waiting for Firebase config... (' + retries + '/20)');
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
 
-    if (!this.firebaseUrl) {
-      console.error('FirebaseMemberListLoader: Firebase URL still not configured after retries');
-      this.renderFallbackMembers();
-      return false;
-    }
+  if (!this.firebaseUrl || this.firebaseUrl.indexOf('%') !== -1) {
+    console.error('FirebaseMemberListLoader: Firebase URL still not configured after retries');
+    this.renderFallbackMembers();
+    return false;
   }
 
   console.log('FirebaseMemberListLoader: Firebase URL:', this.firebaseUrl);
@@ -236,7 +233,7 @@ async init() {
 
 getFirebaseUrl() {
   // Try global FIREBASE_DB_URL first (set by firebase-config.js)
-  if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL) {
+  if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL && FIREBASE_DB_URL.indexOf('%') === -1) {
     return FIREBASE_DB_URL;
   }
 
@@ -244,14 +241,14 @@ getFirebaseUrl() {
   const metaTag = document.querySelector('meta[name="env:FIREBASE_STORAGE_BUCKET"]');
   if (metaTag) {
     const bucket = metaTag.getAttribute('content');
-    if (bucket && bucket.indexOf('YOUR_') === -1) {
+    if (bucket && bucket.indexOf('YOUR_') === -1 && bucket.indexOf('%') === -1) {
       const projectId = bucket.replace('.firebaseio.com', '').replace('.appspot.com', '');
       return `https://${projectId}.firebaseio.com`;
     }
   }
 
   // Try FirebaseCounter if available
-  if (typeof FirebaseCounter !== 'undefined' && FirebaseCounter.db) {
+  if (typeof FirebaseCounter !== 'undefined' && FirebaseCounter.db && FirebaseCounter.db.indexOf('%') === -1) {
     return FirebaseCounter.db;
   }
 
