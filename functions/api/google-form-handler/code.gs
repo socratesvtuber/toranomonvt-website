@@ -165,21 +165,22 @@ function onFormSubmit(e) {
       Logger.log('All required fields are present');
     }
 
-    // Store in Firebase
+    // Store in Firebase (with duplicate check by name_select)
     Logger.log('========================================');
     Logger.log('=== Storing in Firebase ===');
-    var firebaseResult = storeInFirebase(result);
-
+    Logger.log('=== Checking for existing member by name_select ===');
+    var firebaseResult = storeInFirebaseWithDuplicateCheck(result);
+    
     Logger.log('========================================');
     Logger.log('=== Form Submission Completed Successfully ===');
     Logger.log('Firebase ID: ' + firebaseResult.id);
     Logger.log('Firebase URL: ' + FIREBASE_DB_URL + '/form_submissions/' + firebaseResult.id);
     Logger.log('========================================');
-
+    
     return {
       success: true,
       firebaseId: firebaseResult.id,
-      message: 'Data stored successfully in Firebase'
+      message: firebaseResult.isUpdate ? 'Data updated successfully in Firebase' : 'Data stored successfully in Firebase'
     };
 
   } catch (error) {
@@ -452,11 +453,131 @@ function storeInFirebase(data) {
 }
 
 /**
+ * Store data in Firebase Realtime Database with duplicate check by name_select
+ * If a member with the same name_select exists, update the existing record.
+ * Otherwise, create a new record.
+ * @param {Object} data - Data to store
+ * @returns {Object} Result with ID and isUpdate flag
+ */
+function storeInFirebaseWithDuplicateCheck(data) {
+  Logger.log('=== Checking for duplicate by name_select ===');
+  
+  // Get existing submissions
+  var existingData = getExistingSubmissions();
+  var existingKey = findExistingNameSelect(existingData, data.name_select);
+  
+  if (existingKey) {
+    // Update existing record
+    Logger.log('Existing member found: ' + existingKey + ' - Updating...');
+    return updateExistingSubmission(existingKey, data);
+  } else {
+    // Create new record
+    Logger.log('No existing member found - Creating new record...');
+    return createNewSubmission(data);
+  }
+}
+
+/**
+ * Get existing submissions from Firebase
+ * @returns {Object} Existing submissions data
+ */
+function getExistingSubmissions() {
+  var url = FIREBASE_DB_URL + '/form_submissions.json';
+  
+  var options = {
+    'method': 'get',
+    'muteHttpExceptions': true
+  };
+  
+  try {
+    var response = UrlFetchApp.fetch(url, options);
+    var responseCode = response.getResponseCode();
+    
+    if (responseCode >= 400) {
+      Logger.log('ERROR: Failed to get existing submissions: ' + responseCode);
+      return {};
+    }
+    
+    var responseData = response.getContentText();
+    if (responseData === 'null') {
+      return {};
+    }
+    
+    return JSON.parse(responseData);
+  } catch (error) {
+    Logger.log('ERROR: Failed to get existing submissions: ' + error.toString());
+    return {};
+  }
+}
+
+/**
+ * Find existing submission by name_select
+ * @param {Object} submissions - Existing submissions data
+ * @param {String} nameSelect - name_select value to find
+ * @returns {String|null} Existing key or null
+ */
+function findExistingNameSelect(submissions, nameSelect) {
+  if (!submissions || !nameSelect) return null;
+  
+  for (var key in submissions) {
+    var submission = submissions[key];
+    if (submission && submission.name_select === nameSelect) {
+      return key;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Update existing submission in Firebase
+ * @param {String} key - Existing submission key
+ * @param {Object} data - New data to update
+ * @returns {Object} Result with ID and isUpdate flag
+ */
+function updateExistingSubmission(key, data) {
+  var url = FIREBASE_DB_URL + '/form_submissions/' + key + '.json';
+  
+  var options = {
+    'method': 'put',
+    'contentType': 'application/json',
+    'payload': JSON.stringify(data),
+    'muteHttpExceptions': true
+  };
+  
+  Logger.log('Updating existing submission: ' + key);
+  
+  var response = UrlFetchApp.fetch(url, options);
+  var responseCode = response.getResponseCode();
+  
+  if (responseCode >= 400) {
+    Logger.log('ERROR: Firebase update error: ' + responseCode);
+    throw new Error('Firebase update error: ' + responseCode);
+  }
+  
+  Logger.log('Successfully updated submission: ' + key);
+  
+  return {
+    id: key,
+    data: data,
+    isUpdate: true
+  };
+}
+
+/**
+ * Create new submission in Firebase
+ * @param {Object} data - Data to store
+ * @returns {Object} Result with ID
+ */
+function createNewSubmission(data) {
+  return storeInFirebase(data);
+}
+
+/**
  * Store error information in Firebase for debugging
  * @param {Error} error - Error object
  * @param {Object} e - Form submission event
  */
-function storeErrorInFirebase(error, e) {
   try {
     var errorData = {
       error: error.toString(),
