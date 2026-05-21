@@ -111,7 +111,7 @@ The data stored in Firebase will have the following structure:
   "first_stream_date": "First stream date or null",
   "height": "Height or null",
   "image_color": "Image color or null",
-  "sushi_mark": "Sushi mark or null",
+  "oshi_mark": "Oshi mark or null",
   "streaming_language": "Streaming language or null",
   "unit_project_name": "Unit/Project name or null",
   "illustrator": "Illustrator or null",

@@ -376,9 +376,9 @@ if (window.firebaseMemberLoaderLoaded) {
     document.getElementById('member-dream').textContent = 
       member.message_to_fans || '夢・目標';
     
-    // Sushi mark
-    document.getElementById('member-sushi-mark').textContent = 
-      member.sushi_mark || '推しマーク';
+    // Oshi mark
+    document.getElementById('member-sushi-mark').textContent =
+    member.oshi_mark || '推しマーク';
     
     // Streaming terms
     this.renderStreamingTerms(member.streaming_language);

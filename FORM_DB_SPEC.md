@@ -3,7 +3,7 @@
 このドキュメントでは、虎ノ門 VT 公式サイトで使用される Google フォームの質問項目と、Firebase Realtime Database への保存構造について記載しています。
 
 **最終更新日**: 2026-05-21
-**バージョン**: 1.1.0
+**バージョン**: 1.2.0
 
 ---
 
@@ -158,7 +158,7 @@ name_select で既存チェック
 | 6 | `first_stream_date` | 初配信日 | 文字列 | - | 例：2024/04/01 |
 | 7 | `height` | 身長 | 文字列 | - | 例：160cm |
 | 8 | `image_color` | イメージカラー | 文字列 | - | 例：赤、青 |
-| 9 | `sushi_mark` | 推しマーク | 文字列 | - | 例：🐯 |
+| 9 | `oshi_mark` | 推しマーク | 文字列 | - | 例：🐯 |
 | 10 | `streaming_language` | 配信用語 | 文字列 | - | 例：日本語、英語 |
 | 11 | `unit_project_name` | ユニット・プロジェクト名 | 文字列 | - | 所属ユニット名 |
 | 12 | `illustrator` | イラストレーター | 文字列 | - | イラスト作成者 |
@@ -195,7 +195,7 @@ form_submissions/
        ├─ first_stream_date
        ├─ height
        ├─ image_color
-       ├─ sushi_mark
+       ├─ oshi_mark
        ├─ streaming_language
        ├─ unit_project_name
        ├─ illustrator
@@ -234,7 +234,7 @@ form_submissions/
       "first_stream_date": "2024-04-01",
       "height": "160cm",
       "image_color": "赤、青",
-      "sushi_mark": "🐯",
+      "oshi_mark": "🐯",
       "streaming_language": "日本語、英語",
       "unit_project_name": "虎ノ門ナイト",
       "illustrator": "山田さん",
@@ -387,6 +387,7 @@ if (flag.includes('Web') && flag.includes('公開') ||
 |------|-----------|----------|------|
 | 2026-05-20 | 1.0.0 | 初版作成 - Google フォーム質問項目と Firebase 構造を文書化 | - |
 | 2026-05-21 | 1.1.0 | `name_select` による重複チェック機能追加 - 同じメンバーの重複登録を防止 | - |
+| 2026-05-21 | 1.2.0 | `sushi_mark` フィールド名を `oshi_mark` に変更 - 既存データはマイグレーション関数で変換済み | - |
 
 ---
 

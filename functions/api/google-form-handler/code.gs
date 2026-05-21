@@ -23,7 +23,7 @@ var FIELD_DEFINITIONS = {
   'first_stream_date': '初配信日',
   'height': '身長',
   'image_color': 'イメージカラー',
-  'sushi_mark': '推しマーク',
+  'oshi_mark': '推しマーク',
   'streaming_language': '配信用語',
   'unit_project_name': 'ユニット・プロジェクト名',
   'illustrator': 'イラストレーター',
@@ -750,4 +750,73 @@ function testOnFormSubmit() {
     Logger.log('Error: ' + error.toString());
     Logger.log('Stack: ' + (error.stack || 'No stack trace available'));
   }
+}
+
+/**
+ * Migration function: Convert sushi_mark field to oshi_mark
+ * Run this function ONCE to migrate existing data, then delete or comment out
+ * @returns {Object} Migration result
+ */
+function migrateSushiMarkToOshiMark() {
+  Logger.log('=== Starting sushi_mark to oshi_mark migration ===');
+  
+  var baseUrl = FIREBASE_DB_URL + '/form_submissions.json';
+  var options = {
+    'method': 'get',
+    'muteHttpExceptions': true
+  };
+  
+  // Get all submissions
+  var response = UrlFetchApp.fetch(baseUrl, options);
+  var submissions = JSON.parse(response.getContentText());
+  
+  if (!submissions) {
+    Logger.log('No submissions found');
+    return { success: false, message: 'No submissions found' };
+  }
+  
+  var updatedCount = 0;
+  var errorCount = 0;
+  
+  // Iterate through all submissions
+  for (var key in submissions) {
+    var data = submissions[key];
+    
+    // Check if sushi_mark exists and oshi_mark doesn't exist yet
+    if (data.sushi_mark && !data.oshi_mark) {
+      Logger.log('Migrating ' + key + ': sushi_mark=' + data.sushi_mark);
+      
+      // Copy sushi_mark value to oshi_mark
+      data.oshi_mark = data.sushi_mark;
+      
+      // Update the submission
+      var updateUrl = FIREBASE_DB_URL + '/form_submissions/' + key + '.json';
+      var updateOptions = {
+        'method': 'put',
+        'contentType': 'application/json',
+        'payload': JSON.stringify(data),
+        'muteHttpExceptions': true
+      };
+      
+      var updateResponse = UrlFetchApp.fetch(updateUrl, updateOptions);
+      if (updateResponse.getResponseCode() === 200) {
+        updatedCount++;
+        Logger.log('Successfully migrated ' + key);
+      } else {
+        errorCount++;
+        Logger.log('Failed to migrate ' + key + ': ' + updateResponse.getContentText());
+      }
+    }
+  }
+  
+  Logger.log('=== Migration complete ===');
+  Logger.log('Updated: ' + updatedCount);
+  Logger.log('Errors: ' + errorCount);
+  
+  return {
+    success: true,
+    updatedCount: updatedCount,
+    errorCount: errorCount,
+    message: 'Migrated ' + updatedCount + ' records'
+  };
 }

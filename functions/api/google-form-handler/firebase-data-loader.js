@@ -223,7 +223,7 @@ const MemberDataLoader = {
               ${member.first_stream_date ? `<dt>初配信日</dt><dd>${member.first_stream_date}</dd>` : ''}
               ${member.height ? `<dt>身長</dt><dd>${member.height}</dd>` : ''}
               ${member.image_color ? `<dt>イメージカラー</dt><dd>${member.image_color}</dd>` : ''}
-              ${member.sushi_mark ? `<dt>推しマーク</dt><dd>${member.sushi_mark}</dd>` : ''}
+              ${member.oshi_mark ? `<dt>推しマーク</dt><dd>${member.oshi_mark}</dd>` : ''}
               ${member.streaming_language ? `<dt>配信用語</dt><dd>${member.streaming_language}</dd>` : ''}
               ${member.unit_project_name ? `<dt>ユニット・プロジェクト名</dt><dd>${member.unit_project_name}</dd>` : ''}
               ${member.illustrator ? `<dt>イラストレーター</dt><dd>${member.illustrator}</dd>` : ''}
