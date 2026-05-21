@@ -16,7 +16,7 @@
 var FIELD_DEFINITIONS = {
   // Core identification fields (using short unique keys for matching)
   'name_select': 'あなたの名前をプルダウンから選択して下さい。',
-  'sns_link': 'SNS リンク',
+  'sns_link': 'SNS リンク 自身が活動している SNS などの URL のみが記入。 複数ある場合は改行して追加すること。',
   'name_hiragana': '名前（ひらがな）',
   'name_romaji': '名前（ローマ字）',
   'birthday': '誕生日',
