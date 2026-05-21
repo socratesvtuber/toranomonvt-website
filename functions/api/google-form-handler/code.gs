@@ -814,9 +814,78 @@ function migrateSushiMarkToOshiMark() {
   Logger.log('Errors: ' + errorCount);
   
   return {
-    success: true,
-    updatedCount: updatedCount,
-    errorCount: errorCount,
-    message: 'Migrated ' + updatedCount + ' records'
+  success: true,
+  updatedCount: updatedCount,
+  errorCount: errorCount,
+  message: 'Migrated ' + updatedCount + ' records'
   };
-}
+  }
+  
+  /**
+   * Cleanup function: Remove old sushi_mark field from all records
+   * Run this AFTER migrateSushiMarkToOshiMark() completes successfully
+   * @returns {Object} Cleanup result
+   */
+  function cleanupSushiMarkField() {
+  Logger.log('=== Starting sushi_mark field cleanup ===');
+  
+  var baseUrl = FIREBASE_DB_URL + '/form_submissions.json';
+  var options = {
+  'method': 'get',
+  'muteHttpExceptions': true
+  };
+  
+  // Get all submissions
+  var response = UrlFetchApp.fetch(baseUrl, options);
+  var submissions = JSON.parse(response.getContentText());
+  
+  if (!submissions) {
+  Logger.log('No submissions found');
+  return { success: false, message: 'No submissions found' };
+  }
+  
+  var cleanedCount = 0;
+  var errorCount = 0;
+  
+  // Iterate through all submissions
+  for (var key in submissions) {
+  var data = submissions[key];
+  
+  // Check if sushi_mark field exists
+  if (data.sushi_mark) {
+  Logger.log('Cleaning up ' + key + ': removing sushi_mark field');
+  
+  // Delete the sushi_mark field
+  delete data.sushi_mark;
+  
+  // Update the submission
+  var updateUrl = FIREBASE_DB_URL + '/form_submissions/' + key + '.json';
+  var updateOptions = {
+  'method': 'put',
+  'contentType': 'application/json',
+  'payload': JSON.stringify(data),
+  'muteHttpExceptions': true
+  };
+  
+  var updateResponse = UrlFetchApp.fetch(updateUrl, updateOptions);
+  if (updateResponse.getResponseCode() === 200) {
+  cleanedCount++;
+  Logger.log('Successfully cleaned ' + key);
+  } else {
+  errorCount++;
+  Logger.log('Failed to clean ' + key + ': ' + updateResponse.getContentText());
+  }
+  }
+  }
+  
+  Logger.log('=== Cleanup complete ===');
+  Logger.log('Cleaned: ' + cleanedCount);
+  Logger.log('Errors: ' + errorCount);
+  
+  return {
+  success: true,
+  cleanedCount: cleanedCount,
+  errorCount: errorCount,
+  message: 'Cleaned ' + cleanedCount + ' records'
+  };
+  }
