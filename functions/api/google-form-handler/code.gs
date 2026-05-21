@@ -578,6 +578,7 @@ function createNewSubmission(data) {
  * @param {Error} error - Error object
  * @param {Object} e - Form submission event
  */
+function storeErrorInFirebase(error, e) {
   try {
     var errorData = {
       error: error.toString(),
