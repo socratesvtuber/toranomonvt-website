@@ -381,7 +381,7 @@ if (window.firebaseMemberLoaderLoaded) {
     member.oshi_mark || '推しマーク';
     
     // Streaming terms
-    this.renderStreamingTerms(member.streaming_language);
+    this.renderStreamingTerms(member.streaming_terms);
     
     // Unit project
     document.getElementById('member-unit-project').textContent = 

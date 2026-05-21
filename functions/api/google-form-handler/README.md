@@ -112,7 +112,7 @@ The data stored in Firebase will have the following structure:
   "height": "Height or null",
   "image_color": "Image color or null",
   "oshi_mark": "Oshi mark or null",
-  "streaming_language": "Streaming language or null",
+  "streaming_terms": "Streaming terms or null",
   "unit_project_name": "Unit/Project name or null",
   "illustrator": "Illustrator or null",
   "2d_modeler": "2D modeler or null",

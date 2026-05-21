@@ -3,7 +3,7 @@
 このドキュメントでは、虎ノ門 VT 公式サイトで使用される Google フォームの質問項目と、Firebase Realtime Database への保存構造について記載しています。
 
 **最終更新日**: 2026-05-21
-**バージョン**: 1.2.0
+**バージョン**: 1.3.0
 
 ---
 
@@ -159,7 +159,7 @@ name_select で既存チェック
 | 7 | `height` | 身長 | 文字列 | - | 例：160cm |
 | 8 | `image_color` | イメージカラー | 文字列 | - | 例：赤、青 |
 | 9 | `oshi_mark` | 推しマーク | 文字列 | - | 例：🐯 |
-| 10 | `streaming_language` | 配信用語 | 文字列 | - | 例：日本語、英語 |
+| 10 | `streaming_terms` | 配信用語 | 文字列 | - | 例：日本語、英語 |
 | 11 | `unit_project_name` | ユニット・プロジェクト名 | 文字列 | - | 所属ユニット名 |
 | 12 | `illustrator` | イラストレーター | 文字列 | - | イラスト作成者 |
 | 13 | `modeler_2d` | 2D モデラー | 文字列 | - | 2D モデル作成者 |
@@ -196,7 +196,7 @@ form_submissions/
        ├─ height
        ├─ image_color
        ├─ oshi_mark
-       ├─ streaming_language
+       ├─ streaming_terms
        ├─ unit_project_name
        ├─ illustrator
        ├─ modeler_2d
@@ -235,7 +235,7 @@ form_submissions/
       "height": "160cm",
       "image_color": "赤、青",
       "oshi_mark": "🐯",
-      "streaming_language": "日本語、英語",
+      "streaming_terms": "日本語、英語",
       "unit_project_name": "虎ノ門ナイト",
       "illustrator": "山田さん",
       "modeler_2d": "佐藤さん",
@@ -370,6 +370,34 @@ if (flag.includes('Web') && flag.includes('公開') ||
 | `code.gs` | `updateExistingSubmission()` | L564-593 |
 | `code.gs` | `createNewSubmission()` | L595-601 |
 | `code.gs` | `FIELD_DEFINITIONS` | L16-49 |
+| `code.gs` | `migrateSushiMarkToOshiMark()` | L760-819 |
+| `code.gs` | `cleanupSushiMarkField()` | L821-878 |
+| `code.gs` | `migrateStreamingLanguageToTerms()` | L893-951 |
+| `code.gs` | `cleanupStreamingLanguageField()` | L953-1010 |
+
+### マイグレーション関数（バージョン 1.2.0）
+
+2026-05-21 のバージョン 1.2.0 アップデートで追加された関数：
+
+1. **`migrateSushiMarkToOshiMark()`**: 既存の `sushi_mark` フィールドの値を `oshi_mark` にコピー
+2. **`cleanupSushiMarkField()`**: 全レコードから `sushi_mark` フィールドを削除
+
+**使用手順**:
+1. `migrateSushiMarkToOshiMark()` を実行（全レコードに `oshi_mark` を追加）
+2. `cleanupSushiMarkField()` を実行（古い `sushi_mark` を削除）
+3. 完了後、Firebase コンソールで `oshi_mark` のみ残っていることを確認
+
+### マイグレーション関数（バージョン 1.3.0）
+
+2026-05-21 のバージョン 1.3.0 アップデートで追加された関数：
+
+1. **`migrateStreamingLanguageToTerms()`**: 既存の `streaming_language` フィールドの値を `streaming_terms` にコピー
+2. **`cleanupStreamingLanguageField()`**: 全レコードから `streaming_language` フィールドを削除
+
+**使用手順**:
+1. `migrateStreamingLanguageToTerms()` を実行（全レコードに `streaming_terms` を追加）
+2. `cleanupStreamingLanguageField()` を実行（古い `streaming_language` を削除）
+3. 完了後、Firebase コンソールで `streaming_terms` のみ残っていることを確認
 
 ### クライアントサイド
 
@@ -388,6 +416,7 @@ if (flag.includes('Web') && flag.includes('公開') ||
 | 2026-05-20 | 1.0.0 | 初版作成 - Google フォーム質問項目と Firebase 構造を文書化 | - |
 | 2026-05-21 | 1.1.0 | `name_select` による重複チェック機能追加 - 同じメンバーの重複登録を防止 | - |
 | 2026-05-21 | 1.2.0 | `sushi_mark` フィールド名を `oshi_mark` に変更 - 既存データはマイグレーション関数で変換済み | - |
+| 2026-05-21 | 1.3.0 | `streaming_language` フィールド名を `streaming_terms` に変更 - 既存データはマイグレーション関数で変換済み | - |
 
 ---
 

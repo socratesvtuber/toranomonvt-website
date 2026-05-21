@@ -224,7 +224,7 @@ const MemberDataLoader = {
               ${member.height ? `<dt>身長</dt><dd>${member.height}</dd>` : ''}
               ${member.image_color ? `<dt>イメージカラー</dt><dd>${member.image_color}</dd>` : ''}
               ${member.oshi_mark ? `<dt>推しマーク</dt><dd>${member.oshi_mark}</dd>` : ''}
-              ${member.streaming_language ? `<dt>配信用語</dt><dd>${member.streaming_language}</dd>` : ''}
+              ${member.streaming_terms ? `<dt>配信用語</dt><dd>${member.streaming_terms}</dd>` : ''}
               ${member.unit_project_name ? `<dt>ユニット・プロジェクト名</dt><dd>${member.unit_project_name}</dd>` : ''}
               ${member.illustrator ? `<dt>イラストレーター</dt><dd>${member.illustrator}</dd>` : ''}
               ${member.modeler_2d ? `<dt>2D モデラー</dt><dd>${member.modeler_2d}</dd>` : ''}

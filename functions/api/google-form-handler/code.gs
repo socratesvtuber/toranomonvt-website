@@ -24,7 +24,7 @@ var FIELD_DEFINITIONS = {
   'height': '身長',
   'image_color': 'イメージカラー',
   'oshi_mark': '推しマーク',
-  'streaming_language': '配信用語',
+  'streaming_terms': '配信用語',
   'unit_project_name': 'ユニット・プロジェクト名',
   'illustrator': 'イラストレーター',
   'modeler_2d': '2D モデラー',
@@ -857,6 +857,144 @@ function migrateSushiMarkToOshiMark() {
   
   // Delete the sushi_mark field
   delete data.sushi_mark;
+  
+  // Update the submission
+  var updateUrl = FIREBASE_DB_URL + '/form_submissions/' + key + '.json';
+  var updateOptions = {
+  'method': 'put',
+  'contentType': 'application/json',
+  'payload': JSON.stringify(data),
+  'muteHttpExceptions': true
+  };
+  
+  var updateResponse = UrlFetchApp.fetch(updateUrl, updateOptions);
+  if (updateResponse.getResponseCode() === 200) {
+  cleanedCount++;
+  Logger.log('Successfully cleaned ' + key);
+  } else {
+  errorCount++;
+  Logger.log('Failed to clean ' + key + ': ' + updateResponse.getContentText());
+  }
+  }
+  }
+  
+  Logger.log('=== Cleanup complete ===');
+  Logger.log('Cleaned: ' + cleanedCount);
+  Logger.log('Errors: ' + errorCount);
+  
+  return {
+  success: true,
+  cleanedCount: cleanedCount,
+  errorCount: errorCount,
+  message: 'Cleaned ' + cleanedCount + ' records'
+  };
+  }
+  
+  /**
+   * Migration function: Convert streaming_language field to streaming_terms
+   * Run this function ONCE to migrate existing data, then delete or comment out
+   * @returns {Object} Migration result
+   */
+  function migrateStreamingLanguageToTerms() {
+  Logger.log('=== Starting streaming_language to streaming_terms migration ===');
+  
+  var baseUrl = FIREBASE_DB_URL + '/form_submissions.json';
+  var options = {
+  'method': 'get',
+  'muteHttpExceptions': true
+  };
+  
+  // Get all submissions
+  var response = UrlFetchApp.fetch(baseUrl, options);
+  var submissions = JSON.parse(response.getContentText());
+  
+  if (!submissions) {
+  Logger.log('No submissions found');
+  return { success: false, message: 'No submissions found' };
+  }
+  
+  var updatedCount = 0;
+  var errorCount = 0;
+  
+  // Iterate through all submissions
+  for (var key in submissions) {
+  var data = submissions[key];
+  
+  // Check if streaming_language exists and streaming_terms doesn't exist yet
+  if (data.streaming_language && !data.streaming_terms) {
+  Logger.log('Migrating ' + key + ': streaming_language=' + data.streaming_language);
+  
+  // Copy streaming_language value to streaming_terms
+  data.streaming_terms = data.streaming_language;
+  
+  // Update the submission
+  var updateUrl = FIREBASE_DB_URL + '/form_submissions/' + key + '.json';
+  var updateOptions = {
+  'method': 'put',
+  'contentType': 'application/json',
+  'payload': JSON.stringify(data),
+  'muteHttpExceptions': true
+  };
+  
+  var updateResponse = UrlFetchApp.fetch(updateUrl, updateOptions);
+  if (updateResponse.getResponseCode() === 200) {
+  updatedCount++;
+  Logger.log('Successfully migrated ' + key);
+  } else {
+  errorCount++;
+  Logger.log('Failed to migrate ' + key + ': ' + updateResponse.getContentText());
+  }
+  }
+  }
+  
+  Logger.log('=== Migration complete ===');
+  Logger.log('Updated: ' + updatedCount);
+  Logger.log('Errors: ' + errorCount);
+  
+  return {
+  success: true,
+  updatedCount: updatedCount,
+  errorCount: errorCount,
+  message: 'Migrated ' + updatedCount + ' records'
+  };
+  }
+  
+  /**
+   * Cleanup function: Remove old streaming_language field from all records
+   * Run this AFTER migrateStreamingLanguageToTerms() completes successfully
+   * @returns {Object} Cleanup result
+   */
+  function cleanupStreamingLanguageField() {
+  Logger.log('=== Starting streaming_language field cleanup ===');
+  
+  var baseUrl = FIREBASE_DB_URL + '/form_submissions.json';
+  var options = {
+  'method': 'get',
+  'muteHttpExceptions': true
+  };
+  
+  // Get all submissions
+  var response = UrlFetchApp.fetch(baseUrl, options);
+  var submissions = JSON.parse(response.getContentText());
+  
+  if (!submissions) {
+  Logger.log('No submissions found');
+  return { success: false, message: 'No submissions found' };
+  }
+  
+  var cleanedCount = 0;
+  var errorCount = 0;
+  
+  // Iterate through all submissions
+  for (var key in submissions) {
+  var data = submissions[key];
+  
+  // Check if streaming_language field exists
+  if (data.streaming_language) {
+  Logger.log('Cleaning up ' + key + ': removing streaming_language field');
+  
+  // Delete the streaming_language field
+  delete data.streaming_language;
   
   // Update the submission
   var updateUrl = FIREBASE_DB_URL + '/form_submissions/' + key + '.json';
