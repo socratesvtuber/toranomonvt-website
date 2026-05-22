@@ -1,13 +1,3 @@
-/**
- * Google Form Submission Handler for Toranomon VT Website
- * Stores form responses in Firebase Realtime Database
- *
- * Setup Instructions:
- * 1. Copy config.gs.example to config.gs
- * 2. Fill in your Firebase and Google Drive credentials
- * 3. Set up form trigger: onFormSubmit function
- */
-
 // ============================================
 // Field Mapping - Questions mapped by indexOf matching
 // The key is the field name, the value is the question text to match
@@ -16,7 +6,7 @@
 var FIELD_DEFINITIONS = {
   // Core identification fields (using short unique keys for matching)
   'name_select': 'あなたの名前をプルダウンから選択して下さい。',
-  'sns_link': 'SNS リンク',
+  'sns_link': 'SNSリンク',
   'name_hiragana': '名前（ひらがな）',
   'name_romaji': '名前（ローマ字）',
   'birthday': '誕生日',
