@@ -16,7 +16,7 @@
 var FIELD_DEFINITIONS = {
   // Core identification fields (using short unique keys for matching)
   'name_select': 'あなたの名前をプルダウンから選択して下さい。',
-  'sns_link': 'SNS リンク 自身が活動している SNS などの URL のみが記入。 複数ある場合は改行して追加すること。',
+  'sns_link': 'SNS リンク',
   'name_hiragana': '名前（ひらがな）',
   'name_romaji': '名前（ローマ字）',
   'birthday': '誕生日',
@@ -226,6 +226,17 @@ function initializeResultObject() {
 }
 
 /**
+ * Normalize string by removing extra spaces and newlines
+ * @param {String} str - String to normalize
+ * @returns {String} Normalized string
+ */
+function normalizeString(str) {
+  if (!str) return '';
+  // Replace multiple spaces/newlines with single space, then trim
+  return String(str).replace(/[\s\n\r]+/g, ' ').trim();
+}
+
+/**
  * Find matching field key using indexOf
  * Prioritizes longer, more specific matches to avoid false positives
  * @param {String} title - Field title from form
@@ -235,20 +246,22 @@ function findMatchingField(title) {
   if (!title) return null;
 
   var titleStr = String(title).trim();
+  var normalizedTitle = normalizeString(titleStr);
   var bestMatch = null;
   var bestMatchLength = 0;
 
   // First pass: Look for exact or long matches (4+ chars)
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
-    
+    var normalizedFieldTitle = normalizeString(fieldTitle);
+
     // Skip very short field titles (less than 4 chars) in first pass to avoid false matches
     if (fieldTitle.length < 4) {
       continue;
     }
 
-    // Check if form title contains the field title (exact match preferred)
-    if (titleStr.indexOf(fieldTitle) !== -1) {
+    // Check if normalized form title contains the normalized field title
+    if (normalizedTitle.indexOf(normalizedFieldTitle) !== -1) {
       // Prefer longer matches
       if (fieldTitle.length > bestMatchLength) {
         bestMatch = fieldKey;
@@ -256,7 +269,7 @@ function findMatchingField(title) {
       }
     }
   }
-  
+
   if (bestMatch) {
     return bestMatch;
   }
@@ -264,14 +277,15 @@ function findMatchingField(title) {
   // Second pass: Check short field titles only if no long match found
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
-    
+    var normalizedFieldTitle = normalizeString(fieldTitle);
+
     // Only check short field titles
     if (fieldTitle.length >= 4) {
       continue;
     }
 
-    // Check if form title contains the field title
-    if (titleStr.indexOf(fieldTitle) !== -1) {
+    // Check if normalized form title contains the normalized field title
+    if (normalizedTitle.indexOf(normalizedFieldTitle) !== -1) {
       return fieldKey;
     }
   }
@@ -279,8 +293,9 @@ function findMatchingField(title) {
   // Third pass: Check if field title contains the form title (for truncated titles)
   for (var fieldKey in FIELD_DEFINITIONS) {
     var fieldTitle = FIELD_DEFINITIONS[fieldKey];
+    var normalizedFieldTitle = normalizeString(fieldTitle);
 
-    if (fieldTitle.indexOf(titleStr) !== -1) {
+    if (normalizedFieldTitle.indexOf(normalizedTitle) !== -1) {
       return fieldKey;
     }
   }
