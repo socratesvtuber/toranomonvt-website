@@ -468,9 +468,9 @@ if (window.firebaseMemberLoaderLoaded) {
     } else if (urlLower.includes('twitch.tv')) {
       return { class: 'twitch', name: 'Twitch', icon: 'fab fa-twitch' };
     } else if (urlLower.includes('nicovideo.jp') || urlLower.includes('nico.ms')) {
-      return { class: 'niconico', name: 'ニコニコ動画', icon: 'fas fa-play-circle' };
+      return { class: 'niconico', name: 'ニコニコ動画', icon: 'fab fa-niconico' };
     } else if (urlLower.includes('twitter.com') || urlLower.includes('x.com') || urlLower.includes('/twitter/')) {
-      return { class: 'x', name: 'X (Twitter)', icon: 'fab fa-x-twitter' };
+      return { class: 'x', name: 'X (Twitter)', icon: 'fa-brands fa-x-twitter' };
     } else if (urlLower.includes('instagram.com')) {
       return { class: 'instagram', name: 'Instagram', icon: 'fab fa-instagram' };
     } else if (urlLower.includes('facebook.com') || urlLower.includes('fb.com')) {

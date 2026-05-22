@@ -22,7 +22,7 @@
 |-----------------|---------|-----|
 | YouTube | `fab fa-youtube` | Red (#ff0000) |
 | Twitch | `fab fa-twitch` | Purple (#9146ff) |
-| ニコニコ動画 | `fas fa-play-circle` | Cyan (#00a6cc) |
+| ニコニコ動画 | `fab fa-niconico` | Cyan (#00a6cc) |
 | X (Twitter) | `fab fa-x-twitter` | Black (#000000) |
 | Instagram | `fab fa-instagram` | Gradient (pink/orange) |
 | Facebook | `fab fa-facebook` | Blue (#1877f2) |
