@@ -22,8 +22,8 @@
 |-----------------|---------|-----|
 | YouTube | `fab fa-youtube` | Red (#ff0000) |
 | Twitch | `fab fa-twitch` | Purple (#9146ff) |
-| ニコニコ動画 | `fab fa-niconico` | Cyan (#00a6cc) |
-| X (Twitter) | `fab fa-x-twitter` | Black (#000000) |
+| ニコニコ動画 | `fas fa-tv` | Cyan (#03c7fc) - 公式カラー |
+| X (Twitter) | `fa-brands fa-x-twitter` | Black (#000000) - 公式ロゴ |
 | Instagram | `fab fa-instagram` | Gradient (pink/orange) |
 | Facebook | `fab fa-facebook` | Blue (#1877f2) |
 | TikTok | `fab fa-tiktok` | Black (#000000) |
@@ -34,6 +34,8 @@
 | Spotify | `fab fa-spotify` | Green (#1ed761) |
 | Apple | `fab fa-apple` | Black (#000000) |
 | Amazon | `fab fa-amazon` | Orange (#ff9900) |
+| marshmallow | `fas fa-cookie` | Pink (#ff6b9d) - マシュマロ風 |
+| Lit-Link | `fas fa-link` | Blue (#4cb4e2) - 公式カラー |
 | その他 | `fas fa-link` | Gold (theme color) |
 
 ## 実装詳細

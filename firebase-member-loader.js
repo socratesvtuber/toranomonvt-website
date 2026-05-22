@@ -469,7 +469,7 @@ if (window.firebaseMemberLoaderLoaded) {
     } else if (urlLower.includes('twitch.tv')) {
       return { class: 'twitch', name: 'Twitch', icon: 'fab fa-twitch' };
     } else if (urlLower.includes('nicovideo.jp') || urlLower.includes('nico.ms')) {
-      return { class: 'niconico', name: 'ニコニコ動画', icon: 'fab fa-niconico' };
+      return { class: 'niconico', name: 'ニコニコ動画', icon: 'fas fa-tv' };
     } else if (urlLower.includes('twitter.com') || urlLower.includes('x.com') || urlLower.includes('/twitter/')) {
       return { class: 'x', name: 'X (Twitter)', icon: 'fa-brands fa-x-twitter' };
     } else if (urlLower.includes('instagram.com')) {
@@ -492,6 +492,10 @@ if (window.firebaseMemberLoaderLoaded) {
       return { class: 'apple', name: 'Apple', icon: 'fab fa-apple' };
     } else if (urlLower.includes('amazon')) {
       return { class: 'amazon', name: 'Amazon', icon: 'fab fa-amazon' };
+    } else if (urlLower.includes('marshmallow-qa.com') || urlLower.includes('marshmallow-qa')) {
+      return { class: 'marshmallow', name: 'marshmallow', icon: 'fas fa-cookie' };
+    } else if (urlLower.includes('lit.link') || urlLower.includes('litlink')) {
+      return { class: 'litlink', name: 'Lit-Link', icon: 'fas fa-link' };
     } else {
       return { class: 'other', name: 'リンク', icon: 'fas fa-link' };
     }
