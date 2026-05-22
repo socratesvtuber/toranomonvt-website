@@ -428,19 +428,71 @@ if (window.firebaseMemberLoaderLoaded) {
   
   /**
    * Render SNS links
+   * @param {string} snsLink - SNS links (can be multiple URLs separated by newlines or commas)
    */
   renderSnsLinks(snsLink) {
     const container = document.getElementById('sns-links');
     if (!container) return;
-    
+
     if (snsLink) {
-      container.innerHTML = `
-        <a href="${this.escapeHtml(snsLink)}" class="sns-icon" title="SNS" target="_blank" rel="noopener">
-          <i class="fas fa-link"></i>
-        </a>
-      `;
+      // Split by newlines or commas
+      const urls = snsLink.split(/[\n,]/).map(url => url.trim()).filter(url => url);
+      
+      if (urls.length > 0) {
+        container.innerHTML = urls.map(url => {
+          const platform = this.getPlatformInfo(url);
+          return `
+            <a href="${this.escapeHtml(url)}" class="sns-icon ${platform.class}" title="${platform.name}" target="_blank" rel="noopener">
+              <i class="${platform.icon}"></i>
+            </a>
+          `;
+        }).join('');
+      } else {
+        container.innerHTML = '<span class="no-data">登録されていません</span>';
+      }
     } else {
       container.innerHTML = '<span class="no-data">登録されていません</span>';
+    }
+  },
+
+  /**
+   * Get platform info based on URL
+   * @param {string} url - URL to check
+   * @returns {{class: string, name: string, icon: string}} Platform info
+   */
+  getPlatformInfo(url) {
+    const urlLower = url.toLowerCase();
+    
+    if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+      return { class: 'youtube', name: 'YouTube', icon: 'fab fa-youtube' };
+    } else if (urlLower.includes('twitch.tv')) {
+      return { class: 'twitch', name: 'Twitch', icon: 'fab fa-twitch' };
+    } else if (urlLower.includes('nicovideo.jp') || urlLower.includes('nico.ms')) {
+      return { class: 'niconico', name: 'ニコニコ動画', icon: 'fas fa-play-circle' };
+    } else if (urlLower.includes('twitter.com') || urlLower.includes('x.com') || urlLower.includes('/twitter/')) {
+      return { class: 'x', name: 'X (Twitter)', icon: 'fab fa-x-twitter' };
+    } else if (urlLower.includes('instagram.com')) {
+      return { class: 'instagram', name: 'Instagram', icon: 'fab fa-instagram' };
+    } else if (urlLower.includes('facebook.com') || urlLower.includes('fb.com')) {
+      return { class: 'facebook', name: 'Facebook', icon: 'fab fa-facebook' };
+    } else if (urlLower.includes('tiktok.com')) {
+      return { class: 'tiktok', name: 'TikTok', icon: 'fab fa-tiktok' };
+    } else if (urlLower.includes('discord.gg') || urlLower.includes('discord.com')) {
+      return { class: 'discord', name: 'Discord', icon: 'fab fa-discord' };
+    } else if (urlLower.includes('note.com') || urlLower.includes('/note/')) {
+      return { class: 'note', name: 'note', icon: 'fas fa-pen-fancy' };
+    } else if (urlLower.includes('pixiv.net')) {
+      return { class: 'pixiv', name: 'pixiv', icon: 'fas fa-palette' };
+    } else if (urlLower.includes('booth.pm')) {
+      return { class: 'booth', name: 'BOOTH', icon: 'fas fa-store' };
+    } else if (urlLower.includes('spotify.com')) {
+      return { class: 'spotify', name: 'Spotify', icon: 'fab fa-spotify' };
+    } else if (urlLower.includes('apple.com')) {
+      return { class: 'apple', name: 'Apple', icon: 'fab fa-apple' };
+    } else if (urlLower.includes('amazon')) {
+      return { class: 'amazon', name: 'Amazon', icon: 'fab fa-amazon' };
+    } else {
+      return { class: 'other', name: 'リンク', icon: 'fas fa-link' };
     }
   },
   
