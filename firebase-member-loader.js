@@ -56,10 +56,11 @@ if (window.firebaseMemberLoaderLoaded) {
     const memberMatch = window.location.pathname.match(/members\/([^/]+)(?:\.html)?$/);
     const idParam = this.getQueryParam('id');
     const nameParam = this.getQueryParam('name'); // Legacy support
-    
-    console.log('FirebaseMemberLoader: memberMatch:', memberMatch);
-    console.log('FirebaseMemberLoader: idParam:', idParam);
-    console.log('FirebaseMemberLoader: nameParam:', nameParam);
+  
+    // Debug logging (uncomment if needed)
+    // console.log('FirebaseMemberLoader: memberMatch:', memberMatch);
+    // console.log('FirebaseMemberLoader: idParam:', idParam);
+    // console.log('FirebaseMemberLoader: nameParam:', nameParam);
     
     // Extract member name from URL path (e.g., "夜叉姫" from "members/夜叉姫.html" or "members/夜叉姫")
     let pathMemberName = null;
