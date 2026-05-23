@@ -355,10 +355,17 @@ if (window.firebaseMemberLoaderLoaded) {
     // Header image (from headerImageUrl - Google Drive)
     const headerImageEl = document.getElementById('member-header-image');
     if (headerImageEl) {
+      console.log('DEBUG - headerImageUrl value:', member.headerImageUrl);
+      console.log('DEBUG - headerImageUrl type:', typeof member.headerImageUrl);
       if (member.headerImageUrl) {
-        console.log('DEBUG - Setting header image:', this.getDriveImageProxy(member.headerImageUrl));
-        headerImageEl.src = this.getDriveImageProxy(member.headerImageUrl);
+        const proxyUrl = this.getDriveImageProxy(member.headerImageUrl);
+        console.log('DEBUG - Setting header image:', proxyUrl);
+        console.log('DEBUG - Original URL:', member.headerImageUrl);
+        headerImageEl.src = proxyUrl;
         headerImageEl.style.display = 'block';
+        headerImageEl.onerror = function() {
+          console.error('DEBUG - Header image failed to load:', this.src);
+        };
       } else {
         console.log('DEBUG - No headerImageUrl found');
         headerImageEl.style.display = 'none';
@@ -371,10 +378,17 @@ if (window.firebaseMemberLoaderLoaded) {
   
     // Avatar (from fullbodyImageUrl - Google Drive)
     const avatarEl = document.getElementById('member-avatar');
+    console.log('DEBUG - fullbodyImageUrl value:', member.fullbodyImageUrl);
+    console.log('DEBUG - fullbodyImageUrl type:', typeof member.fullbodyImageUrl);
     if (member.fullbodyImageUrl) {
-      console.log('DEBUG - Setting avatar image:', this.getDriveImageProxy(member.fullbodyImageUrl));
-      avatarEl.src = this.getDriveImageProxy(member.fullbodyImageUrl);
+      const proxyUrl = this.getDriveImageProxy(member.fullbodyImageUrl);
+      console.log('DEBUG - Setting avatar image:', proxyUrl);
+      console.log('DEBUG - Original URL:', member.fullbodyImageUrl);
+      avatarEl.src = proxyUrl;
       avatarEl.alt = member.name_hiragana || 'メンバー';
+      avatarEl.onerror = function() {
+        console.error('DEBUG - Avatar image failed to load:', this.src);
+      };
     } else {
       console.log('DEBUG - No fullbodyImageUrl found, using fallback');
       avatarEl.src = '../img/虎ノ門ロゴ大本.png';
@@ -809,16 +823,30 @@ if (window.firebaseMemberLoaderLoaded) {
    * Get Google Drive image proxy URL
    */
   getDriveImageProxy(driveUrl) {
-    if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
-    
-    const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) {
-      const fileId = match[1];
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
-    }
-    
-    return driveUrl;
-  },
+      if (!driveUrl) return '';
+      
+      // URL が文字列でない場合は空文字を返す
+      if (typeof driveUrl !== 'string') return '';
+  
+      // Google Drive のファイル ID を抽出
+      // 対応形式：https://drive.google.com/file/d/[FILE_ID]/view
+      // または：https://drive.google.com/file/d/[FILE_ID]/view?usp=drive_link
+      const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        const fileId = match[1];
+        console.log('DEBUG - getDriveImageProxy: Converted URL for fileId:', fileId);
+        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      }
+      
+      // 既に変換済み URL の場合（https://drive.google.com/uc?export=view&id=）
+      if (driveUrl.includes('drive.google.com/uc?')) {
+        console.log('DEBUG - getDriveImageProxy: Already converted URL');
+        return driveUrl;
+      }
+  
+      console.log('DEBUG - getDriveImageProxy: Could not parse URL, returning as-is:', driveUrl);
+      return driveUrl;
+    },
   
   /**
    * Escape HTML special characters
