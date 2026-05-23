@@ -108,11 +108,11 @@ function onFormSubmit(e) {
 
       if (matchedField) {
         Logger.log(' Matched Field: ' + matchedField);
-
+      
         // Handle file uploads separately
         if (isFileUploadField(matchedField)) {
           Logger.log(' Handling as file upload field');
-          handleFileUpload(result, matchedField, item, formResponse);
+          handleFileUpload(result, matchedField, response, title);
         } else {
           // Handle regular text responses
           result[matchedField] = formatResponse(response);
@@ -323,85 +323,101 @@ function formatResponse(response) {
  * Handle file upload field
  * @param {Object} result - Result object to update
  * @param {String} fieldKey - Field key
- * @param {Object} item - Form item
- * @param {Object} formResponse - Form response object
+ * @param {String} response - File upload response (file ID or comma-separated IDs)
+ * @param {String} title - Field title for logging
  */
-function handleFileUpload(result, fieldKey, item, formResponse) {
+function handleFileUpload(result, fieldKey, response, title) {
   try {
-    var itemResponses = formResponse.getItemResponses();
+    Logger.log('=== File Upload Processing ===');
+    Logger.log(' Field: ' + fieldKey);
+    Logger.log(' Title: ' + title);
+    Logger.log(' Response type: ' + typeof response);
+    Logger.log(' Response value: ' + (response ? (response.length > 200 ? response.substring(0, 200) + '...' : response) : 'null'));
 
-    for (var i = 0; i < itemResponses.length; i++) {
-      var itemResponse = itemResponses[i];
-      var responseItem = itemResponse.getItem();
+    if (!response || response.length === 0) {
+      Logger.log(' Warning: No response or empty response for field: ' + fieldKey);
+      return;
+    }
 
-      // Match item using indexOf
-      if (responseItem.getTitle() && responseItem.getTitle().indexOf(FILE_UPLOAD_FIELDS[fieldKey]) !== -1) {
-        var response = itemResponse.getResponse();
+    if (fieldKey === 'voice_audio') {
+      // Handle multiple audio files (0-10 files)
+      result.voiceAudioUrls = [];
+      
+      // response is a comma-separated string of file IDs for multiple files
+      var fileIds = [];
+      if (typeof response === 'string') {
+        fileIds = response.split(',');
+      } else if (response instanceof Array) {
+        fileIds = response;
+      }
+      
+      for (var j = 0; j < fileIds.length; j++) {
+        var fileId = null;
+        var shareUrl = null;
+        var rawId = fileIds[j];
 
-        Logger.log(' Field: ' + fieldKey + ', Response type: ' + typeof response);
-        Logger.log(' Response: ' + JSON.stringify(response));
-
-        if (response && response.length > 0) {
-          if (fieldKey === 'voice_audio') {
-            // Handle multiple audio files (0-10 files)
-            result.voiceAudioUrls = [];
-            for (var j = 0; j < response.length; j++) {
-              var fileId = null;
-              var shareUrl = null;
-              
-              // Get file ID from response
-              if (response[j] && typeof response[j] === 'object' && typeof response[j].getId === 'function') {
-                fileId = response[j].getId();
-              } else if (response[j] && typeof response[j] === 'string') {
-                fileId = response[j];
-                Logger.log(' String file ID detected: ' + fileId);
-              } else {
-                Logger.log(' Warning: response[j] is not a valid file object: ' + JSON.stringify(response[j]));
-                continue;
-              }
-              
-              // Construct Google Drive share URL directly from file ID
-              shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-              Logger.log(' Constructed share URL: ' + shareUrl);
-              result.voiceAudioUrls.push(shareUrl);
-            }
-            Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
-          } else {
-            // Handle single file uploads
-            var fileId = null;
-            var shareUrl = null;
-            
-            // Get file ID from response
-            if (response[0] && typeof response[0] === 'object' && typeof response[0].getId === 'function') {
-              fileId = response[0].getId();
-            } else if (response[0] && typeof response[0] === 'string') {
-              fileId = response[0];
-              Logger.log(' String file ID detected: ' + fileId);
-            } else {
-              Logger.log(' Warning: response[0] is not a valid file object: ' + JSON.stringify(response[0]));
-            }
-            
-            if (fileId) {
-              // Construct Google Drive share URL directly from file ID
-              shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-              Logger.log(' File ID: ' + fileId);
-              Logger.log(' Share URL: ' + shareUrl);
-
-              if (fieldKey === 'header_image') {
-                result.headerImageUrl = shareUrl;
-              } else if (fieldKey === 'fullbody_image') {
-                result.fullbodyImageUrl = shareUrl;
-              } else if (fieldKey === 'video') {
-                result.videoUrl = shareUrl;
-              }
-            }
-          }
+        // Get file ID from response - trim whitespace
+        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+          fileId = rawId.getId();
+        } else if (rawId && typeof rawId === 'string') {
+          fileId = rawId.trim();
+          Logger.log(' String file ID detected: ' + fileId);
+        } else {
+          Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+          continue;
         }
-        break;
+
+        // Construct Google Drive share URL directly from file ID
+        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+        Logger.log(' Constructed share URL: ' + shareUrl);
+        result.voiceAudioUrls.push(shareUrl);
+      }
+      Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+    } else {
+      // Handle single file uploads (header_image, fullbody_image, video)
+      var fileId = null;
+      var shareUrl = null;
+      var rawResponse = null;
+
+      // response could be a string (comma-separated IDs) or array
+      if (typeof response === 'string') {
+        // Split by comma and take first item
+        var parts = response.split(',');
+        rawResponse = parts[0] ? parts[0].trim() : null;
+      } else if (response instanceof Array) {
+        rawResponse = response[0];
+      }
+
+      // Get file ID from response
+      if (rawResponse && typeof rawResponse === 'object' && typeof rawResponse.getId === 'function') {
+        fileId = rawResponse.getId();
+      } else if (rawResponse && typeof rawResponse === 'string') {
+        fileId = rawResponse.trim();
+        Logger.log(' String file ID detected: ' + fileId);
+      } else {
+        Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
+      }
+
+      if (fileId) {
+        // Construct Google Drive share URL directly from file ID
+        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+        Logger.log(' File ID: ' + fileId);
+        Logger.log(' Share URL: ' + shareUrl);
+
+        if (fieldKey === 'header_image') {
+          result.headerImageUrl = shareUrl;
+        } else if (fieldKey === 'fullbody_image') {
+          result.fullbodyImageUrl = shareUrl;
+        } else if (fieldKey === 'video') {
+          result.videoUrl = shareUrl;
+        }
+      } else {
+        Logger.log(' ERROR: No file ID extracted for field: ' + fieldKey);
       }
     }
   } catch (error) {
     Logger.log('ERROR handling file upload for ' + fieldKey + ': ' + error.toString());
+    Logger.log('Stack: ' + (error.stack || 'No stack trace'));
     throw error;
   }
 }
