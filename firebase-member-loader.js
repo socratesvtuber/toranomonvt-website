@@ -162,9 +162,14 @@ if (window.firebaseMemberLoaderLoaded) {
   const data = await response.json();
   
   if (!data) {
-  this.showError('メンバーデータが見つかりませんでした。');
-  return;
+    this.showError('メンバーデータが見つかりませんでした。');
+    return;
   }
+  
+  // Debug: Log the raw data from Firebase
+  console.log('DEBUG - Raw Firebase data for member ' + memberId + ':', JSON.stringify(data));
+  console.log('DEBUG - headerImageUrl from DB:', data.headerImageUrl);
+  console.log('DEBUG - fullbodyImageUrl from DB:', data.fullbodyImageUrl);
   
   // Store and render
   const member = { id: memberId, ...data };
@@ -334,6 +339,9 @@ if (window.firebaseMemberLoaderLoaded) {
    */
   renderMemberPage(member) {
     console.log('FirebaseMemberLoader: Rendering member page:', member.name_hiragana);
+    console.log('DEBUG - Full member data:', JSON.stringify(member, null, 2));
+    console.log('DEBUG - headerImageUrl:', member.headerImageUrl);
+    console.log('DEBUG - fullbodyImageUrl:', member.fullbodyImageUrl);
   
     // Hide loading, show content
     document.getElementById('loading-state').style.display = 'none';
@@ -348,9 +356,11 @@ if (window.firebaseMemberLoaderLoaded) {
     const headerImageEl = document.getElementById('member-header-image');
     if (headerImageEl) {
       if (member.headerImageUrl) {
+        console.log('DEBUG - Setting header image:', this.getDriveImageProxy(member.headerImageUrl));
         headerImageEl.src = this.getDriveImageProxy(member.headerImageUrl);
         headerImageEl.style.display = 'block';
       } else {
+        console.log('DEBUG - No headerImageUrl found');
         headerImageEl.style.display = 'none';
       }
     }
@@ -362,9 +372,11 @@ if (window.firebaseMemberLoaderLoaded) {
     // Avatar (from fullbodyImageUrl - Google Drive)
     const avatarEl = document.getElementById('member-avatar');
     if (member.fullbodyImageUrl) {
+      console.log('DEBUG - Setting avatar image:', this.getDriveImageProxy(member.fullbodyImageUrl));
       avatarEl.src = this.getDriveImageProxy(member.fullbodyImageUrl);
       avatarEl.alt = member.name_hiragana || 'メンバー';
     } else {
+      console.log('DEBUG - No fullbodyImageUrl found, using fallback');
       avatarEl.src = '../img/虎ノ門ロゴ大本.png';
       avatarEl.alt = 'メンバー画像';
     }
