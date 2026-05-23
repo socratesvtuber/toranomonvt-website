@@ -625,20 +625,22 @@ if (window.firebaseMemberLoaderLoaded) {
   
   /**
    * Render Q&A
+   * Parses Q&A pairs from the database where questions start with Q/QA/質問 and answers start with A/回答
+   * @param {string} qa - Q&A text from database
    */
   renderQa(qa) {
     const container = document.getElementById('qa-section');
     if (!container) return;
-    
+
     if (qa) {
-      // Split by newlines and create details/summary pairs
-      const qaLines = qa.split('\n').filter(line => line.trim());
-      if (qaLines.length > 0) {
-        container.innerHTML = qaLines.map((line, i) => `
-          <details>
-            <summary>Q${i + 1}</summary>
-            <p>${this.escapeHtml(line)}</p>
-          </details>
+      const qaPairs = this.parseQaPairs(qa);
+      
+      if (qaPairs.length > 0) {
+        container.innerHTML = qaPairs.map((pair, i) => `
+        <details>
+          <summary>${this.escapeHtml(pair.question)}</summary>
+          <p>${this.escapeHtml(pair.answer)}</p>
+        </details>
         `).join('');
       } else {
         container.innerHTML = '<p class="no-data">登録されていません</p>';
@@ -646,6 +648,62 @@ if (window.firebaseMemberLoaderLoaded) {
     } else {
       container.innerHTML = '<p class="no-data">登録されていません</p>';
     }
+  },
+
+  /**
+   * Parse Q&A pairs from text
+   * Each Q&A pair should have a question line (starting with Q) and an answer line (starting with A)
+   * @param {string} qa - Raw Q&A text from database
+   * @returns {Array<{question: string, answer: string}>} Array of Q&A pairs
+   */
+  parseQaPairs(qa) {
+    if (!qa || typeof qa !== 'string') return [];
+
+    const lines = qa.split('\n').map(line => line.trim()).filter(line => line);
+    const pairs = [];
+    let currentQuestion = null;
+    let currentAnswer = null;
+
+    for (const line of lines) {
+      // Check if this is a question line (starts with Q, Q., QA., 質問，etc.)
+      const isQuestion = /^Q[.:]?\s*|^QA[.:]?\s*|^質問/.test(line);
+      // Check if this is an answer line (starts with A, A., 回答，etc.)
+      const isAnswer = /^A[.:]?\s*|^回答/.test(line);
+
+      if (isQuestion) {
+        // If we have a pending question without an answer, save it
+        if (currentQuestion && currentAnswer === null) {
+          pairs.push({ question: currentQuestion, answer: '回答未入力' });
+        }
+        // Start a new question
+        currentQuestion = line.replace(/^Q[.:]?\s*|^QA[.:]?\s*|^質問\s*/, '').trim();
+        currentAnswer = null;
+      } else if (isAnswer) {
+        // This is an answer - attach to current question
+        if (currentQuestion) {
+          currentAnswer = line.replace(/^A[.:]?\s*|^回答\s*/, '').trim();
+          pairs.push({ question: currentQuestion, answer: currentAnswer });
+          currentQuestion = null;
+          currentAnswer = null;
+        }
+      } else {
+        // This is a continuation line
+        if (currentQuestion && !currentAnswer) {
+          // Continuation of question
+          currentQuestion += ' ' + line;
+        } else if (currentAnswer) {
+          // Continuation of answer
+          currentAnswer += ' ' + line;
+        }
+      }
+    }
+
+    // Handle any remaining question without an answer
+    if (currentQuestion && currentAnswer === null) {
+      pairs.push({ question: currentQuestion, answer: '回答未入力' });
+    }
+
+    return pairs;
   },
   
   /**
