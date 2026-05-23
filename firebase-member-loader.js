@@ -547,7 +547,19 @@ if (window.firebaseMemberLoaderLoaded) {
   renderBasicInfo(member) {
     const container = document.getElementById('member-info-grid');
     if (!container) return;
-    
+  
+    // 全身画像の表示（基本情報の左側）
+    let html = '';
+    if (member.fullbodyImageUrl) {
+      const fullbodyImageUrl = this.getDriveImageProxy(member.fullbodyImageUrl);
+      html += `
+        <dt class="fullbody-image-label">全身画像</dt>
+        <dd class="fullbody-image-display">
+          <img src="${fullbodyImageUrl}" alt="${this.escapeHtml(member.name_hiragana || 'メンバー')}" class="member-fullbody-image" onerror="this.src='../img/虎ノ門ロゴ大本.png'">
+        </dd>
+      `;
+    }
+  
     const items = [
       { label: '名前（ひらがな）', value: member.name_hiragana },
       { label: '名前（ローマ字）', value: member.name_romaji },
@@ -556,8 +568,7 @@ if (window.firebaseMemberLoaderLoaded) {
       { label: '身長', value: member.height },
       { label: 'イメージカラー', value: member.image_color, isColor: true },
     ];
-    
-    let html = '';
+  
     items.forEach(item => {
       if (item.value) {
         html += `<dt>${item.label}</dt>`;
@@ -570,7 +581,7 @@ if (window.firebaseMemberLoaderLoaded) {
         }
       }
     });
-    
+  
     container.innerHTML = html || '<dd class="no-data">登録されていません</dd>';
   },
   
