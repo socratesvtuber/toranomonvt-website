@@ -922,34 +922,3 @@
     padding: 16px;
   }
 }
-
-/* Fullbody image in basic info section */
-.fullbody-image-label {
-  grid-column: 1 / -1;
-  font-weight: bold;
-  color: var(--text);
-  border-bottom: 2px solid var(--accent);
-  padding-bottom: 8px;
-  margin-top: 16px;
-}
-
-.fullbody-image-display {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 16px 0;
-}
-
-.member-fullbody-image {
-  max-width: 200px;
-  max-height: 300px;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 768px) {
-  .member-fullbody-image {
-    max-width: 150px;
-    max-height: 250px;
-  }
-}
