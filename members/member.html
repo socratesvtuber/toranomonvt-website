@@ -52,12 +52,15 @@
 <!-- Member content (dynamically rendered) -->
 <div id="member-root" style="display: none;">
 <section class="member-header">
-<h1 id="member-name-display">メンバー名</h1>
-<p class="member-subtitle" id="member-name-romaji">Member Name</p>
-<button class="favorite-btn" id="favorite-btn">
-<i class="far fa-heart"></i>
-<span>お気に入り</span>
-</button>
+  <div class="member-header-image-container">
+    <img id="member-header-image" src="" alt="ヘッダー画像" class="member-header-image" onerror="this.style.display='none'">
+  </div>
+  <h1 id="member-name-display">メンバー名</h1>
+  <p class="member-subtitle" id="member-name-romaji">Member Name</p>
+  <button class="favorite-btn" id="favorite-btn">
+    <i class="far fa-heart"></i>
+    <span>お気に入り</span>
+  </button>
 </section>
 
 <div class="member-content">

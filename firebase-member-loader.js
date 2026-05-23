@@ -334,27 +334,41 @@ if (window.firebaseMemberLoaderLoaded) {
    */
   renderMemberPage(member) {
     console.log('FirebaseMemberLoader: Rendering member page:', member.name_hiragana);
-    
+  
     // Hide loading, show content
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('error-state').style.display = 'none';
     document.getElementById('member-root').style.display = 'block';
-    
+  
     // Set page title
     const memberName = member.name_hiragana || member.name_romaji || 'メンバー';
     document.title = `${memberName} - 虎ノ門`;
-    
-    // Header
+  
+    // Header image (from headerImageUrl - Google Drive)
+    const headerImageEl = document.getElementById('member-header-image');
+    if (headerImageEl) {
+      if (member.headerImageUrl) {
+        headerImageEl.src = this.getDriveImageProxy(member.headerImageUrl);
+        headerImageEl.style.display = 'block';
+      } else {
+        headerImageEl.style.display = 'none';
+      }
+    }
+  
+    // Header text
     document.getElementById('member-name-display').textContent = member.name_hiragana || '名前不明';
     document.getElementById('member-name-romaji').textContent = member.name_romaji || '';
-    
-    // Avatar
+  
+    // Avatar (from fullbodyImageUrl - Google Drive)
     const avatarEl = document.getElementById('member-avatar');
     if (member.fullbodyImageUrl) {
       avatarEl.src = this.getDriveImageProxy(member.fullbodyImageUrl);
       avatarEl.alt = member.name_hiragana || 'メンバー';
+    } else {
+      avatarEl.src = '../img/虎ノ門ロゴ大本.png';
+      avatarEl.alt = 'メンバー画像';
     }
-    
+  
     // Favorite button
     const favoriteBtn = document.getElementById('favorite-btn');
     if (favoriteBtn) {
@@ -362,67 +376,67 @@ if (window.firebaseMemberLoaderLoaded) {
       favoriteBtn.dataset.name = member.name_hiragana || member.name_romaji || '';
       favoriteBtn.dataset.image = member.fullbodyImageUrl || '';
     }
-    
+  
     // SNS links
     this.renderSnsLinks(member.sns_link);
-    
+  
     // Basic info grid
     this.renderBasicInfo(member);
-    
+  
     // Catch copy (use unit_project_name or message_to_fans as fallback)
-    document.getElementById('member-catchcopy').textContent = 
-      member.unit_project_name || 'キャッチコピー';
-    
+    document.getElementById('member-catchcopy').textContent =
+    member.unit_project_name || 'キャッチコピー';
+  
     // Dream (use message_to_fans as fallback)
-    document.getElementById('member-dream').textContent = 
-      member.message_to_fans || '夢・目標';
-    
+    document.getElementById('member-dream').textContent =
+    member.message_to_fans || '夢・目標';
+  
     // Oshi mark
     document.getElementById('member-sushi-mark').textContent =
     member.oshi_mark || '推しマーク';
-    
+  
     // Streaming terms
     this.renderStreamingTerms(member.streaming_terms);
-    
+  
     // Unit project
-    document.getElementById('member-unit-project').textContent = 
-      member.unit_project_name || '';
-    
+    document.getElementById('member-unit-project').textContent =
+    member.unit_project_name || '';
+  
     // Creator info
     this.renderCreatorInfo(member.illustrator, member.modeler_2d, member.modeler_3d);
-    
+  
     // Community info
     this.renderCommunityInfo(member.fan_name, member.official_hashtag);
-    
+  
     // Schedule
-    document.getElementById('schedule-info').innerHTML = member.streaming_schedule 
-      ? `<p>${this.escapeHtml(member.streaming_schedule)}</p>`
-      : '<p>未定</p>';
-    
+    document.getElementById('schedule-info').innerHTML = member.streaming_schedule
+    ? `<p>${this.escapeHtml(member.streaming_schedule)}</p>`
+    : '<p>未定</p>';
+  
     // Recommended videos
     this.renderRecommendedVideos(member.recommended_video);
-    
+  
     // Announcements
     document.getElementById('announcement-box').innerHTML = member.announcement_event
-      ? `<p>${this.escapeHtml(member.announcement_event)}</p>`
-      : '<p>お知らせはありません</p>';
-    
+    ? `<p>${this.escapeHtml(member.announcement_event)}</p>`
+    : '<p>お知らせはありません</p>';
+  
     // Goods/music links
     this.renderGoodsMusicLinks(member.goods_music_link);
-    
+  
     // Message to fans
-    document.getElementById('message-box').textContent = 
-      member.message_to_fans || '';
-    
+    document.getElementById('message-box').textContent =
+    member.message_to_fans || '';
+  
     // Q&A
     this.renderQa(member.qa);
-    
+  
     // Voice buttons
     this.renderVoiceButtons(member.voiceAudioUrls);
-    
+  
     // Navigation
     this.renderNavigation(member);
-    
+  
     // Store voice files globally for playback
     window.memberVoiceFiles = member.voiceAudioUrls || [];
   },
