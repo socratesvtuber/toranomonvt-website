@@ -28,9 +28,9 @@ var FIELD_DEFINITIONS = {
   'message_to_fans': 'ファンへ一言',
   'qa': 'Q＆A',
   
-  // File upload fields
-  'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
-  'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
+  // File upload fields - Updated to match actual form field titles
+  'header_image': 'Web に公開するヘッダー画像をアップして下さい。（1 ファイル 10MB まで）',
+  'fullbody_image': 'Web に公開する全身画像をアップして下さい。（1 ファイル 10MB まで）',
   'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
   'video': '自己紹介ページに動画を流したい場合はアップして下さい。',
   
@@ -50,8 +50,8 @@ var REQUIRED_FIELD_KEYS = [
 
 // File upload fields - matches the short question text in FIELD_DEFINITIONS
 var FILE_UPLOAD_FIELDS = {
-  'header_image': 'Web に公開するヘッダー画像をアップして下さい。',
-  'fullbody_image': 'Web に公開する全身画像をアップして下さい。',
+  'header_image': 'Web に公開するヘッダー画像をアップして下さい。（1 ファイル 10MB まで）',
+  'fullbody_image': 'Web に公開する全身画像をアップして下さい。（1 ファイル 10MB まで）',
   'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
   'video': '自己紹介ページに動画を流したい場合はアップして下さい。'
 };
