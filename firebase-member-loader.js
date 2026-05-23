@@ -835,7 +835,8 @@ if (window.firebaseMemberLoaderLoaded) {
       if (match && match[1]) {
         const fileId = match[1];
         console.log('DEBUG - getDriveImageProxy: Converted URL for fileId:', fileId);
-        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+        // CORS 対応のため、gstatic.com 経由で画像を取得
+        return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
       }
       
       // 既に変換済み URL の場合（https://drive.google.com/uc?export=view&id=）
