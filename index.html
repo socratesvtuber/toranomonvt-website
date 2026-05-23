@@ -348,9 +348,11 @@ getFirebaseUrl() {
     console.log('DEBUG member.fullbodyImageUrl:', member.fullbodyImageUrl);
     console.log('DEBUG member.headerImageUrl:', member.headerImageUrl);
     
-    const avatarUrl = member.fullbodyImageUrl
-    ? this.getDriveImageProxy(member.fullbodyImageUrl)
-    : '';
+    const avatarUrl = member.headerImageUrl
+        ? this.getDriveImageProxy(member.headerImageUrl)
+        : (member.fullbodyImageUrl
+            ? this.getDriveImageProxy(member.fullbodyImageUrl)
+            : '');
   
     // Create URL with Firebase ID parameter
     const memberUrl = `members/member.html?id=${encodeURIComponent(member.id)}`;
