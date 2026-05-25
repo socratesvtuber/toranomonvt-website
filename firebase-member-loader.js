@@ -787,19 +787,27 @@ if (window.firebaseMemberLoaderLoaded) {
    */
   renderNavigation(currentMember) {
     const container = document.getElementById('member-nav');
+    console.log('DEBUG renderNavigation: container found:', !!container);
     if (!container) return;
   
     // Get all public members sorted by name_select (first 3 digits)
     const members = this.getPublicMembersList();
+    console.log('DEBUG renderNavigation: members count:', members.length);
+    console.log('DEBUG renderNavigation: members:', members.map(m => ({ id: m.id, name: m.name_hiragana, name_select: m.name_select })));
+    
     const currentIndex = members.findIndex(m => m.id === currentMember.id);
+    console.log('DEBUG renderNavigation: currentMember.id:', currentMember.id);
+    console.log('DEBUG renderNavigation: currentIndex:', currentIndex);
   
     if (members.length === 0) {
+      console.log('DEBUG renderNavigation: no members, returning');
       container.innerHTML = '';
       return;
     }
   
     // Handle single member case - link to self
     if (members.length === 1) {
+      console.log('DEBUG renderNavigation: single member case');
       container.innerHTML = `
       <a href="member.html?id=${encodeURIComponent(members[0].id)}" class="nav-button self-member">
       <span>${this.escapeHtml(members[0].name_hiragana || members[0].name_romaji || '')}</span>
@@ -813,6 +821,8 @@ if (window.firebaseMemberLoaderLoaded) {
     const nextIndex = currentIndex < members.length - 1 ? currentIndex + 1 : 0;
     const prevMember = members[prevIndex];
     const nextMember = members[nextIndex];
+    
+    console.log('DEBUG renderNavigation: prevMember:', prevMember.name_hiragana, 'nextMember:', nextMember.name_hiragana);
   
     container.innerHTML = `
     <a href="member.html?id=${encodeURIComponent(prevMember.id)}" class="nav-button prev-member">
