@@ -160,20 +160,24 @@ if (window.firebaseMemberLoaderLoaded) {
   }
   
   const data = await response.json();
-  
+
   if (!data) {
     this.showError('メンバーデータが見つかりませんでした。');
     return;
   }
-  
+
   // Debug: Log the raw data from Firebase
   console.log('DEBUG - Raw Firebase data for member ' + memberId + ':', JSON.stringify(data));
   console.log('DEBUG - headerImageUrl from DB:', data.headerImageUrl);
   console.log('DEBUG - fullbodyImageUrl from DB:', data.fullbodyImageUrl);
-  
+
   // Store and render
   const member = { id: memberId, ...data };
   this.currentMember = member;
+  
+  // Update allMembers cache for getPublicMembersList() to work correctly
+  this.allMembers[memberId] = data;
+  
   this.renderMemberPage(member);
   
   // Set up real-time listener for this member's data
