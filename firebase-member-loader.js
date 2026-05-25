@@ -751,20 +751,31 @@ if (window.firebaseMemberLoaderLoaded) {
    */
   renderVoiceButtons(voiceUrls) {
     const container = document.getElementById('voice-buttons-container');
+    const voicePlayBtn = document.getElementById('voice-play-btn');
     if (!container) return;
-    
+  
     if (voiceUrls && voiceUrls.length > 0) {
-      container.innerHTML = voiceUrls.slice(0, 10).map((url, i) => 
+      container.innerHTML = voiceUrls.slice(0, 10).map((url, i) =>
         `<button class="voice-individual-btn" data-voice-index="${i}" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-          ボイス${i + 1}
+        ボイス${i + 1}
         </button>`
       ).join('');
-      
+  
+      // Show voice play button if hidden
+      if (voicePlayBtn) {
+        voicePlayBtn.style.display = 'block';
+      }
+  
       // Store voice URLs globally
       window.memberVoiceFiles = voiceUrls;
     } else {
-      container.innerHTML = '<span class="no-data">音声はありません</span>';
+      container.innerHTML = '';
       window.memberVoiceFiles = [];
+  
+      // Hide voice play button
+      if (voicePlayBtn) {
+        voicePlayBtn.style.display = 'none';
+      }
     }
   },
   
