@@ -313,17 +313,20 @@ if (window.firebaseMemberLoaderLoaded) {
    */
   async refreshMemberData(memberId) {
     if (!this.firebaseUrl || !memberId) return;
-    
+
     const url = `${this.firebaseUrl}/form_submissions/${memberId}.json`;
-    
+
     try {
       const response = await fetch(url);
-      
+
       if (!response.ok) return;
-      
+
       const data = await response.json();
-      
-      if (data && JSON.stringify(data) !== JSON.stringify(this.currentMember)) {
+
+      // Compare data excluding the id property (which is added separately to currentMember)
+      // Create a version of currentMember without the id for comparison
+      const { id, ...currentMemberWithoutId } = this.currentMember || {};
+      if (data && JSON.stringify(data) !== JSON.stringify(currentMemberWithoutId)) {
         console.log('FirebaseMemberLoader: Data updated, re-rendering...');
         this.currentMember = { id: memberId, ...data };
         this.renderMemberPage(this.currentMember);
