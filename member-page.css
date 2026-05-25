@@ -922,3 +922,76 @@
     padding: 16px;
   }
 }
+
+/* Member navigation - prev/next links */
+.member-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.member-nav .nav-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 184, 77, 0.1);
+  border: 2px solid rgba(255, 184, 77, 0.3);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.member-nav .nav-button:hover {
+  background: rgba(255, 184, 77, 0.2);
+  border-color: rgba(255, 184, 77, 0.5);
+  transform: translateY(-2px);
+}
+
+.member-nav .nav-button i {
+  font-size: 0.9rem;
+}
+
+.member-nav .prev-member {
+  order: 1;
+}
+
+.member-nav .next-member {
+  order: 3;
+}
+
+.member-nav .self-member {
+  order: 2;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .member-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .member-nav .nav-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .member-nav .prev-member {
+    order: 1;
+  }
+
+  .member-nav .next-member {
+    order: 2;
+  }
+
+  .member-nav .self-member {
+    order: 3;
+  }
+}

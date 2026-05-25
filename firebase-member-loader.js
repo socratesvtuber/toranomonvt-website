@@ -456,6 +456,9 @@ if (window.firebaseMemberLoaderLoaded) {
   
     // Q&A
     this.renderQa(member.qa);
+    
+    // Navigation (prev/next member links)
+    this.renderNavigation(member);
   
     // Voice buttons
     this.renderVoiceButtons(member.voiceAudioUrls);
@@ -785,22 +788,35 @@ if (window.firebaseMemberLoaderLoaded) {
   renderNavigation(currentMember) {
     const container = document.getElementById('member-nav');
     if (!container) return;
-    
-    // Get all public members
+  
+    // Get all public members sorted by name_select (first 3 digits)
     const members = this.getPublicMembersList();
     const currentIndex = members.findIndex(m => m.id === currentMember.id);
-    
-    if (members.length <= 1) {
+  
+    if (members.length === 0) {
       container.innerHTML = '';
       return;
     }
-    
-    const prevMember = currentIndex > 0 ? members[currentIndex - 1] : members[members.length - 1];
-    const nextMember = currentIndex < members.length - 1 ? members[currentIndex + 1] : members[0];
-    
+  
+    // Handle single member case - link to self
+    if (members.length === 1) {
+      container.innerHTML = `
+      <a href="member.html?id=${encodeURIComponent(members[0].id)}" class="nav-button self-member">
+      <span>${this.escapeHtml(members[0].name_hiragana || members[0].name_romaji || '')}</span>
+      </a>
+      `;
+      return;
+    }
+  
+    // Handle multiple members case - prev/next navigation
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : members.length - 1;
+    const nextIndex = currentIndex < members.length - 1 ? currentIndex + 1 : 0;
+    const prevMember = members[prevIndex];
+    const nextMember = members[nextIndex];
+  
     container.innerHTML = `
     <a href="member.html?id=${encodeURIComponent(prevMember.id)}" class="nav-button prev-member">
-    <i class="fas fa-arrow-right"></i>
+    <i class="fas fa-arrow-left"></i>
     <span>${this.escapeHtml(prevMember.name_hiragana || prevMember.name_romaji || '')}</span>
     </a>
     <a href="member.html?id=${encodeURIComponent(nextMember.id)}" class="nav-button next-member">
@@ -815,19 +831,26 @@ if (window.firebaseMemberLoaderLoaded) {
    */
   getPublicMembersList() {
     const members = [];
-    
+  
     for (const id in this.allMembers) {
       const member = this.allMembers[id];
       // Check if member should be displayed: normalize by removing spaces
       const flag = (member.public_flag || '').toString().replace(/\s/g, '');
       // Use includes() for robust matching regardless of encoding differences
       if (flag.includes('Web') && flag.includes('公開') ||
-          flag === '公開する' || flag === '公開' || flag === 'true') {
+      flag === '公開する' || flag === '公開' || flag === 'true') {
         members.push({ id, ...member });
       }
     }
-    
-    return members.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  
+    // Sort by name_select (first 3 digits) in ascending order
+    return members.sort((a, b) => {
+      const aSelect = a.name_select || '';
+      const bSelect = b.name_select || '';
+      const aNum = parseInt(aSelect.substring(0, 3), 10) || 0;
+      const bNum = parseInt(bSelect.substring(0, 3), 10) || 0;
+      return aNum - bNum;
+    });
   },
   
   /**
