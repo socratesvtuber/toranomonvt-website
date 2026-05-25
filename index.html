@@ -338,36 +338,37 @@ getFirebaseUrl() {
   
   // Generate HTML with ID-based links
   const html = members.map((member, index) => {
-    const name = member.name_hiragana || member.name_romaji || '名前不明';
-    const romaji = member.name_romaji ? ` (${member.name_romaji})` : '';
-    const catchCopy = member.unit_project_name || member.message_to_fans || 'メンバー';
-    const avatarClass = `avatar-${(index % 3) + 1}`;
-    
-    // Debug logging
-    console.log('DEBUG member[' + index + ']:', member);
-    console.log('DEBUG member.fullbodyImageUrl:', member.fullbodyImageUrl);
-    console.log('DEBUG member.headerImageUrl:', member.headerImageUrl);
-    
-    const avatarUrl = member.headerImageUrl
-        ? this.getDriveImageProxy(member.headerImageUrl)
-        : (member.fullbodyImageUrl
-            ? this.getDriveImageProxy(member.fullbodyImageUrl)
-            : '');
+  const name = member.name_hiragana || member.name_romaji || '名前不明';
+  const romaji = member.name_romaji ? ` (${member.name_romaji})` : '';
+  const catchCopy = member.unit_project_name || member.message_to_fans || 'メンバー';
+  const avatarClass = `avatar-${(index % 3) + 1}`;
   
-    // Create URL with Firebase ID parameter
-    const memberUrl = `members/member.html?id=${encodeURIComponent(member.id)}`;
+  // Debug logging
+  console.log('DEBUG member[' + index + ']:', member);
+  console.log('DEBUG member.fullbodyImageUrl:', member.fullbodyImageUrl);
+  console.log('DEBUG member.headerImageUrl:', member.headerImageUrl);
   
-    return `
-    <a href="${memberUrl}" class="member-card-link">
-    <article class="member-card">
-    <div class="member-avatar ${avatarClass}">
-    ${avatarUrl ? `<img src="${avatarUrl}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : ''}
-    </div>
-    <h3>${name}${romaji ? `<small>${romaji}</small>` : ''}</h3>
-    <p>${catchCopy}</p>
-    </article>
-    </a>
-    `;
+  // Use fullbodyImageUrl as primary, headerImageUrl as fallback
+  const avatarUrl = member.fullbodyImageUrl
+  ? this.getDriveImageProxy(member.fullbodyImageUrl)
+  : (member.headerImageUrl
+  ? this.getDriveImageProxy(member.headerImageUrl)
+  : '');
+  
+  // Create URL with Firebase ID parameter
+  const memberUrl = `members/member.html?id=${encodeURIComponent(member.id)}`;
+  
+  return `
+  <a href="${memberUrl}" class="member-card-link">
+  <article class="member-card">
+  <div class="member-avatar ${avatarClass}">
+  ${avatarUrl ? `<img src="${avatarUrl}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : ''}
+  </div>
+  <h3>${name}${romaji ? `<small>${romaji}</small>` : ''}</h3>
+  <p>${catchCopy}</p>
+  </article>
+  </a>
+  `;
   }).join('');
   
   container.innerHTML = html;
