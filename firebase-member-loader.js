@@ -139,49 +139,60 @@ if (window.firebaseMemberLoaderLoaded) {
    * @param {string} memberId - Firebase ID to search for
    */
   async loadMemberById(memberId) {
-  if (!this.firebaseUrl) {
-  this.showError('Firebase が設定されていません。');
-  return;
-  }
-  
-  // Fetch specific member by ID directly
-  const url = `${this.firebaseUrl}/form_submissions/${memberId}.json`;
-  
-  try {
-  const response = await fetch(url);
-  
-  if (!response.ok) {
-  if (response.status === 404) {
-  this.showError('メンバーデータが見つかりませんでした。ID: ' + memberId);
-  } else {
-  throw new Error(`Failed to fetch data: ${response.status}`);
-  }
-  return;
-  }
-  
-  const data = await response.json();
+    if (!this.firebaseUrl) {
+      this.showError('Firebase が設定されていません。');
+      return;
+    }
 
-  if (!data) {
-    this.showError('メンバーデータが見つかりませんでした。');
-    return;
-  }
+    // Fetch all members data first to populate allMembers cache
+    const allMembersUrl = `${this.firebaseUrl}/form_submissions.json`;
 
-  // Debug: Log the raw data from Firebase
-  console.log('DEBUG - Raw Firebase data for member ' + memberId + ':', JSON.stringify(data));
-  console.log('DEBUG - headerImageUrl from DB:', data.headerImageUrl);
-  console.log('DEBUG - fullbodyImageUrl from DB:', data.fullbodyImageUrl);
+    try {
+      // First, fetch all members to populate allMembers
+      const allResponse = await fetch(allMembersUrl);
+      if (allResponse.ok) {
+        const allData = await allResponse.json();
+        if (allData) {
+          this.allMembers = allData;
+        }
+      }
 
-  // Store and render
-  const member = { id: memberId, ...data };
-  this.currentMember = member;
-  
-  // Update allMembers cache for getPublicMembersList() to work correctly
-  this.allMembers[memberId] = data;
-  
-  this.renderMemberPage(member);
-  
-  // Set up real-time listener for this member's data
-  this.setupRealtimeListener(memberId);
+      // Then fetch specific member by ID
+      const url = `${this.firebaseUrl}/form_submissions/${memberId}.json`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          this.showError('メンバーデータが見つかりませんでした。ID: ' + memberId);
+        } else {
+          throw new Error(`Failed to fetch data: ${response.status}`);
+        }
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!data) {
+        this.showError('メンバーデータが見つかりませんでした。');
+        return;
+      }
+
+      // Debug: Log the raw data from Firebase
+      console.log('DEBUG - Raw Firebase data for member ' + memberId + ':', JSON.stringify(data));
+      console.log('DEBUG - headerImageUrl from DB:', data.headerImageUrl);
+      console.log('DEBUG - fullbodyImageUrl from DB:', data.fullbodyImageUrl);
+
+      // Store and render
+      const member = { id: memberId, ...data };
+      this.currentMember = member;
+      
+      // Update allMembers cache for getPublicMembersList() to work correctly
+      this.allMembers[memberId] = data;
+      
+      this.renderMemberPage(member);
+
+      // Set up real-time listener for this member's data
+      this.setupRealtimeListener(memberId);
   
   } catch (error) {
   console.error('FirebaseMemberLoader: Error loading member by ID:', error);
@@ -812,14 +823,10 @@ if (window.firebaseMemberLoaderLoaded) {
       return;
     }
   
-    // Handle single member case - link to self
+    // Handle single member case - no navigation needed (don't show link to self)
     if (members.length === 1) {
-      console.log('DEBUG renderNavigation: single member case');
-      container.innerHTML = `
-      <a href="member.html?id=${encodeURIComponent(members[0].id)}" class="nav-button self-member">
-      <span>${this.escapeHtml(members[0].name_hiragana || members[0].name_romaji || '')}</span>
-      </a>
-      `;
+      console.log('DEBUG renderNavigation: single member case - no navigation needed');
+      container.innerHTML = '';
       return;
     }
   
