@@ -691,15 +691,11 @@
 }
 
 .nav-button.prev-member {
-  transform: none;
-}
-
-.nav-button.prev-member i {
-  transform: scaleX(-1);
+transform: none;
 }
 
 .nav-button.prev-member:hover {
-  transform: translateX(-4px);
+transform: translateX(-4px);
 }
 
 /* Footer */
