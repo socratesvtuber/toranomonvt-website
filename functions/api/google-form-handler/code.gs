@@ -33,9 +33,9 @@ var FIELD_DEFINITIONS = {
    'fullbody_image': 'Webに公開する全身画像をアップして下さい。\n（1ファイル10MBまで）',
    'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
    'video': '自己紹介ページに動画を流したい場合はアップして下さい。',
-    'outer_image': '自己紹介ページで表示する衣装画像をアップして下さい。（10MBずつ10ファイルまで）',
-    'three_view_image': '自己紹介ページで表示する三面図画像をアップして下さい。（1ファイル10MBまで）',
-    'concept_image': '自己紹介ページで表示するコンセプト画像をアップして下さい。（1ファイル10MBまで）',
+    'outer_image': '自己紹介ページで表示する衣装画像をアップして下さい。\n（10MBずつ10ファイルまで）',
+    'three_view_image': '自己紹介ページで表示する三面図画像をアップして下さい。\n（1ファイル10MBまで）',
+    'concept_image': '自己紹介ページで表示するコンセプト画像をアップして下さい。\n（1ファイル10MBまで）',
    
    // Public flag field - use longer unique text to avoid false matches
    'public_flag': '公開可否フラグ'
