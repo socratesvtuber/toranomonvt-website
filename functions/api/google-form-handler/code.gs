@@ -89,16 +89,16 @@ function onFormSubmit(e) {
        Logger.log('WARNING: e.response missing, constructing mock response from namedValues');
        var namedValues = e.namedValues || {};
        var mockItemResponses = [];
-       for (var key in namedValues) {
-         if (namedValues.hasOwnProperty(key)) {
-           (function(k) {
-             mockItemResponses.push({
-               getItem: function() { return { getTitle: function() { return k; }; }; },
-               getResponse: function() { return namedValues[k][0]; }
-             });
-           })(key);
-         }
-       }
+        for (var key in namedValues) {
+          if (namedValues.hasOwnProperty(key)) {
+            (function(k) {
+              mockItemResponses.push({
+                getItem: function() { return { getTitle: function() { return k } }; },
+                getResponse: function() { return namedValues[k][0]; }
+              });
+            })(key);
+          }
+        }
        formResponse = {
          getItemResponses: function() { return mockItemResponses; },
          getId: function() { return 'mock-response-id'; },
