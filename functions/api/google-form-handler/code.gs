@@ -93,7 +93,7 @@ function onFormSubmit(e) {
           if (namedValues.hasOwnProperty(key)) {
             (function(k) {
               mockItemResponses.push({
-                getItem: function() { return { getTitle: function() { return k } }; },
+                getItem: function() { return { getTitle: function() { return k; }, getType: function() { return 'TEXT'; } }; },
                 getResponse: function() { return namedValues[k][0]; }
               });
             })(key);
@@ -118,10 +118,10 @@ function onFormSubmit(e) {
     // Parse each item response using indexOf matching
     for (var i = 0; i < itemResponses.length; i++) {
       var itemResponse = itemResponses[i];
-      var item = itemResponse.getItem();
-      var title = item.getTitle();
-      var responseType = item.getType();
-      var response = itemResponse.getResponse();
+       var item = itemResponse.getItem();
+       var title = item.getTitle();
+       var responseType = typeof item.getType === 'function' ? item.getType() : 'TEXT';
+       var response = itemResponse.getResponse();
 
       Logger.log('--- Processing Item ' + (i + 1) + ' ---');
       Logger.log(' Title: ' + title);
