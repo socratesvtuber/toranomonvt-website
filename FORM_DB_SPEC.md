@@ -3,7 +3,7 @@
 このドキュメントでは、虎ノ門 VT 公式サイトで使用される Google フォームの質問項目と、Firebase Realtime Database への保存構造について記載しています。
 
 **最終更新日**: 2026-05-30
-**バージョン**: 1.4.0
+**バージョン**: 1.4.1
 
 ---
 
@@ -215,12 +215,15 @@ form_submissions/
        ├─ headerImageUrl
        ├─ fullbodyImageUrl
        ├─ voiceAudioUrls
-       ├─ videoUrl
-       ├─ public_flag
-       ├─ submittedAt
-       ├─ formSubmissionId
-       ├─ formResponseId
-       └─ timestamp
+        ├─ videoUrl
+        ├─ outerImageUrls
+        ├─ threeViewImageUrl
+        ├─ conceptImageUrl
+        ├─ public_flag
+        ├─ submittedAt
+        ├─ formSubmissionId
+        ├─ formResponseId
+        └─ timestamp
 ```
 
 ### データ構造（JSON 形式）
@@ -257,12 +260,18 @@ form_submissions/
         "https://drive.google.com/file/d/VOICE1_FILE_ID/view",
         "https://drive.google.com/file/d/VOICE2_FILE_ID/view"
       ],
-      "videoUrl": "https://drive.google.com/file/d/VIDEO_FILE_ID/view",
-      "public_flag": "公開",
-      "submittedAt": "2024-05-17T10:00:00.000Z",
-      "formSubmissionId": "1234567890abcdef",
-      "formResponseId": "anonymous",
-      "timestamp": 1715943600000
+       "videoUrl": "https://drive.google.com/file/d/VIDEO_FILE_ID/view",
+       "outerImageUrls": [
+         "https://drive.google.com/file/d/OUTER1_FILE_ID/view",
+         "https://drive.google.com/file/d/OUTER2_FILE_ID/view"
+       ],
+       "threeViewImageUrl": "https://drive.google.com/file/d/THREEVIEW_FILE_ID/view",
+       "conceptImageUrl": "https://drive.google.com/file/d/CONCEPT_FILE_ID/view",
+       "public_flag": "公開",
+       "submittedAt": "2024-05-17T10:00:00.000Z",
+       "formSubmissionId": "1234567890abcdef",
+       "formResponseId": "anonymous",
+       "timestamp": 1715943600000
     }
   }
 }
@@ -420,6 +429,7 @@ if (flag.includes('Web') && flag.includes('公開') ||
 | 2026-05-21 | 1.1.0 | `name_select` による重複チェック機能追加 - 同じメンバーの重複登録を防止 | - |
 | 2026-05-21 | 1.2.0 | `sushi_mark` フィールド名を `oshi_mark` に変更 - 既存データはマイグレーション関数で変換済み | - |
 | 2026-05-21 | 1.3.0 | `streaming_language` フィールド名を `streaming_terms` に変更 - 既存データはマイグレーション関数で変換済み | - |
+| 2026-05-30 | 1.4.1 | 衣装画像（outer_image）、三面図画像（three_view_image）、コンセプト画像（concept_image）フィールド追加 - 最大10枚の衣装画像を配列で保存、クリックで画像切替機能を実装 | - |
 
 ---
 
