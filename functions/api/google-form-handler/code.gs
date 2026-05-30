@@ -4,38 +4,41 @@
 // Based on Google Form header: Timestamp, Email Address, and form fields
 // ============================================
 var FIELD_DEFINITIONS = {
-  // Core identification fields (using short unique keys for matching)
-  'name_select': 'あなたの名前をプルダウンから選択して下さい。',
-  'sns_link': 'SNSリンク',
-  'name_hiragana': '名前（ひらがな）',
-  'name_romaji': '名前（ローマ字）',
-  'birthday': '誕生日',
-  'first_stream_date': '初配信日',
-  'height': '身長',
-  'image_color': 'イメージカラー',
-  'oshi_mark': '推しマーク',
-  'streaming_terms': '配信用語',
-  'unit_project_name': 'ユニット・プロジェクト名',
-  'illustrator': 'イラストレーター',
-  'modeler_2d': '2D モデラー',
-  'modeler_3d': '3D モデラー',
-  'fan_name': 'ファンネーム',
-  'official_hashtag': '公式ハッシュタグ',
-  'streaming_schedule': '配信予定',
-  'recommended_video': 'オススメ動画',
-  'announcement_event': 'お知らせ・イベント予定',
-  'goods_music_link': 'グッズ・音楽配信サイトリンク',
-  'message_to_fans': 'ファンへ一言',
-  'qa': 'Q＆A',
-  
-  // File upload fields - Updated to match actual form field titles
-  'header_image': 'Webに公開するヘッダー画像をアップして下さい。\n（1ファイル10MBまで）',
-  'fullbody_image': 'Webに公開する全身画像をアップして下さい。\n（1ファイル10MBまで）',
-  'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
-  'video': '自己紹介ページに動画を流したい場合はアップして下さい。',
-  
-  // Public flag field - use longer unique text to avoid false matches
-  'public_flag': '公開可否フラグ'
+   // Core identification fields (using short unique keys for matching)
+   'name_select': 'あなたの名前をプルダウンから選択して下さい。',
+   'sns_link': 'SNSリンク',
+   'name_hiragana': '名前（ひらがな）',
+   'name_romaji': '名前（ローマ字）',
+   'birthday': '誕生日',
+   'first_stream_date': '初配信日',
+   'height': '身長',
+   'image_color': 'イメージカラー',
+   'oshi_mark': '推しマーク',
+   'streaming_terms': '配信用語',
+   'unit_project_name': 'ユニット・プロジェクト名',
+   'illustrator': 'イラストレーター',
+   'modeler_2d': '2D モデラー',
+   'modeler_3d': '3D モデラー',
+   'fan_name': 'ファンネーム',
+   'official_hashtag': '公式ハッシュタグ',
+   'streaming_schedule': '配信予定',
+   'recommended_video': 'オススメ動画',
+   'announcement_event': 'お知らせ・イベント予定',
+   'goods_music_link': 'グッズ・音楽配信サイトリンク',
+   'message_to_fans': 'ファンへ一言',
+   'qa': 'Q＆A',
+   
+   // File upload fields - Updated to match actual form field titles
+   'header_image': 'Webに公開するヘッダー画像をアップして下さい。\n（1ファイル10MBまで）',
+   'fullbody_image': 'Webに公開する全身画像をアップして下さい。\n（1ファイル10MBまで）',
+   'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
+   'video': '自己紹介ページに動画を流したい場合はアップして下さい。',
+   'outer_image': '自己紹介ページで表示する衣装画像をアップして下さい。\n（1ファイル10MBまで）',
+   'three_view_image': '自己紹介ページで表示する三面図画像をアップして下さい。\n（1ファイル10MBまで）',
+   'concept_image': '自己紹介ページで表示するコンセプト画像をアップして下さい。\n（1ファイル10MBまで）',
+   
+   // Public flag field - use longer unique text to avoid false matches
+   'public_flag': '公開可否フラグ'
 };
 
 // Required fields list (必須項目)
@@ -50,10 +53,13 @@ var REQUIRED_FIELD_KEYS = [
 
 // File upload fields - matches the short question text in FIELD_DEFINITIONS
 var FILE_UPLOAD_FIELDS = {
-  'header_image': 'Webに公開するヘッダー画像をアップして下さい。\n（1 ファイル 10MB まで）',
-  'fullbody_image': 'Webに公開する全身画像をアップして下さい。\n（1 ファイル 10MB まで）',
-  'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
-  'video': '自己紹介ページに動画を流したい場合はアップして下さい。'
+   'header_image': 'Webに公開するヘッダー画像をアップして下さい。\n（1 ファイル 10MB まで）',
+   'fullbody_image': 'Webに公開する全身画像をアップして下さい。\n（1 ファイル 10MB まで）',
+   'voice_audio': '自己紹介ページで再生されるボイスをアップして下さい。',
+   'video': '自己紹介ページに動画を流したい場合はアップして下さい。',
+   'outer_image': '自己紹介ページで表示する衣装画像をアップして下さい。\n（1 ファイル 10MB まで）',
+   'three_view_image': '自己紹介ページで表示する三面図画像をアップして下さい。\n（1 ファイル 10MB まで）',
+   'concept_image': '自己紹介ページで表示するコンセプト画像をアップして下さい。\n（1 ファイル 10MB まで）'
 };
 
 /**
@@ -206,11 +212,14 @@ function initializeResultObject() {
     result[key] = null;
   }
 
-  // Add file URL fields
-  result.headerImageUrl = null;
-  result.fullbodyImageUrl = null;
-  result.voiceAudioUrls = [];
-  result.videoUrl = null;
+   // Add file URL fields
+   result.headerImageUrl = null;
+   result.fullbodyImageUrl = null;
+   result.voiceAudioUrls = [];
+   result.videoUrl = null;
+   result.outerImageUrls = [];
+   result.threeViewImageUrl = null;
+   result.conceptImageUrl = null;
 
   return result;
 }
@@ -339,82 +348,120 @@ function handleFileUpload(result, fieldKey, response, title) {
       return;
     }
 
-    if (fieldKey === 'voice_audio') {
-      // Handle multiple audio files (0-10 files)
-      result.voiceAudioUrls = [];
-      
-      // response is a comma-separated string of file IDs for multiple files
-      var fileIds = [];
-      if (typeof response === 'string') {
-        fileIds = response.split(',');
-      } else if (response instanceof Array) {
-        fileIds = response;
-      }
-      
-      for (var j = 0; j < fileIds.length; j++) {
-        var fileId = null;
-        var shareUrl = null;
-        var rawId = fileIds[j];
-
-        // Get file ID from response - trim whitespace
-        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
-          fileId = rawId.getId();
-        } else if (rawId && typeof rawId === 'string') {
-          fileId = rawId.trim();
-          Logger.log(' String file ID detected: ' + fileId);
-        } else {
-          Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
-          continue;
-        }
-
-        // Construct Google Drive share URL directly from file ID
-        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-        Logger.log(' Constructed share URL: ' + shareUrl);
-        result.voiceAudioUrls.push(shareUrl);
-      }
-      Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
-    } else {
-      // Handle single file uploads (header_image, fullbody_image, video)
-      var fileId = null;
-      var shareUrl = null;
-      var rawResponse = null;
-
-      // response could be a string (comma-separated IDs) or array
-      if (typeof response === 'string') {
-        // Split by comma and take first item
-        var parts = response.split(',');
-        rawResponse = parts[0] ? parts[0].trim() : null;
-      } else if (response instanceof Array) {
-        rawResponse = response[0];
-      }
-
-      // Get file ID from response
-      if (rawResponse && typeof rawResponse === 'object' && typeof rawResponse.getId === 'function') {
-        fileId = rawResponse.getId();
-      } else if (rawResponse && typeof rawResponse === 'string') {
-        fileId = rawResponse.trim();
-        Logger.log(' String file ID detected: ' + fileId);
-      } else {
-        Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
-      }
-
-      if (fileId) {
-        // Construct Google Drive share URL directly from file ID
-        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-        Logger.log(' File ID: ' + fileId);
-        Logger.log(' Share URL: ' + shareUrl);
-
-        if (fieldKey === 'header_image') {
-          result.headerImageUrl = shareUrl;
-        } else if (fieldKey === 'fullbody_image') {
-          result.fullbodyImageUrl = shareUrl;
-        } else if (fieldKey === 'video') {
-          result.videoUrl = shareUrl;
-        }
-      } else {
-        Logger.log(' ERROR: No file ID extracted for field: ' + fieldKey);
-      }
-    }
+     if (fieldKey === 'voice_audio') {
+       // Handle multiple audio files (0-10 files)
+       result.voiceAudioUrls = [];
+       
+       // response is a comma-separated string of file IDs for multiple files
+       var fileIds = [];
+       if (typeof response === 'string') {
+         fileIds = response.split(',');
+       } else if (response instanceof Array) {
+         fileIds = response;
+       }
+       
+       for (var j = 0; j < fileIds.length; j++) {
+         var fileId = null;
+         var shareUrl = null;
+         var rawId = fileIds[j];
+ 
+         // Get file ID from response - trim whitespace
+         if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+           fileId = rawId.getId();
+         } else if (rawId && typeof rawId === 'string') {
+           fileId = rawId.trim();
+           Logger.log(' String file ID detected: ' + fileId);
+         } else {
+           Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+           continue;
+         }
+ 
+         // Construct Google Drive share URL directly from file ID
+         shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+         Logger.log(' Constructed share URL: ' + shareUrl);
+         result.voiceAudioUrls.push(shareUrl);
+       }
+       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+     } else if (fieldKey === 'outer_image') {
+       // Handle multiple image files (0-10 files)
+       result.outerImageUrls = [];
+       
+       // response is a comma-separated string of file IDs for multiple files
+       var fileIds = [];
+       if (typeof response === 'string') {
+         fileIds = response.split(',');
+       } else if (response instanceof Array) {
+         fileIds = response;
+       }
+       
+       for (var j = 0; j < fileIds.length; j++) {
+         var fileId = null;
+         var shareUrl = null;
+         var rawId = fileIds[j];
+ 
+         // Get file ID from response - trim whitespace
+         if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+           fileId = rawId.getId();
+         } else if (rawId && typeof rawId === 'string') {
+           fileId = rawId.trim();
+           Logger.log(' String file ID detected: ' + fileId);
+         } else {
+           Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+           continue;
+         }
+ 
+         // Construct Google Drive share URL directly from file ID
+         shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+         Logger.log(' Constructed share URL: ' + shareUrl);
+         result.outerImageUrls.push(shareUrl);
+       }
+       Logger.log(' Processed ' + result.outerImageUrls.length + ' outer image files');
+     } else {
+       // Handle single file uploads (header_image, fullbody_image, video, three_view_image, concept_image)
+       var fileId = null;
+       var shareUrl = null;
+       var rawResponse = null;
+ 
+       // response could be a string (comma-separated IDs) or array
+       if (typeof response === 'string') {
+         // Split by comma and take first item
+         var parts = response.split(',');
+         rawResponse = parts[0] ? parts[0].trim() : null;
+       } else if (response instanceof Array) {
+         rawResponse = response[0];
+       }
+ 
+       // Get file ID from response
+       if (rawResponse && typeof rawResponse === 'object' && typeof rawResponse.getId === 'function') {
+         fileId = rawResponse.getId();
+       } else if (rawResponse && typeof rawResponse === 'string') {
+         fileId = rawResponse.trim();
+         Logger.log(' String file ID detected: ' + fileId);
+       } else {
+         Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
+       }
+ 
+       if (fileId) {
+         // Construct Google Drive share URL directly from file ID
+         shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+         Logger.log(' File ID: ' + fileId);
+         Logger.log(' Share URL: ' + shareUrl);
+ 
+         if (fieldKey === 'header_image') {
+           result.headerImageUrl = shareUrl;
+         } else if (fieldKey === 'fullbody_image') {
+           result.fullbodyImageUrl = shareUrl;
+         } else if (fieldKey === 'video') {
+           result.videoUrl = shareUrl;
+         } else if (fieldKey === 'three_view_image') {
+           result.threeViewImageUrl = shareUrl;
+         } else if (fieldKey === 'concept_image') {
+           result.conceptImageUrl = shareUrl;
+         }
+       } else {
+         Logger.log(' ERROR: No file ID extracted for field: ' + fieldKey);
+       }
+     }
   } catch (error) {
     Logger.log('ERROR handling file upload for ' + fieldKey + ': ' + error.toString());
     Logger.log('Stack: ' + (error.stack || 'No stack trace'));

@@ -419,9 +419,46 @@ if (window.firebaseMemberLoaderLoaded) {
       favoriteBtn.dataset.memberId = member.id;
       favoriteBtn.dataset.name = member.name_hiragana || member.name_romaji || '';
       favoriteBtn.dataset.image = member.fullbodyImageUrl || '';
-    }
-  
-    // SNS links
+     }
+     // Costume navigation links
+     const costumeNavUl = document.querySelector('.costume-nav ul');
+     if (costumeNavUl) {
+       let linksHtml = '';
+       // Costume links
+       if (member.outerImageUrls && member.outerImageUrls.length > 0) {
+         for (let i = 0; i < member.outerImageUrls.length; i++) {
+           linksHtml += `<li><a href="#" data-type="costume" data-index="${i}">衣装${i + 1}</a></li>`;
+         }
+       }
+       // Three-view link
+       linksHtml += `<li><a href="#" data-type="three-view">三面図</a></li>`;
+       // Concept link
+       linksHtml += `<li><a href="#" data-type="concept">コンセプト</a></li>`;
+       costumeNavUl.innerHTML = linksHtml;
+       
+       // Click handler to change avatar image
+       costumeNavUl.addEventListener('click', function(e) {
+         e.preventDefault();
+         const link = e.target.closest('a');
+         if (!link) return;
+         const type = link.dataset.type;
+         let url = null;
+         if (type === 'costume') {
+           const index = parseInt(link.dataset.index, 10);
+           url = member.outerImageUrls[index];
+         } else if (type === 'three-view') {
+           url = member.threeViewImageUrl;
+         } else if (type === 'concept') {
+           url = member.conceptImageUrl;
+         }
+         if (url) {
+           const proxyUrl = this.getDriveImageProxy(url);
+           avatarEl.src = proxyUrl;
+           avatarEl.alt = member.name_hiragana || 'メンバー';
+         }
+       });
+     }
+     // SNS links
     this.renderSnsLinks(member.sns_link);
   
     // Basic info grid
