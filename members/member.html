@@ -218,15 +218,10 @@ function updateVoiceButtonState(playing) {
 }
 
 function stopCurrentVoice() {
-  if (window._voiceEndTimeout) {
-    clearTimeout(window._voiceEndTimeout);
-    window._voiceEndTimeout = null;
+  if (currentMemberAudio) {
+    currentMemberAudio.pause();
+    currentMemberAudio = null;
   }
-  if (window._voiceIframe && window._voiceIframe.parentNode) {
-    window._voiceIframe.parentNode.removeChild(window._voiceIframe);
-    window._voiceIframe = null;
-  }
-  currentMemberAudio = null;
   isPlaying = false;
   currentVoiceIndex = -1;
   updateVoiceButtonState(false);
@@ -242,23 +237,23 @@ function playVoiceByIndex(index) {
 
   stopCurrentVoice();
 
-  const driveUrl = window.memberVoiceFiles[index];
-  const idMatch = driveUrl.match(/\/file\/d\/([^/]+)/);
-  if (!idMatch) {
-    return;
-  }
-  const fileId = idMatch[1];
+  const src = window.memberVoiceFiles[index];
+  const audio = new Audio(src);
+  audio.volume = 0.5;
+  audio.preload = 'auto';
+  currentMemberAudio = audio;
   currentVoiceIndex = index;
-  window._voiceIframe = document.createElement('iframe');
-  window._voiceIframe.src = 'https://drive.google.com/file/d/' + fileId + '/preview';
-  window._voiceIframe.style.display = 'none';
-  document.body.appendChild(window._voiceIframe);
-  isPlaying = true;
-  updateVoiceButtonState(true);
-
-  window._voiceEndTimeout = setTimeout(() => {
+  audio.play().then(() => {
+    isPlaying = true;
+    updateVoiceButtonState(true);
+  }).catch((err) => {
+    console.warn('Audio playback failed:', err);
     stopCurrentVoice();
-  }, 1000 * 60 * 10);
+  });
+
+  audio.onended = () => {
+    stopCurrentVoice();
+  };
 }
 
 function toggleVoicePlayback() {
@@ -287,6 +282,31 @@ function initVoicePlayback() {
       const randomIndex = Math.floor(Math.random() * window.memberVoiceFiles.length);
       playVoiceByIndex(randomIndex);
     });
+  }
+
+  voicePlayBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleVoicePlayback();
+  });
+}
+
+function initIndividualVoiceButtons() {
+  document.querySelectorAll('.voice-individual-btn').forEach((button) => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const index = parseInt(this.dataset.voiceIndex, 10);
+      if (!Number.isNaN(index)) {
+        playVoiceByIndex(index);
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initVoicePlayback();
+  initIndividualVoiceButtons();
+  updateVoiceButtonState(false);
+});
   }
 
   voicePlayBtn.addEventListener('click', function(e) {

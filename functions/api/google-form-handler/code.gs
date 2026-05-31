@@ -395,8 +395,8 @@ function handleFileUpload(result, fieldKey, response, title) {
            continue;
          }
  
-          // Drive preview URL for iframe playback
-          shareUrl = 'https://drive.google.com/file/d/' + fileId + '/preview';
+           // Direct download URL for audio playback
+           shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
           Logger.log(' Constructed share URL: ' + shareUrl);
           result.voiceAudioUrls.push(shareUrl);
        }
