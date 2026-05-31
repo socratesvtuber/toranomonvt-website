@@ -437,6 +437,7 @@ if (window.firebaseMemberLoaderLoaded) {
        costumeNavUl.innerHTML = linksHtml;
        
         // Click handler to change avatar image
+        const loaderInstance = this;
         costumeNavUl.addEventListener('click', function(e) {
           e.preventDefault();
           const link = e.target.closest('a');

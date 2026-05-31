@@ -258,6 +258,9 @@ function playVoiceByIndex(index) {
     isPlaying = true;
     updateVoiceButtonState(true);
   }).catch((err) => {
+    if (err && err.name === 'AbortError') {
+      return;
+    }
     console.warn('Audio playback failed:', err);
     stopCurrentVoice();
   });
