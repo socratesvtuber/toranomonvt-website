@@ -513,17 +513,12 @@ if (window.firebaseMemberLoaderLoaded) {
     // Q&A
     this.renderQa(member.qa);
     
-    // Navigation (prev/next member links)
-    this.renderNavigation(member);
-  
-    // Voice buttons
-    this.renderVoiceButtons(member.voiceAudioUrls);
-  
-    // Navigation
-    this.renderNavigation(member);
-  
-     // Store voice files globally for playback
-     window.memberVoiceFiles = member.voiceAudioUrls || [];
+// Navigation (prev/next member links)
+     this.renderNavigation(member);
+   
+     // Voice buttons
+     this.renderVoiceButtons(member.voiceAudioUrls);
+   
      // Initialize voice playback after voice files are available
      if (typeof initVoicePlayback === 'function') {
        initVoicePlayback();
@@ -536,7 +531,7 @@ if (window.firebaseMemberLoaderLoaded) {
        fullbodyImageUrl: member.fullbodyImageUrl || '',
        name_hiragana: member.name_hiragana || 'メンバー'
      };
-   },
+    },
   
   /**
    * Render SNS links
@@ -817,38 +812,71 @@ if (window.firebaseMemberLoaderLoaded) {
     return pairs;
   },
   
-  /**
-   * Render voice buttons
-   */
-  renderVoiceButtons(voiceUrls) {
-    const container = document.getElementById('voice-buttons-container');
-    const voicePlayBtn = document.getElementById('voice-play-btn');
-    if (!container) return;
-  
-    if (voiceUrls && voiceUrls.length > 0) {
-      container.innerHTML = voiceUrls.slice(0, 10).map((url, i) =>
-        `<button class="voice-individual-btn" data-voice-index="${i}" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-        ボイス${i + 1}
-        </button>`
-      ).join('');
-  
-      // Show voice play button if hidden
-      if (voicePlayBtn) {
-        voicePlayBtn.style.display = 'block';
-      }
-  
-      // Store voice URLs globally
-      window.memberVoiceFiles = voiceUrls;
-    } else {
-      container.innerHTML = '';
-      window.memberVoiceFiles = [];
-  
-      // Hide voice play button
-      if (voicePlayBtn) {
-        voicePlayBtn.style.display = 'none';
-      }
-    }
-  },
+/**
+    * Render voice buttons
+    */
+   renderVoiceButtons(voiceUrls) {
+     const container = document.getElementById('voice-buttons-container');
+     const voicePlayBtn = document.getElementById('voice-play-btn');
+     if (!container) return;
+
+     if (voiceUrls && voiceUrls.length > 0) {
+       // Convert URLs for direct playback (audio needs uc?export=download format)
+       const convertedUrls = voiceUrls.map(url => this.getVoiceStreamUrl(url));
+       container.innerHTML = convertedUrls.slice(0, 10).map((url, i) =>
+         `<button class="voice-individual-btn" data-voice-index="${i}" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
+         ボイス${i + 1}
+         </button>`
+       ).join('');
+
+       // Show voice play button if hidden
+       if (voicePlayBtn) {
+         voicePlayBtn.style.display = 'block';
+       }
+
+       // Store converted voice URLs globally
+       window.memberVoiceFiles = convertedUrls;
+     } else {
+       container.innerHTML = '';
+       window.memberVoiceFiles = [];
+
+       // Hide voice play button
+       if (voicePlayBtn) {
+         voicePlayBtn.style.display = 'none';
+       }
+     }
+   },
+
+   /**
+    * Get Google Drive audio stream URL for direct playback
+    * Audio files need uc?export=download format to play in browser
+    */
+   getVoiceStreamUrl(driveUrl) {
+     if (!driveUrl) return '';
+
+     // Handle /file/d/FILE_ID/view format - convert to uc?export=download
+     const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+     if (fileMatch && fileMatch[1]) {
+       const fileId = fileMatch[1];
+       return `https://drive.google.com/uc?export=download&id=${fileId}`;
+     }
+
+     // Handle uc?export=FORMAT&id=FILE_ID format - ensure it's download format
+     const idMatch = driveUrl.match(/(uc\?export=[^&]+)&id=([a-zA-Z0-9_-]+)/);
+     if (idMatch) {
+       const fileId = idMatch[2];
+       return `https://drive.google.com/uc?export=download&id=${fileId}`;
+     }
+
+     // Handle uc?id=FILE_ID format - convert to download format
+     const simpleMatch = driveUrl.match(/uc\?id=([a-zA-Z0-9_-]+)/);
+     if (simpleMatch) {
+       const fileId = simpleMatch[1];
+       return `https://drive.google.com/uc?export=download&id=${fileId}`;
+     }
+
+     return driveUrl;
+   },
   
   /**
    * Render navigation between members
@@ -930,31 +958,32 @@ if (window.firebaseMemberLoaderLoaded) {
 /**
    * Get Google Drive image proxy URL
    */
-   getDriveImageProxy(driveUrl) {
-     if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
-     
-     // Handle /file/d/FILE_ID/view format
-     const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-     if (fileMatch && fileMatch[1]) {
-       const fileId = fileMatch[1];
-       return `https://drive.google.com/uc?export=view&id=${fileId}`;
-     }
-     
-     // Handle uc?export=FORMAT&id=FILE_ID format
-     const idMatch = driveUrl.match(/(uc\?export=[^&]+)&id=([a-zA-Z0-9_-]+)/);
-     if (idMatch) {
-       return driveUrl;
-     }
-     
-     // Handle uc?id=FILE_ID format
-     const simpleMatch = driveUrl.match(/uc\?id=([a-zA-Z0-9_-]+)/);
-     if (simpleMatch) {
-       const fileId = simpleMatch[1];
-       return `https://drive.google.com/uc?export=view&id=${fileId}`;
-     }
-     
-return driveUrl;
-   },
+getDriveImageProxy(driveUrl) {
+    if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
+
+    // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
+    const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileMatch && fileMatch[1]) {
+      const fileId = fileMatch[1];
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+
+    // Handle uc?export=FORMAT&id=FILE_ID format - extract ID and convert to proxy format
+    const idMatch = driveUrl.match(/(uc\?export=[^&]+)&id=([a-zA-Z0-9_-]+)/);
+    if (idMatch) {
+      const fileId = idMatch[2];
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+
+    // Handle uc?id=FILE_ID format - extract ID and convert to proxy format
+    const simpleMatch = driveUrl.match(/uc\?id=([a-zA-Z0-9_-]+)/);
+    if (simpleMatch) {
+      const fileId = simpleMatch[1];
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+
+    return driveUrl;
+  },
 
   /**
    * Escape HTML special characters

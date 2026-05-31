@@ -303,62 +303,37 @@ function initIndividualVoiceButtons() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  initVoicePlayback();
-  initIndividualVoiceButtons();
-  updateVoiceButtonState(false);
-});
-  }
+   initVoicePlayback();
+   initIndividualVoiceButtons();
+   updateVoiceButtonState(false);
+ });
+ </script>
 
-  voicePlayBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggleVoicePlayback();
-  });
-}
+ <script>
+ // Initialize Firebase config and Member Loader
+ document.addEventListener('DOMContentLoaded', async function() {
+ console.log('member.html: DOMContentLoaded - Starting initialization');
 
-function initIndividualVoiceButtons() {
-  document.querySelectorAll('.voice-individual-btn').forEach((button) => {
-    button.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const index = parseInt(this.dataset.voiceIndex, 10);
-      if (!Number.isNaN(index)) {
-        playVoiceByIndex(index);
-      }
-    });
-  });
-}
+ // Initialize Firebase config first to set FIREBASE_DB_URL
+ if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+ console.log('member.html: Initializing FirebaseConfig...');
+ await FirebaseConfig.init();
+ console.log('member.html: FirebaseConfig initialized');
+ } else {
+ console.log('member.html: FirebaseConfig not available or no init method');
+ }
 
-document.addEventListener('DOMContentLoaded', function() {
-  initVoicePlayback();
-  initIndividualVoiceButtons();
-  updateVoiceButtonState(false);
-});
-</script>
-
-<script>
-// Initialize Firebase config and Member Loader
-document.addEventListener('DOMContentLoaded', async function() {
-console.log('member.html: DOMContentLoaded - Starting initialization');
-
-// Initialize Firebase config first to set FIREBASE_DB_URL
-if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
-console.log('member.html: Initializing FirebaseConfig...');
-await FirebaseConfig.init();
-console.log('member.html: FirebaseConfig initialized');
-} else {
-console.log('member.html: FirebaseConfig not available or no init method');
-}
-
-// Check if FirebaseMemberLoader is available
-if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
-console.log('member.html: Calling FirebaseMemberLoader.init()...');
-// Wait a bit to ensure Firebase URL is set
-setTimeout(() => {
-window.FirebaseMemberLoader.init();
-}, 100);
-} else {
-console.error('member.html: FirebaseMemberLoader not available');
-}
-});
-</script>
-</body>
-</html>
+ // Check if FirebaseMemberLoader is available
+ if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
+ console.log('member.html: Calling FirebaseMemberLoader.init()...');
+ // Wait a bit to ensure Firebase URL is set
+ setTimeout(() => {
+ window.FirebaseMemberLoader.init();
+ }, 100);
+ } else {
+ console.error('member.html: FirebaseMemberLoader not available');
+ }
+ });
+ </script>
+ </body>
+ </html>

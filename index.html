@@ -401,10 +401,11 @@ getFirebaseUrl() {
   getDriveImageProxy(driveUrl) {
     if (!driveUrl) return '';
     
+    // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
     const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (match && match[1]) {
       const fileId = match[1];
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
     }
     
     return driveUrl;
