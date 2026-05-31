@@ -928,46 +928,37 @@ if (window.firebaseMemberLoaderLoaded) {
   },
   
 /**
-    * Get Google Drive image proxy URL
-    * Note: Due to Google Drive restrictions, direct image access may not work.
-    * Try multiple formats for compatibility.
-    */
+   * Get Google Drive image proxy URL
+   */
    getDriveImageProxy(driveUrl) {
-       if (!driveUrl) return '';
-       
-       // URL が文字列でない場合は空文字を返す
-       if (typeof driveUrl !== 'string') return '';
-
-       // Extract file ID from any Google Drive URL format
-       let fileId = null;
-       
-       // Format: https://drive.google.com/file/d/[FILE_ID]/view
-       const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-       if (fileMatch && fileMatch[1]) {
-         fileId = fileMatch[1];
-       }
-       
-       // Format: https://drive.google.com/uc?export=view&id=[FILE_ID] or similar
-       if (!fileId) {
-         const idMatch = driveUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-         if (idMatch && idMatch[1]) {
-           fileId = idMatch[1];
-         }
-       }
-       
-       if (fileId) {
-         console.log('DEBUG - getDriveImageProxy: Found fileId:', fileId);
-         // Try direct uc?id= format (may work better than export=)
-         return `https://drive.google.com/uc?id=${fileId}`;
-       }
-   
-       console.log('DEBUG - getDriveImageProxy: Could not parse URL, returning as-is:', driveUrl);
+     if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
+     
+     // Handle /file/d/FILE_ID/view format
+     const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+     if (fileMatch && fileMatch[1]) {
+       const fileId = fileMatch[1];
+       return `https://drive.google.com/uc?export=view&id=${fileId}`;
+     }
+     
+     // Handle uc?export=FORMAT&id=FILE_ID format
+     const idMatch = driveUrl.match(/(uc\?export=[^&]+)&id=([a-zA-Z0-9_-]+)/);
+     if (idMatch) {
        return driveUrl;
-     },
-  
-/**
-    * Escape HTML special characters
-    */
+     }
+     
+     // Handle uc?id=FILE_ID format
+     const simpleMatch = driveUrl.match(/uc\?id=([a-zA-Z0-9_-]+)/);
+     if (simpleMatch) {
+       const fileId = simpleMatch[1];
+       return `https://drive.google.com/uc?export=view&id=${fileId}`;
+     }
+     
+return driveUrl;
+   },
+
+  /**
+   * Escape HTML special characters
+   */
    escapeHtml(str) {
      if (!str) return '';
      return String(str)

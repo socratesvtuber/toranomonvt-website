@@ -395,20 +395,13 @@ function handleFileUpload(result, fieldKey, response, title) {
           continue;
         }
 
-        if (fileId) {
-          // Set file sharing permission
-          var file = DriveApp.getFileById(fileId);
-          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-          
-          // Use direct Google Drive URL for HTML5 audio playback
-          // /uc?export=download&id= works for both audio and video in browsers
-          shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
-          Logger.log(' Constructed share URL: ' + shareUrl);
-          result.voiceAudioUrls.push(shareUrl);
-        }
+        // Construct Google Drive share URL directly from file ID
+        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+        Logger.log(' Constructed share URL: ' + shareUrl);
+        result.voiceAudioUrls.push(shareUrl);
       }
       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
-    } else if (fieldKey === 'outer_image') {
+    } else {
       // Handle multiple image files (0-10 files)
       result.outerImageUrls = [];
       
