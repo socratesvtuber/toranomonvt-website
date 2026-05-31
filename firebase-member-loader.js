@@ -929,6 +929,8 @@ if (window.firebaseMemberLoaderLoaded) {
   
 /**
     * Get Google Drive image proxy URL
+    * Note: Due to Google Drive restrictions, direct image access may not work.
+    * Try multiple formats for compatibility.
     */
    getDriveImageProxy(driveUrl) {
        if (!driveUrl) return '';
@@ -936,25 +938,27 @@ if (window.firebaseMemberLoaderLoaded) {
        // URL が文字列でない場合は空文字を返す
        if (typeof driveUrl !== 'string') return '';
 
-       // Already in correct uc format - ensure it uses download format for reliability
-       if (driveUrl.includes('uc?export=')) {
-         console.log('DEBUG - getDriveImageProxy: Converting to download format');
-         // Extract file ID and always use download format
-         const match = driveUrl.match(/id=([a-zA-Z0-9_-]+)/);
-         if (match && match[1]) {
-           return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-         }
-         return driveUrl;
+       // Extract file ID from any Google Drive URL format
+       let fileId = null;
+       
+       // Format: https://drive.google.com/file/d/[FILE_ID]/view
+       const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+       if (fileMatch && fileMatch[1]) {
+         fileId = fileMatch[1];
        }
-
-       // Google Drive のファイル ID を抽出
-       // 対応形式：https://drive.google.com/file/d/[FILE_ID]/view
-       // または：https://drive.google.com/file/d/[FILE_ID]/view?usp=drive_link
-       const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-       if (match && match[1]) {
-         const fileId = match[1];
-         console.log('DEBUG - getDriveImageProxy: Converted URL for fileId:', fileId);
-         return `https://drive.google.com/uc?export=download&id=${fileId}`;
+       
+       // Format: https://drive.google.com/uc?export=view&id=[FILE_ID] or similar
+       if (!fileId) {
+         const idMatch = driveUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+         if (idMatch && idMatch[1]) {
+           fileId = idMatch[1];
+         }
+       }
+       
+       if (fileId) {
+         console.log('DEBUG - getDriveImageProxy: Found fileId:', fileId);
+         // Try direct uc?id= format (may work better than export=)
+         return `https://drive.google.com/uc?id=${fileId}`;
        }
    
        console.log('DEBUG - getDriveImageProxy: Could not parse URL, returning as-is:', driveUrl);

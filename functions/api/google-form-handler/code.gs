@@ -1142,6 +1142,39 @@ function uploadFileToFirebaseStorage(fileId,storagePath){
     var response=UrlFetchApp.fetch(uploadUrl,options);var responseCode=response.getResponseCode();
     if(responseCode>=200 && responseCode<300){var responseData=JSON.parse(response.getContentText());var downloadToken=responseData.downloadTokens;if(!downloadToken){downloadToken=Utilities.getUuid();}
     var downloadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent((storagePath+ext).replace(/\//g,'/'))+'?alt=media&token='+downloadToken;Logger.log(' Uploaded to Firebase Storage: '+downloadUrl);return downloadUrl;}
-    Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getContentText());return null;
-  }catch(error){Logger.log(' Error uploading to Firebase Storage: '+error.toString());return null;}
+Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getContentText());return null;
+   }catch(error){Logger.log(' Error uploading to Firebase Storage: '+error.toString());return null;}
+}
+
+/**
+ * Get image from Google Drive and serve as response
+ * @param {Object} e - Web app request event
+ * @returns {ContentService} Image blob response
+ */
+function doGet(e) {
+  var fileId = e.parameter.id;
+  
+  if (!fileId) {
+    return ContentService.createTextOutput('Missing file ID parameter');
+  }
+  
+  try {
+    var file = DriveApp.getFileById(fileId);
+    var blob = file.getBlob();
+    
+    return ContentService
+      .createBlob(blob.getBytes(), blob.getContentType())
+      .setEncoding('utf-8');
+  } catch (error) {
+    return ContentService.createTextOutput('Error: ' + error.toString());
+  }
+}
+
+/**
+ * Get file info (returns proxy URL for client-side use)
+ * @param {string} fileId - Google Drive file ID
+ * @returns {string} Proxy URL
+ */
+function getDriveImageUrl(fileId) {
+  return FIREBASE_DB_URL.replace('.firebaseio.com', '') + '.web.app/api/image?id=' + fileId;
 }
