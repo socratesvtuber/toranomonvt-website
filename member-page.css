@@ -166,31 +166,44 @@
   max-height: 55vh;
   object-fit: contain;
   object-position: top center;
+  display: block;
+}
+
+.standing-illustration-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.standing-illustration-wrap .standing-illustration {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .voice-play-btn {
   position: absolute;
-  bottom: 16px;
-  right: 16px;
-  width: 48px;
-  height: 48px;
+  bottom: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ffb84d, #ff8b61);
   color: #08101f;
   border: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(255, 184, 77, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(255, 184, 77, 0.35);
   z-index: 10;
 }
 
 .voice-play-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 12px 32px rgba(255, 184, 77, 0.4);
+  transform: scale(1.08);
+  box-shadow: 0 8px 22px rgba(255, 184, 77, 0.45);
 }
 
 .voice-play-btn:active {
