@@ -200,39 +200,9 @@
 <script src="../script.js"></script>
 <script src="../audio-voice-player.js"></script>
 <script>
-// Voice playback state
 let currentMemberAudio = null;
 let isPlaying = false;
 let currentVoiceIndex = -1;
-
-function getVoiceStreamUrl(driveUrl) {
-  const m = driveUrl.match(/\/file\/d\/([^/]+)/);
-  if (m && m[1]) {
-    return 'https://drive.google.com/uc?export=download&id=' + m[1];
-  }
-  return driveUrl;
-}
-
-function getDrivePreviewUrl(driveUrl) {
-  const m = driveUrl.match(/\/file\/d\/([^/]+)/);
-  if (m && m[1]) {
-    return 'https://drive.google.com/uc?export=preview&id=' + m[1];
-  }
-  return driveUrl;
-}
-
-function warmupDrivePreview(url) {
-  const previewUrl = getDrivePreviewUrl(url);
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.src = previewUrl;
-  document.body.appendChild(iframe);
-  setTimeout(() => {
-    if (iframe.parentNode) {
-      iframe.parentNode.removeChild(iframe);
-    }
-  }, 15000);
-}
 
 function updateVoiceButtonState(playing) {
   const btn = document.getElementById('voice-play-btn');
@@ -278,10 +248,10 @@ function playVoiceByIndex(index) {
     return;
   }
   const fileId = idMatch[1];
-  warmupDrivePreview(driveUrl);
   currentVoiceIndex = index;
   window._voiceIframe = document.createElement('iframe');
   window._voiceIframe.src = 'https://drive.google.com/file/d/' + fileId + '/preview';
+  window._voiceIframe.style.display = 'none';
   document.body.appendChild(window._voiceIframe);
   isPlaying = true;
   updateVoiceButtonState(true);
