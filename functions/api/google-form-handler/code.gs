@@ -395,10 +395,10 @@ function handleFileUpload(result, fieldKey, response, title) {
            continue;
          }
  
-         // Construct Google Drive share URL directly from file ID
-         shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-         Logger.log(' Constructed share URL: ' + shareUrl);
-         result.voiceAudioUrls.push(shareUrl);
+          // Direct download URL for audio playback
+          shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+          Logger.log(' Constructed share URL: ' + shareUrl);
+          result.voiceAudioUrls.push(shareUrl);
        }
        Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
      } else if (fieldKey === 'outer_image') {

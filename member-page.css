@@ -170,21 +170,22 @@
 
 .voice-play-btn {
   position: absolute;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
+  bottom: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ffb84d, #ff8b61);
   color: #08101f;
   border: none;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(255, 184, 77, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 184, 77, 0.35);
+  z-index: 10;
 }
 
 .voice-play-btn:hover {
