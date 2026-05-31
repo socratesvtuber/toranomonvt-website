@@ -472,21 +472,15 @@ function handleFileUpload(result, fieldKey, response, title) {
         Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
       }
 
-      if (fileId) {
-        // Set file sharing permission
-        var file = DriveApp.getFileById(fileId);
-        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        
-        // Construct Google Drive share URL directly from file ID
-        // Use /uc?export=download&id= format for videos/audio to work with HTML5 players
-        // Use /uc?export=view&id= format for images to display properly
-        if (fieldKey === 'video') {
-          shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
-          Logger.log(' Using download URL for video: ' + shareUrl);
-        } else {
-          shareUrl = 'https://drive.google.com/uc?export=view&id=' + fileId;
-          Logger.log(' Using view URL for image: ' + shareUrl);
-        }
+if (fileId) {
+         // Set file sharing permission
+         var file = DriveApp.getFileById(fileId);
+         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+         
+         // Construct Google Drive share URL directly from file ID
+         // Use /uc?export=download&id= for all file types (works more reliably)
+         shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+         Logger.log(' Using URL: ' + shareUrl);
         Logger.log(' File ID: ' + fileId);
 
         if (fieldKey === 'header_image') {

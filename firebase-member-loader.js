@@ -936,9 +936,14 @@ if (window.firebaseMemberLoaderLoaded) {
        // URL が文字列でない場合は空文字を返す
        if (typeof driveUrl !== 'string') return '';
 
-       // Already in correct uc format - return as-is
+       // Already in correct uc format - ensure it uses download format for reliability
        if (driveUrl.includes('uc?export=')) {
-         console.log('DEBUG - getDriveImageProxy: Already converted URL');
+         console.log('DEBUG - getDriveImageProxy: Converting to download format');
+         // Extract file ID and always use download format
+         const match = driveUrl.match(/id=([a-zA-Z0-9_-]+)/);
+         if (match && match[1]) {
+           return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+         }
          return driveUrl;
        }
 
@@ -949,26 +954,25 @@ if (window.firebaseMemberLoaderLoaded) {
        if (match && match[1]) {
          const fileId = match[1];
          console.log('DEBUG - getDriveImageProxy: Converted URL for fileId:', fileId);
-         // Use uc?export=view format for direct image access
-         return `https://drive.google.com/uc?export=view&id=${fileId}`;
+         return `https://drive.google.com/uc?export=download&id=${fileId}`;
        }
    
        console.log('DEBUG - getDriveImageProxy: Could not parse URL, returning as-is:', driveUrl);
        return driveUrl;
      },
   
-  /**
-   * Escape HTML special characters
-   */
-  escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '>')
-      .replace(/"/g, '"')
-      .replace(/'/g, '&#039;');
-  },
+/**
+    * Escape HTML special characters
+    */
+   escapeHtml(str) {
+     if (!str) return '';
+     return String(str)
+       .replace(/&/g, '&amp;')
+       .replace(/</g, '&lt;')
+       .replace(/>/g, '&gt;')
+       .replace(/"/g, '&quot;')
+       .replace(/'/g, '&#039;');
+   },
   
   /**
    * Show error state
