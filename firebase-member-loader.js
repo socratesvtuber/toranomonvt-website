@@ -436,27 +436,28 @@ if (window.firebaseMemberLoaderLoaded) {
        linksHtml += `<li><a href="#" data-type="concept">コンセプト</a></li>`;
        costumeNavUl.innerHTML = linksHtml;
        
-       // Click handler to change avatar image
-       costumeNavUl.addEventListener('click', function(e) {
-         e.preventDefault();
-         const link = e.target.closest('a');
-         if (!link) return;
-         const type = link.dataset.type;
-         let url = null;
-         if (type === 'costume') {
-           const index = parseInt(link.dataset.index, 10);
-           url = member.outerImageUrls[index];
-         } else if (type === 'three-view') {
-           url = member.threeViewImageUrl;
-         } else if (type === 'concept') {
-           url = member.conceptImageUrl;
-         }
-         if (url) {
-           const proxyUrl = this.getDriveImageProxy(url);
-           avatarEl.src = proxyUrl;
-           avatarEl.alt = member.name_hiragana || 'メンバー';
-         }
-       });
+        // Click handler to change avatar image
+        costumeNavUl.addEventListener('click', function(e) {
+          const self = this;
+          e.preventDefault();
+          const link = e.target.closest('a');
+          if (!link) return;
+          const type = link.dataset.type;
+          let url = null;
+          if (type === 'costume') {
+            const index = parseInt(link.dataset.index, 10);
+            url = member.outerImageUrls[index];
+          } else if (type === 'three-view') {
+            url = member.threeViewImageUrl;
+          } else if (type === 'concept') {
+            url = member.conceptImageUrl;
+          }
+          if (url) {
+            const proxyUrl = self.getDriveImageProxy(url);
+            avatarEl.src = proxyUrl;
+            avatarEl.alt = member.name_hiragana || 'メンバー';
+          }
+        });
      }
      // SNS links
     this.renderSnsLinks(member.sns_link);
@@ -523,6 +524,10 @@ if (window.firebaseMemberLoaderLoaded) {
   
      // Store voice files globally for playback
      window.memberVoiceFiles = member.voiceAudioUrls || [];
+     // Initialize voice playback after voice files are available
+     if (typeof initVoicePlayback === 'function') {
+       initVoicePlayback();
+     }
      // Store costume/test-image URLs globally for nav click handling
      window.memberCostumeNav = {
        outerImageUrls: member.outerImageUrls || [],

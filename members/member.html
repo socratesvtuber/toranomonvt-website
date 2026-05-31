@@ -202,122 +202,120 @@
 <script src="../script.js"></script>
 <script src="../audio-voice-player.js"></script>
 <script>
-// Voice playback functionality
+// Voice playback state
 let currentMemberAudio = null;
 let isPlaying = false;
+let currentVoiceIndex = -1;
 
-function updateButtonIcon(playing) {
-const btn = document.querySelector('.voice-play-btn i');
-if (btn) {
-if (playing) {
-btn.classList.remove('fa-play');
-btn.classList.add('fa-pause');
-} else {
-btn.classList.remove('fa-pause');
-btn.classList.add('fa-play');
-}
-}
-}
-
-function playVoice(src) {
-if (currentMemberAudio && isPlaying) {
-currentMemberAudio.pause();
-isPlaying = false;
-updateButtonIcon(false);
-if (currentMemberAudio.src === src) {
-return;
-}
+function updateVoiceButtonState(playing) {
+  const btn = document.getElementById('voice-play-btn');
+  if (!btn) return;
+  const icon = btn.querySelector('i');
+  if (playing) {
+    icon.className = 'fas fa-pause';
+    btn.setAttribute('aria-label', '一時停止');
+  } else {
+    icon.className = 'fas fa-play';
+    btn.setAttribute('aria-label', '再生');
+  }
 }
 
-if (currentMemberAudio && !isPlaying && currentMemberAudio.src === src) {
-currentMemberAudio.play().catch(() => {
-console.warn('Audio playback failed.');
-});
-isPlaying = true;
-updateButtonIcon(true);
-return;
+function playVoiceByIndex(index) {
+  if (!window.memberVoiceFiles || index < 0 || index >= window.memberVoiceFiles.length) return;
+  if (currentMemberAudio && isPlaying) {
+    currentMemberAudio.pause();
+    currentMemberAudio = null;
+    isPlaying = false;
+  }
+  if (currentMemberAudio && !isPlaying && currentVoiceIndex === index) {
+    currentMemberAudio.play().catch(() => {});
+    isPlaying = true;
+    updateVoiceButtonState(true);
+    return;
+  }
+  if (currentMemberAudio) {
+    currentMemberAudio.pause();
+    currentMemberAudio = null;
+  }
+  const src = window.memberVoiceFiles[index];
+  const audio = new Audio(src);
+  audio.volume = 0.5;
+  audio.preload = 'auto';
+  currentMemberAudio = audio;
+  currentVoiceIndex = index;
+  isPlaying = true;
+  updateVoiceButtonState(true);
+  audio.play().catch(() => {
+    console.warn('Audio playback failed. User interaction may be required.');
+  });
+  audio.onended = () => {
+    currentMemberAudio = null;
+    isPlaying = false;
+    currentVoiceIndex = -1;
+    updateVoiceButtonState(false);
+  };
 }
 
-if (currentMemberAudio) {
-currentMemberAudio.pause();
-currentMemberAudio.currentTime = 0;
+function toggleVoicePlayback() {
+  if (!window.memberVoiceFiles || window.memberVoiceFiles.length === 0) return;
+  if (currentMemberAudio && isPlaying) {
+    currentMemberAudio.pause();
+    isPlaying = false;
+    updateVoiceButtonState(false);
+  } else {
+    let index = currentVoiceIndex;
+    if (index < 0 || index >= window.memberVoiceFiles.length) {
+      index = Math.floor(Math.random() * window.memberVoiceFiles.length);
+    }
+    playVoiceByIndex(index);
+  }
 }
 
-const audio = new Audio(src);
-audio.volume = 0.5;
-audio.preload = 'auto';
-currentMemberAudio = audio;
-isPlaying = true;
-updateButtonIcon(true);
+function initVoicePlayback() {
+  const voicePlayBtn = document.getElementById('voice-play-btn');
+  if (!voicePlayBtn) return;
 
-audio.play().catch(() => {
-console.warn('Audio playback failed. User interaction may be required.');
-});
+  // Standing illustration click -> random voice
+  const standingIllustration = document.getElementById('member-avatar');
+  if (standingIllustration) {
+    standingIllustration.addEventListener('click', function(e) {
+      if (!window.memberVoiceFiles || window.memberVoiceFiles.length === 0) return;
+      const randomIndex = Math.floor(Math.random() * window.memberVoiceFiles.length);
+      playVoiceByIndex(randomIndex);
+    });
+  }
 
-audio.onended = () => {
-currentMemberAudio = null;
-isPlaying = false;
-updateButtonIcon(false);
-};
+  // Voice play button click -> toggle play/pause
+  voicePlayBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleVoicePlayback();
+  });
+
+  updateVoiceButtonState(false);
 }
 
-// Initialize voice buttons
-document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
-element.addEventListener('click', function(e) {
-e.stopPropagation();
-const randomIndex = Math.floor(Math.random() * window.memberVoiceFiles.length);
-playVoice(window.memberVoiceFiles[randomIndex]);
-});
-});
-
-document.querySelectorAll('.voice-individual-btn').forEach(button => {
-button.addEventListener('click', function(e) {
-e.stopPropagation();
-const index = parseInt(this.dataset.voiceIndex);
-if (window.memberVoiceFiles[index]) {
-playVoice(window.memberVoiceFiles[index]);
+// Initialize individual voice buttons
+function initIndividualVoiceButtons() {
+  document.querySelectorAll('.voice-individual-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const index = parseInt(this.dataset.voiceIndex, 10);
+      playVoiceByIndex(index);
+    });
+  });
 }
-});
-});
 
-// Favorite button functionality
+// Start after DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-const favoriteBtn = document.getElementById('favorite-btn');
-if (!favoriteBtn) return;
-
-const memberData = {
-id: favoriteBtn.dataset.memberId || '',
-name: favoriteBtn.dataset.name || '',
-url: window.location.href,
-image: favoriteBtn.dataset.image || ''
-};
-
-let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
-const isFavorited = favorites.some(fav => fav.id === memberData.id);
-
-if (isFavorited) {
-favoriteBtn.classList.add('active');
-favoriteBtn.querySelector('i').classList.remove('far');
-favoriteBtn.querySelector('i').classList.add('fas');
-}
-
-favoriteBtn.addEventListener('click', function() {
-const index = favorites.findIndex(fav => fav.id === memberData.id);
-
-if (index !== -1) {
-favorites.splice(index, 1);
-this.classList.remove('active');
-this.querySelector('i').classList.remove('fas');
-this.querySelector('i').classList.add('far');
-} else {
-favorites.push(memberData);
-this.classList.add('active');
-this.querySelector('i').classList.remove('far');
-this.querySelector('i').classList.add('fas');
-}
-
-localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
-});
+  const initOnce = () => {
+    initVoicePlayback();
+    initIndividualVoiceButtons();
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOnce);
+  } else {
+    initOnce();
+  }
 });
 </script>
 
