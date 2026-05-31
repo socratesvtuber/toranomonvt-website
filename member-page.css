@@ -151,35 +151,32 @@
   overflow: visible;
   width: 100%;
   min-height: 360px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 0;
+  padding: 24px;
   max-width: 1680px;
   z-index: 8;
 }
 
 .standing-illustration {
-  width: 100%;
-  max-width: 100%;
+  width: auto;
+  max-width: 300%;
   height: auto;
-  max-height: 200vh;
+  max-height: none;
   object-fit: contain;
   object-position: top center;
   display: block;
+  margin: 0 auto;
 }
 
 .standing-illustration-wrap {
   position: relative;
-  display: block;
-  width: 100%;
+  display: inline-block;
   line-height: 0;
 }
 
 .voice-play-btn {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: 8px;
+  right: 8px;
   width: 44px;
   height: 44px;
   border-radius: 50%;
