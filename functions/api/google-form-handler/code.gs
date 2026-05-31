@@ -367,126 +367,143 @@ function handleFileUpload(result, fieldKey, response, title) {
       return;
     }
 
-     if (fieldKey === 'voice_audio') {
-       // Handle multiple audio files (0-10 files)
-       result.voiceAudioUrls = [];
-       
-       // response is a comma-separated string of file IDs for multiple files
-       var fileIds = [];
-       if (typeof response === 'string') {
-         fileIds = response.split(',');
-       } else if (response instanceof Array) {
-         fileIds = response;
-       }
-       
-       for (var j = 0; j < fileIds.length; j++) {
-         var fileId = null;
-         var shareUrl = null;
-         var rawId = fileIds[j];
- 
-         // Get file ID from response - trim whitespace
-         if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
-           fileId = rawId.getId();
-         } else if (rawId && typeof rawId === 'string') {
-           fileId = rawId.trim();
-           Logger.log(' String file ID detected: ' + fileId);
-         } else {
-           Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
-           continue;
-         }
- 
+    if (fieldKey === 'voice_audio') {
+      // Handle multiple audio files (0-10 files)
+      result.voiceAudioUrls = [];
+      
+      // response is a comma-separated string of file IDs for multiple files
+      var fileIds = [];
+      if (typeof response === 'string') {
+        fileIds = response.split(',');
+      } else if (response instanceof Array) {
+        fileIds = response;
+      }
+      
+      for (var j = 0; j < fileIds.length; j++) {
+        var fileId = null;
+        var shareUrl = null;
+        var rawId = fileIds[j];
+
+        // Get file ID from response - trim whitespace
+        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+          fileId = rawId.getId();
+        } else if (rawId && typeof rawId === 'string') {
+          fileId = rawId.trim();
+          Logger.log(' String file ID detected: ' + fileId);
+        } else {
+          Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+          continue;
+        }
+
+        if (fileId) {
+          // Set file sharing permission
           var file = DriveApp.getFileById(fileId);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      var uploaded = uploadFileToFirebaseStorage(fileId, 'voice/voice_' + (j + 1));
-          if (uploaded) {
-            shareUrl = uploaded;
-          } else {
-            shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
-          }
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          
+          // Use direct Google Drive URL for HTML5 audio playback
+          // /uc?export=download&id= works for both audio and video in browsers
+          shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
           Logger.log(' Constructed share URL: ' + shareUrl);
           result.voiceAudioUrls.push(shareUrl);
-       }
-       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
-     } else if (fieldKey === 'outer_image') {
-       // Handle multiple image files (0-10 files)
-       result.outerImageUrls = [];
-       
-       // response is a comma-separated string of file IDs for multiple files
-       var fileIds = [];
-       if (typeof response === 'string') {
-         fileIds = response.split(',');
-       } else if (response instanceof Array) {
-         fileIds = response;
-       }
-       
-       for (var j = 0; j < fileIds.length; j++) {
-         var fileId = null;
-         var shareUrl = null;
-         var rawId = fileIds[j];
- 
-         // Get file ID from response - trim whitespace
-         if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
-           fileId = rawId.getId();
-         } else if (rawId && typeof rawId === 'string') {
-           fileId = rawId.trim();
-           Logger.log(' String file ID detected: ' + fileId);
-         } else {
-           Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
-           continue;
-         }
- 
-         // Construct Google Drive share URL directly from file ID
-         shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-         Logger.log(' Constructed share URL: ' + shareUrl);
-         result.outerImageUrls.push(shareUrl);
-       }
-       Logger.log(' Processed ' + result.outerImageUrls.length + ' outer image files');
-     } else {
-       // Handle single file uploads (header_image, fullbody_image, video, three_view_image, concept_image)
-       var fileId = null;
-       var shareUrl = null;
-       var rawResponse = null;
- 
-       // response could be a string (comma-separated IDs) or array
-       if (typeof response === 'string') {
-         // Split by comma and take first item
-         var parts = response.split(',');
-         rawResponse = parts[0] ? parts[0].trim() : null;
-       } else if (response instanceof Array) {
-         rawResponse = response[0];
-       }
- 
-       // Get file ID from response
-       if (rawResponse && typeof rawResponse === 'object' && typeof rawResponse.getId === 'function') {
-         fileId = rawResponse.getId();
-       } else if (rawResponse && typeof rawResponse === 'string') {
-         fileId = rawResponse.trim();
-         Logger.log(' String file ID detected: ' + fileId);
-       } else {
-         Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
-       }
- 
-       if (fileId) {
-         // Construct Google Drive share URL directly from file ID
-         shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-         Logger.log(' File ID: ' + fileId);
-         Logger.log(' Share URL: ' + shareUrl);
- 
-         if (fieldKey === 'header_image') {
-           result.headerImageUrl = shareUrl;
-         } else if (fieldKey === 'fullbody_image') {
-           result.fullbodyImageUrl = shareUrl;
-         } else if (fieldKey === 'video') {
-           result.videoUrl = shareUrl;
-         } else if (fieldKey === 'three_view_image') {
-           result.threeViewImageUrl = shareUrl;
-         } else if (fieldKey === 'concept_image') {
-           result.conceptImageUrl = shareUrl;
-         }
-       } else {
-         Logger.log(' ERROR: No file ID extracted for field: ' + fieldKey);
-       }
-     }
+        }
+      }
+      Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+    } else if (fieldKey === 'outer_image') {
+      // Handle multiple image files (0-10 files)
+      result.outerImageUrls = [];
+      
+      // response is a comma-separated string of file IDs for multiple files
+      var fileIds = [];
+      if (typeof response === 'string') {
+        fileIds = response.split(',');
+      } else if (response instanceof Array) {
+        fileIds = response;
+      }
+      
+      for (var j = 0; j < fileIds.length; j++) {
+        var fileId = null;
+        var shareUrl = null;
+        var rawId = fileIds[j];
+
+        // Get file ID from response - trim whitespace
+        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+          fileId = rawId.getId();
+        } else if (rawId && typeof rawId === 'string') {
+          fileId = rawId.trim();
+          Logger.log(' String file ID detected: ' + fileId);
+        } else {
+          Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+          continue;
+        }
+
+        if (fileId) {
+          // Set file sharing permission
+          var file = DriveApp.getFileById(fileId);
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          // Use /uc?export=view for images
+          shareUrl = 'https://drive.google.com/uc?export=view&id=' + fileId;
+          Logger.log(' Constructed share URL: ' + shareUrl);
+          result.outerImageUrls.push(shareUrl);
+        }
+      }
+      Logger.log(' Processed ' + result.outerImageUrls.length + ' outer image files');
+    } else {
+      // Handle single file uploads (header_image, fullbody_image, video, three_view_image, concept_image)
+      var fileId = null;
+      var shareUrl = null;
+      var rawResponse = null;
+
+      // response could be a string (comma-separated IDs) or array
+      if (typeof response === 'string') {
+        // Split by comma and take first item
+        var parts = response.split(',');
+        rawResponse = parts[0] ? parts[0].trim() : null;
+      } else if (response instanceof Array) {
+        rawResponse = response[0];
+      }
+
+      // Get file ID from response
+      if (rawResponse && typeof rawResponse === 'object' && typeof rawResponse.getId === 'function') {
+        fileId = rawResponse.getId();
+      } else if (rawResponse && typeof rawResponse === 'string') {
+        fileId = rawResponse.trim();
+        Logger.log(' String file ID detected: ' + fileId);
+      } else {
+        Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
+      }
+
+      if (fileId) {
+        // Set file sharing permission
+        var file = DriveApp.getFileById(fileId);
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        
+        // Construct Google Drive share URL directly from file ID
+        // Use /uc?export=download&id= format for videos/audio to work with HTML5 players
+        // Use /uc?export=view&id= format for images to display properly
+        if (fieldKey === 'video') {
+          shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+          Logger.log(' Using download URL for video: ' + shareUrl);
+        } else {
+          shareUrl = 'https://drive.google.com/uc?export=view&id=' + fileId;
+          Logger.log(' Using view URL for image: ' + shareUrl);
+        }
+        Logger.log(' File ID: ' + fileId);
+
+        if (fieldKey === 'header_image') {
+          result.headerImageUrl = shareUrl;
+        } else if (fieldKey === 'fullbody_image') {
+          result.fullbodyImageUrl = shareUrl;
+        } else if (fieldKey === 'video') {
+          result.videoUrl = shareUrl;
+        } else if (fieldKey === 'three_view_image') {
+          result.threeViewImageUrl = shareUrl;
+        } else if (fieldKey === 'concept_image') {
+          result.conceptImageUrl = shareUrl;
+        }
+      } else {
+        Logger.log(' ERROR: No file ID extracted for field: ' + fieldKey);
+      }
+    }
   } catch (error) {
     Logger.log('ERROR handling file upload for ' + fieldKey + ': ' + error.toString());
     Logger.log('Stack: ' + (error.stack || 'No stack trace'));

@@ -277,33 +277,35 @@ const MemberDataLoader = {
           </div>
         </div>
         
-        ${member.voiceAudioUrls && member.voiceAudioUrls.length > 0 ? `
-          <div class="member-audio">
-            <h3>ボイス</h3>
-            ${member.voiceAudioUrls.map(url => `
-              <audio controls class="voice-audio">
-                <source src="${url}" type="audio/mp4">
-                お使いのブラウザは音声再生に対応していません。
-              </audio>
-            `).join('')}
-          </div>
-        ` : ''}
+${member.voiceAudioUrls && member.voiceAudioUrls.length > 0 ? `
+           <div class="member-audio">
+             <h3>ボイス</h3>
+             ${member.voiceAudioUrls.map(url => `
+               <audio controls class="voice-audio" preload="metadata">
+                 <source src="${url}" type="audio/mp4">
+                 <source src="${url}" type="audio/mpeg">
+                 <source src="${url}" type="audio/mp3">
+                 お使いのブラウザは音声再生に対応していません。
+               </audio>
+             `).join('')}
+           </div>
+         ` : ''}
         
-        ${member.videoUrl ? `
-          <div class="member-video">
-            <h3>動画</h3>
-            <video controls class="member-video-player">
-              <source src="${member.videoUrl}" type="video/mp4">
-              お使いのブラウザは動画再生に対応していません。
-            </video>
-          </div>
-        ` : ''}
+${member.videoUrl ? `
+           <div class="member-video">
+             <h3>動画</h3>
+             <video controls class="member-video-player" preload="metadata">
+               <source src="${member.videoUrl}" type="video/mp4">
+               お使いのブラウザは動画再生に対応していません。
+             </video>
+           </div>
+         ` : ''}
       </div>
     `;
     
-    container.innerHTML = html;
+container.innerHTML = html;
   },
-  
+
   /**
    * Get Google Drive image proxy URL
    * @param {string} driveUrl - Google Drive share URL
@@ -311,14 +313,19 @@ const MemberDataLoader = {
    */
   getDriveImageProxy(driveUrl) {
     if (!driveUrl) return '';
-    
+
+    // Already in correct format for Google Drive direct access
+    if (driveUrl.includes('uc?export=')) {
+      return driveUrl;
+    }
+
     // Extract file ID from Google Drive URL
     const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (match && match[1]) {
       const fileId = match[1];
       return `https://drive.google.com/uc?export=view&id=${fileId}`;
     }
-    
+
     return driveUrl;
   },
   
