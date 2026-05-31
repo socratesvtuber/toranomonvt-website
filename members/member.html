@@ -273,13 +273,8 @@ function playVoiceByIndex(index) {
   stopCurrentVoice();
 
   const driveUrl = window.memberVoiceFiles[index];
-  const previewUrl = getDrivePreviewUrl(driveUrl);
-  warmupDrivePreview(driveUrl);
   currentVoiceIndex = index;
-  window._voiceIframe = window._voiceIframe || document.createElement('iframe');
-  window._voiceIframe.style.display = 'none';
-  window._voiceIframe.src = previewUrl;
-  document.body.appendChild(window._voiceIframe);
+  warmupDrivePreview(driveUrl);
   isPlaying = true;
   updateVoiceButtonState(true);
 
