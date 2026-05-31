@@ -351,74 +351,74 @@ if (window.firebaseMemberLoaderLoaded) {
     }
   },
   
-  /**
-   * Render member page with data
-   * @param {Object} member - Member data
-   */
-  renderMemberPage(member) {
-    console.log('FirebaseMemberLoader: Rendering member page:', member.name_hiragana);
-    console.log('DEBUG - Full member data:', JSON.stringify(member, null, 2));
-    console.log('DEBUG - headerImageUrl:', member.headerImageUrl);
-    console.log('DEBUG - fullbodyImageUrl:', member.fullbodyImageUrl);
-  
-    // Hide loading, show content
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('error-state').style.display = 'none';
-    document.getElementById('member-root').style.display = 'block';
-  
-    // Set page title
-    const memberName = member.name_hiragana || member.name_romaji || 'メンバー';
-    document.title = `${memberName} - 虎ノ門`;
-  
-    // Header image (from headerImageUrl - Google Drive)
-    const headerImageEl = document.getElementById('member-header-image');
-    if (headerImageEl) {
-      console.log('DEBUG - headerImageUrl value:', member.headerImageUrl);
-      console.log('DEBUG - headerImageUrl type:', typeof member.headerImageUrl);
-      if (member.headerImageUrl) {
-        const proxyUrl = this.getDriveImageProxy(member.headerImageUrl);
-        console.log('DEBUG - Setting header image:', proxyUrl);
-        console.log('DEBUG - Original URL:', member.headerImageUrl);
-        headerImageEl.src = proxyUrl;
-        headerImageEl.style.display = 'block';
-        headerImageEl.onerror = function() {
-          console.error('DEBUG - Header image failed to load:', this.src);
-        };
-      } else {
-        console.log('DEBUG - No headerImageUrl found');
-        headerImageEl.style.display = 'none';
-      }
-    }
-  
-    // Header text
-    document.getElementById('member-name-display').textContent = member.name_hiragana || '名前不明';
-    document.getElementById('member-name-romaji').textContent = member.name_romaji || '';
-  
-    // Avatar (from fullbodyImageUrl - Google Drive)
-    const avatarEl = document.getElementById('member-avatar');
-    console.log('DEBUG - fullbodyImageUrl value:', member.fullbodyImageUrl);
-    console.log('DEBUG - fullbodyImageUrl type:', typeof member.fullbodyImageUrl);
-    if (member.fullbodyImageUrl) {
-      const proxyUrl = this.getDriveImageProxy(member.fullbodyImageUrl);
-      console.log('DEBUG - Setting avatar image:', proxyUrl);
-      console.log('DEBUG - Original URL:', member.fullbodyImageUrl);
-      avatarEl.src = proxyUrl;
-      avatarEl.alt = member.name_hiragana || 'メンバー';
-      avatarEl.onerror = function() {
-        console.error('DEBUG - Avatar image failed to load:', this.src);
-      };
-    } else {
-      console.log('DEBUG - No fullbodyImageUrl found, using fallback');
-      avatarEl.src = '../img/虎ノ門ロゴ大本.png';
-      avatarEl.alt = 'メンバー画像';
-    }
-  
-    // Favorite button
-    const favoriteBtn = document.getElementById('favorite-btn');
-    if (favoriteBtn) {
-      favoriteBtn.dataset.memberId = member.id;
-      favoriteBtn.dataset.name = member.name_hiragana || member.name_romaji || '';
-      favoriteBtn.dataset.image = member.fullbodyImageUrl || '';
+/**
+    * Render member page with data
+    * @param {Object} member - Member data
+    */
+   renderMemberPage(member) {
+     console.log('FirebaseMemberLoader: Rendering member page:', member.name_hiragana);
+     console.log('DEBUG - Full member data:', JSON.stringify(member, null, 2));
+     console.log('DEBUG - headerImageUrl:', member.headerImageUrl);
+     console.log('DEBUG - fullbodyImageUrl:', member.fullbodyImageUrl);
+
+     // Hide loading, show content
+     document.getElementById('loading-state').style.display = 'none';
+     document.getElementById('error-state').style.display = 'none';
+     document.getElementById('member-root').style.display = 'block';
+
+     // Set page title
+     const memberName = member.name_hiragana || member.name_romaji || 'メンバー';
+     document.title = `${memberName} - 虎ノ門`;
+
+     // Header image (from headerImageUrl - Google Drive)
+     const headerImageEl = document.getElementById('member-header-image');
+     if (headerImageEl) {
+       console.log('DEBUG - headerImageUrl value:', member.headerImageUrl);
+       console.log('DEBUG - headerImageUrl type:', typeof member.headerImageUrl);
+       if (member.headerImageUrl) {
+         const proxyUrl = this.getDriveImageProxy(member.headerImageUrl);
+         console.log('DEBUG - Setting header image:', proxyUrl);
+         console.log('DEBUG - Original URL:', member.headerImageUrl);
+         headerImageEl.src = proxyUrl;
+         headerImageEl.style.display = 'block';
+         headerImageEl.onerror = function() {
+           console.error('DEBUG - Header image failed to load:', this.src);
+         };
+       } else {
+         console.log('DEBUG - No headerImageUrl found');
+         headerImageEl.style.display = 'none';
+       }
+     }
+
+     // Header text
+     document.getElementById('member-name-display').textContent = member.name_hiragana || '名前不明';
+     document.getElementById('member-name-romaji').textContent = member.name_romaji || '';
+
+     // Avatar (from fullbodyImageUrl - Google Drive)
+     const avatarEl = document.getElementById('member-avatar');
+     console.log('DEBUG - fullbodyImageUrl value:', member.fullbodyImageUrl);
+     console.log('DEBUG - fullbodyImageUrl type:', typeof member.fullbodyImageUrl);
+     if (member.fullbodyImageUrl) {
+       const proxyUrl = this.getDriveImageProxy(member.fullbodyImageUrl);
+       console.log('DEBUG - Setting avatar image:', proxyUrl);
+       console.log('DEBUG - Original URL:', member.fullbodyImageUrl);
+       avatarEl.src = proxyUrl;
+       avatarEl.alt = member.name_hiragana || 'メンバー';
+       avatarEl.onerror = function() {
+         console.error('DEBUG - Avatar image failed to load:', this.src);
+       };
+     } else {
+       console.log('DEBUG - No fullbodyImageUrl found, using fallback');
+       avatarEl.src = '../img/虎ノ門ロゴ大本.png';
+       avatarEl.alt = 'メンバー画像';
+     }
+
+     // Favorite button
+     const favoriteBtn = document.getElementById('favorite-btn');
+     if (favoriteBtn) {
+       favoriteBtn.dataset.memberId = member.id;
+       favoriteBtn.dataset.name = member.name_hiragana || member.name_romaji || '';
+       favoriteBtn.dataset.image = member.fullbodyImageUrl || '';
      }
      // Costume navigation links
      const costumeNavUl = document.querySelector('.costume-nav ul');
@@ -435,29 +435,29 @@ if (window.firebaseMemberLoaderLoaded) {
        // Concept link
        linksHtml += `<li><a href="#" data-type="concept">コンセプト</a></li>`;
        costumeNavUl.innerHTML = linksHtml;
-       
-        // Click handler to change avatar image
-        const loaderInstance = this;
-        costumeNavUl.addEventListener('click', function(e) {
-          e.preventDefault();
-          const link = e.target.closest('a');
-          if (!link) return;
-          const type = link.dataset.type;
-          let url = null;
-          if (type === 'costume') {
-            const index = parseInt(link.dataset.index, 10);
-            url = member.outerImageUrls[index];
-          } else if (type === 'three-view') {
-            url = member.threeViewImageUrl;
-          } else if (type === 'concept') {
-            url = member.conceptImageUrl;
-          }
-          if (url) {
-            const proxyUrl = loaderInstance.getDriveImageProxy(url);
-            avatarEl.src = proxyUrl;
-            avatarEl.alt = member.name_hiragana || 'メンバー';
-          }
-        });
+
+       // Click handler to change avatar image
+       const loaderInstance = this;
+       costumeNavUl.addEventListener('click', function(e) {
+         e.preventDefault();
+         const link = e.target.closest('a');
+         if (!link) return;
+         const type = link.dataset.type;
+         let url = null;
+         if (type === 'costume') {
+           const index = parseInt(link.dataset.index, 10);
+           url = member.outerImageUrls[index];
+         } else if (type === 'three-view') {
+           url = member.threeViewImageUrl;
+         } else if (type === 'concept') {
+           url = member.conceptImageUrl;
+         }
+         if (url) {
+           const proxyUrl = loaderInstance.getDriveImageProxy(url);
+           avatarEl.src = proxyUrl;
+           avatarEl.alt = member.name_hiragana || 'メンバー';
+         }
+       });
      }
      // SNS links
     this.renderSnsLinks(member.sns_link);
@@ -927,35 +927,35 @@ if (window.firebaseMemberLoaderLoaded) {
     });
   },
   
-  /**
-   * Get Google Drive image proxy URL
-   */
-  getDriveImageProxy(driveUrl) {
-      if (!driveUrl) return '';
-      
-      // URL が文字列でない場合は空文字を返す
-      if (typeof driveUrl !== 'string') return '';
-  
-      // Google Drive のファイル ID を抽出
-      // 対応形式：https://drive.google.com/file/d/[FILE_ID]/view
-      // または：https://drive.google.com/file/d/[FILE_ID]/view?usp=drive_link
-      const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        const fileId = match[1];
-        console.log('DEBUG - getDriveImageProxy: Converted URL for fileId:', fileId);
-        // CORS 対応のため、gstatic.com 経由で画像を取得
-        return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
-      }
-      
-      // 既に変換済み URL の場合（https://drive.google.com/uc?export=view&id=）
-      if (driveUrl.includes('drive.google.com/uc?')) {
-        console.log('DEBUG - getDriveImageProxy: Already converted URL');
-        return driveUrl;
-      }
-  
-      console.log('DEBUG - getDriveImageProxy: Could not parse URL, returning as-is:', driveUrl);
-      return driveUrl;
-    },
+/**
+    * Get Google Drive image proxy URL
+    */
+   getDriveImageProxy(driveUrl) {
+       if (!driveUrl) return '';
+       
+       // URL が文字列でない場合は空文字を返す
+       if (typeof driveUrl !== 'string') return '';
+
+       // Already in correct uc format - return as-is
+       if (driveUrl.includes('uc?export=')) {
+         console.log('DEBUG - getDriveImageProxy: Already converted URL');
+         return driveUrl;
+       }
+
+       // Google Drive のファイル ID を抽出
+       // 対応形式：https://drive.google.com/file/d/[FILE_ID]/view
+       // または：https://drive.google.com/file/d/[FILE_ID]/view?usp=drive_link
+       const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+       if (match && match[1]) {
+         const fileId = match[1];
+         console.log('DEBUG - getDriveImageProxy: Converted URL for fileId:', fileId);
+         // Use uc?export=view format for direct image access
+         return `https://drive.google.com/uc?export=view&id=${fileId}`;
+       }
+   
+       console.log('DEBUG - getDriveImageProxy: Could not parse URL, returning as-is:', driveUrl);
+       return driveUrl;
+     },
   
   /**
    * Escape HTML special characters
