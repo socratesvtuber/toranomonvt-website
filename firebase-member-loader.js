@@ -452,7 +452,7 @@ if (window.firebaseMemberLoaderLoaded) {
             url = member.conceptImageUrl;
           }
           if (url) {
-            const proxyUrl = this.getDriveImageProxy(url);
+            const proxyUrl = loaderInstance.getDriveImageProxy(url);
             avatarEl.src = proxyUrl;
             avatarEl.alt = member.name_hiragana || 'メンバー';
           }
