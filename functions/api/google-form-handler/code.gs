@@ -395,7 +395,9 @@ function handleFileUpload(result, fieldKey, response, title) {
            continue;
          }
  
-          var uploaded = uploadFileToFirebaseStorage(fileId, 'voice/voice_' + (j + 1));
+          var file = DriveApp.getFileById(fileId);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      var uploaded = uploadFileToFirebaseStorage(fileId, 'voice/voice_' + (j + 1));
           if (uploaded) {
             shareUrl = uploaded;
           } else {
