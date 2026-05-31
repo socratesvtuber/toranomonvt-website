@@ -163,7 +163,7 @@
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 55vh;
+  max-height: 200vh;
   object-fit: contain;
   object-position: top center;
   display: block;
@@ -171,7 +171,8 @@
 
 .standing-illustration-wrap {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
   line-height: 0;
 }
 
