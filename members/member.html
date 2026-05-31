@@ -208,7 +208,7 @@ let isPlaying = false;
 let currentVoiceIndex = -1;
 
 function getVoiceStreamUrl(driveUrl) {
-  const m = driveUrl.match(/id=([^&]+)/);
+  const m = driveUrl.match(/\/file\/d\/([^/]+)/);
   if (m && m[1]) {
     return 'https://drive.google.com/uc?export=download&id=' + m[1];
   }
