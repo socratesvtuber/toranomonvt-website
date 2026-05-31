@@ -521,9 +521,17 @@ if (window.firebaseMemberLoaderLoaded) {
     // Navigation
     this.renderNavigation(member);
   
-    // Store voice files globally for playback
-    window.memberVoiceFiles = member.voiceAudioUrls || [];
-  },
+     // Store voice files globally for playback
+     window.memberVoiceFiles = member.voiceAudioUrls || [];
+     // Store costume/test-image URLs globally for nav click handling
+     window.memberCostumeNav = {
+       outerImageUrls: member.outerImageUrls || [],
+       threeViewImageUrl: member.threeViewImageUrl || '',
+       conceptImageUrl: member.conceptImageUrl || '',
+       fullbodyImageUrl: member.fullbodyImageUrl || '',
+       name_hiragana: member.name_hiragana || 'メンバー'
+     };
+   },
   
   /**
    * Render SNS links
