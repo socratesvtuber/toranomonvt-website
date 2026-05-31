@@ -402,46 +402,7 @@ function handleFileUpload(result, fieldKey, response, title) {
       }
       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
     } else {
-      // Handle multiple image files (0-10 files)
-      result.outerImageUrls = [];
-      
-      // response is a comma-separated string of file IDs for multiple files
-      var fileIds = [];
-      if (typeof response === 'string') {
-        fileIds = response.split(',');
-      } else if (response instanceof Array) {
-        fileIds = response;
-      }
-      
-      for (var j = 0; j < fileIds.length; j++) {
-        var fileId = null;
-        var shareUrl = null;
-        var rawId = fileIds[j];
-
-        // Get file ID from response - trim whitespace
-        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
-          fileId = rawId.getId();
-        } else if (rawId && typeof rawId === 'string') {
-          fileId = rawId.trim();
-          Logger.log(' String file ID detected: ' + fileId);
-        } else {
-          Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
-          continue;
-        }
-
-        if (fileId) {
-          // Set file sharing permission
-          var file = DriveApp.getFileById(fileId);
-          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-          // Use /uc?export=view for images
-          shareUrl = 'https://drive.google.com/uc?export=view&id=' + fileId;
-          Logger.log(' Constructed share URL: ' + shareUrl);
-          result.outerImageUrls.push(shareUrl);
-        }
-      }
-      Logger.log(' Processed ' + result.outerImageUrls.length + ' outer image files');
-    } else {
-      // Handle single file uploads (header_image, fullbody_image, video, three_view_image, concept_image)
+      // Handle single file uploads (header_image, fullbody_image, video)
       var fileId = null;
       var shareUrl = null;
       var rawResponse = null;
@@ -465,16 +426,11 @@ function handleFileUpload(result, fieldKey, response, title) {
         Logger.log(' Warning: rawResponse is not a valid file object: ' + JSON.stringify(rawResponse));
       }
 
-if (fileId) {
-         // Set file sharing permission
-         var file = DriveApp.getFileById(fileId);
-         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-         
-         // Construct Google Drive share URL directly from file ID
-         // Use /uc?export=download&id= for all file types (works more reliably)
-         shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
-         Logger.log(' Using URL: ' + shareUrl);
+      if (fileId) {
+        // Construct Google Drive share URL directly from file ID
+        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
         Logger.log(' File ID: ' + fileId);
+        Logger.log(' Share URL: ' + shareUrl);
 
         if (fieldKey === 'header_image') {
           result.headerImageUrl = shareUrl;
