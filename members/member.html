@@ -216,7 +216,7 @@ function getVoiceStreamUrl(driveUrl) {
 function getDrivePreviewUrl(driveUrl) {
   const m = driveUrl.match(/\/file\/d\/([^/]+)/);
   if (m && m[1]) {
-    return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+    return 'https://drive.google.com/uc?export=preview&id=' + m[1];
   }
   return driveUrl;
 }
@@ -273,8 +273,16 @@ function playVoiceByIndex(index) {
   stopCurrentVoice();
 
   const driveUrl = window.memberVoiceFiles[index];
-  currentVoiceIndex = index;
+  const idMatch = driveUrl.match(/\/file\/d\/([^/]+)/);
+  if (!idMatch) {
+    return;
+  }
+  const fileId = idMatch[1];
   warmupDrivePreview(driveUrl);
+  currentVoiceIndex = index;
+  window._voiceIframe = document.createElement('iframe');
+  window._voiceIframe.src = 'https://drive.google.com/file/d/' + fileId + '/preview';
+  document.body.appendChild(window._voiceIframe);
   isPlaying = true;
   updateVoiceButtonState(true);
 
