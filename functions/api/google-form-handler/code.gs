@@ -401,8 +401,39 @@ function handleFileUpload(result, fieldKey, response, title) {
         result.voiceAudioUrls.push(shareUrl);
       }
       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+    } else if (fieldKey === 'outer_image') {
+      // Handle multiple image files (0-10 files)
+      result.outerImageUrls = [];
+      
+      var fileIds = [];
+      if (typeof response === 'string') {
+        fileIds = response.split(',');
+      } else if (response instanceof Array) {
+        fileIds = response;
+      }
+      
+      for (var j = 0; j < fileIds.length; j++) {
+        var fileId = null;
+        var rawId = fileIds[j];
+
+        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+          fileId = rawId.getId();
+        } else if (rawId && typeof rawId === 'string') {
+          fileId = rawId.trim();
+          Logger.log(' String file ID detected: ' + fileId);
+        } else {
+          continue;
+        }
+
+        if (fileId) {
+          var shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
+          Logger.log(' Constructed share URL: ' + shareUrl);
+          result.outerImageUrls.push(shareUrl);
+        }
+      }
+      Logger.log(' Processed ' + result.outerImageUrls.length + ' outer image files');
     } else {
-      // Handle single file uploads (header_image, fullbody_image, video)
+      // Handle single file uploads (header_image, fullbody_image, video, three_view_image, concept_image)
       var fileId = null;
       var shareUrl = null;
       var rawResponse = null;
