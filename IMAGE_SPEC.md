@@ -2,8 +2,8 @@
 
 このドキュメントでは、虎ノ門 VT 公式サイトで使用される画像の仕様について記載しています。
 
-**最終更新日**: 2026-05-21
-**バージョン**: 1.1.0
+**最終更新日**: 2026-05-31
+**バージョン**: 1.2.0
 
 ---
 
@@ -47,7 +47,7 @@ index.html (FirebaseMemberListLoader)
 
 ### 変換処理
 
-`index.html` 内の `getDriveImageProxy()` 関数（L392-402）で、Google Drive のファイル URL を直接表示可能な形式に変換しています。
+`index.html` および `firebase-member-loader.js` 内の `getDriveImageProxy()` 関数で、Google Drive のファイル URL を直接表示可能な形式に変換しています。
 
 **変換前**:
 ```
@@ -56,20 +56,55 @@ https://drive.google.com/file/d/[FILE_ID]/view
 
 **変換後**:
 ```
-https://drive.google.com/uc?export=view&id=[FILE_ID]
+https://lh3.googleusercontent.com/d/[FILE_ID]
 ```
+
+### URL形式の重要事項
+
+- **画像URL**は必ず`https://lh3.googleusercontent.com/d/{ファイルID}`形式に変換してください
+- この形式はGoogleドライブの画像を直接表示できる代理URLです
+- `drive.google.com/file/d/...`形式のままでは、ブラウザのセキュリティポリシーにより表示エラーが発生する可能性があります
+- 音声ファイルの場合は`https://drive.google.com/uc?export=download&id={ファイルID}`形式を使用します
 
 ### ソースコード
 
 ```javascript
-// index.html L392-402 より
+// firebase-member-loader.js L966-991 より（画像用）
+getDriveImageProxy(driveUrl) {
+  if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
+
+  const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch && fileMatch[1]) {
+    const fileId = fileMatch[1];
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+
+  return driveUrl;
+}
+
+// firebase-member-loader.js L854-876 より（音声用）
+getVoiceStreamUrl(driveUrl) {
+  if (!driveUrl) return '';
+
+  const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch && fileMatch[1]) {
+    const fileId = fileMatch[1];
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  }
+
+  return driveUrl;
+}
+```
+
+**index.html L401-411 より（トップページメンバーアバター用）**
+```javascript
 getDriveImageProxy(driveUrl) {
   if (!driveUrl) return '';
 
   const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
     const fileId = match[1];
-    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
 
   return driveUrl;
@@ -90,9 +125,12 @@ getDriveImageProxy(driveUrl) {
 
 | 機能 | ファイル | 行番号 |
 |------|---------|--------|
-| メンバーデータ読み込み | `index.html` | L258-310 |
-| メンバー表示レンダリング | `index.html` | L312-366 |
-| 画像 URL 変換 | `index.html` | L392-402 |
+| メンバーデータ読み込み | `firebase-member-loader.js` | L141-205 |
+| メンバー表示レンダリング | `firebase-member-loader.js` | L358-527 |
+| 画像 URL 変換（画像用） | `firebase-member-loader.js` | L966-991 |
+| 音声 URL 変換 | `firebase-member-loader.js` | L854-876 |
+| トップページメンバーリスト | `index.html` | L258-310 |
+| トップページアバター変換 | `index.html` | L401-411 |
 | CSS アバタースタイル | `styles.css` | L504-525 |
 
 ---
@@ -117,6 +155,11 @@ getDriveImageProxy(driveUrl) {
 | ソース | 形式 | 用途 |
 |--------|------|------|
 | Google Drive | `fullbodyImageUrl` | メンバーサムネイル |
+| Google Drive | `headerImageUrl` | メンバーヘッダー画像 |
+| Google Drive | `conceptImageUrl` | コンセプト画像 |
+| Google Drive | `threeViewImageUrl` | 三面図画像 |
+| Google Drive | `outerImageUrls[]` | 衣装画像 |
+| Google Drive | `voiceAudioUrls[]` | 音声ファイル（`uc?export=download`形式を使用） |
 
 ---
 
@@ -126,6 +169,7 @@ getDriveImageProxy(driveUrl) {
 |------|-----------|----------|------|
 | 2026-05-20 | 1.0.0 | 初版作成 - メンバーサムネイル画像の仕様を文書化 | - |
 | 2026-05-21 | 1.1.0 | `name_select` による重複チェック機能追加の注記を追加 | - |
+| 2026-05-31 | 1.2.0 | 画像URLを`lh3.googleusercontent.com/d/{fileId}`形式に変換するよう修正。音声URLは`uc?export=download`形式を使用 | - |
 
 ---
 
