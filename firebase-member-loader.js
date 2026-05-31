@@ -437,8 +437,8 @@ if (window.firebaseMemberLoaderLoaded) {
        costumeNavUl.innerHTML = linksHtml;
        
         // Click handler to change avatar image
+        const loaderInstance = this;
         costumeNavUl.addEventListener('click', function(e) {
-          const self = this;
           e.preventDefault();
           const link = e.target.closest('a');
           if (!link) return;
@@ -453,7 +453,7 @@ if (window.firebaseMemberLoaderLoaded) {
             url = member.conceptImageUrl;
           }
           if (url) {
-            const proxyUrl = self.getDriveImageProxy(url);
+            const proxyUrl = loaderInstance.getDriveImageProxy(url);
             avatarEl.src = proxyUrl;
             avatarEl.alt = member.name_hiragana || 'メンバー';
           }

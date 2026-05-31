@@ -207,6 +207,14 @@ let currentMemberAudio = null;
 let isPlaying = false;
 let currentVoiceIndex = -1;
 
+function getVoiceStreamUrl(driveUrl) {
+  const m = driveUrl.match(/id=([^&]+)/);
+  if (m && m[1]) {
+    return 'https://drive.google.com/uc?export=download&id=' + m[1];
+  }
+  return driveUrl;
+}
+
 function updateVoiceButtonState(playing) {
   const btn = document.getElementById('voice-play-btn');
   if (!btn) return;
@@ -220,62 +228,64 @@ function updateVoiceButtonState(playing) {
   }
 }
 
+function stopCurrentVoice() {
+  if (currentMemberAudio) {
+    try { currentMemberAudio.pause(); } catch (e) {}
+    currentMemberAudio = null;
+  }
+  isPlaying = false;
+  currentVoiceIndex = -1;
+  updateVoiceButtonState(false);
+}
+
 function playVoiceByIndex(index) {
   if (!window.memberVoiceFiles || index < 0 || index >= window.memberVoiceFiles.length) return;
-  if (currentMemberAudio && isPlaying) {
-    currentMemberAudio.pause();
-    currentMemberAudio = null;
-    isPlaying = false;
-  }
-  if (currentMemberAudio && !isPlaying && currentVoiceIndex === index) {
-    currentMemberAudio.play().catch(() => {});
-    isPlaying = true;
-    updateVoiceButtonState(true);
+
+  if (isPlaying && currentVoiceIndex === index) {
+    stopCurrentVoice();
     return;
   }
-  if (currentMemberAudio) {
-    currentMemberAudio.pause();
-    currentMemberAudio = null;
-  }
-  const src = window.memberVoiceFiles[index];
+
+  stopCurrentVoice();
+
+  const src = getVoiceStreamUrl(window.memberVoiceFiles[index]);
   const audio = new Audio(src);
   audio.volume = 0.5;
   audio.preload = 'auto';
   currentMemberAudio = audio;
   currentVoiceIndex = index;
-  isPlaying = true;
-  updateVoiceButtonState(true);
-  audio.play().catch(() => {
-    console.warn('Audio playback failed. User interaction may be required.');
+  audio.play().then(() => {
+    isPlaying = true;
+    updateVoiceButtonState(true);
+  }).catch((err) => {
+    console.warn('Audio playback failed:', err);
+    stopCurrentVoice();
   });
+
   audio.onended = () => {
-    currentMemberAudio = null;
-    isPlaying = false;
-    currentVoiceIndex = -1;
-    updateVoiceButtonState(false);
+    stopCurrentVoice();
   };
 }
 
 function toggleVoicePlayback() {
   if (!window.memberVoiceFiles || window.memberVoiceFiles.length === 0) return;
-  if (currentMemberAudio && isPlaying) {
-    currentMemberAudio.pause();
-    isPlaying = false;
-    updateVoiceButtonState(false);
-  } else {
-    let index = currentVoiceIndex;
-    if (index < 0 || index >= window.memberVoiceFiles.length) {
-      index = Math.floor(Math.random() * window.memberVoiceFiles.length);
-    }
-    playVoiceByIndex(index);
+
+  if (isPlaying) {
+    stopCurrentVoice();
+    return;
   }
+
+  let index = currentVoiceIndex;
+  if (index < 0 || index >= window.memberVoiceFiles.length || !window.memberVoiceFiles[index]) {
+    index = Math.floor(Math.random() * window.memberVoiceFiles.length);
+  }
+  playVoiceByIndex(index);
 }
 
 function initVoicePlayback() {
   const voicePlayBtn = document.getElementById('voice-play-btn');
   if (!voicePlayBtn) return;
 
-  // Standing illustration click -> random voice
   const standingIllustration = document.getElementById('member-avatar');
   if (standingIllustration) {
     standingIllustration.addEventListener('click', function(e) {
@@ -285,37 +295,28 @@ function initVoicePlayback() {
     });
   }
 
-  // Voice play button click -> toggle play/pause
   voicePlayBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     toggleVoicePlayback();
   });
-
-  updateVoiceButtonState(false);
 }
 
-// Initialize individual voice buttons
 function initIndividualVoiceButtons() {
-  document.querySelectorAll('.voice-individual-btn').forEach(button => {
+  document.querySelectorAll('.voice-individual-btn').forEach((button) => {
     button.addEventListener('click', function(e) {
       e.stopPropagation();
       const index = parseInt(this.dataset.voiceIndex, 10);
-      playVoiceByIndex(index);
+      if (!Number.isNaN(index)) {
+        playVoiceByIndex(index);
+      }
     });
   });
 }
 
-// Start after DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-  const initOnce = () => {
-    initVoicePlayback();
-    initIndividualVoiceButtons();
-  };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initOnce);
-  } else {
-    initOnce();
-  }
+  initVoicePlayback();
+  initIndividualVoiceButtons();
+  updateVoiceButtonState(false);
 });
 </script>
 
