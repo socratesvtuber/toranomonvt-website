@@ -395,8 +395,12 @@ function handleFileUpload(result, fieldKey, response, title) {
            continue;
          }
  
-           // Direct download URL for audio playback
-           shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+          var uploaded = uploadFileToFirebaseStorage(fileId, 'voice/voice_' + (j + 1));
+          if (uploaded) {
+            shareUrl = uploaded;
+          } else {
+            shareUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+          }
           Logger.log(' Constructed share URL: ' + shareUrl);
           result.voiceAudioUrls.push(shareUrl);
        }
@@ -1114,3 +1118,17 @@ function migrateSushiMarkToOshiMark() {
   message: 'Cleaned ' + cleanedCount + ' records'
   };
   }
+
+function uploadFileToFirebaseStorage(fileId,storagePath){
+  if(!FIREBASE_STORAGE_BUCKET){Logger.log('Firebase Storage bucket not configured, skipping upload');return null;}
+  try{
+    var file=DriveApp.getFileById(fileId);var blob=file.getBlob();var mimeType=blob.getContentType();var ext='.m4a';
+    if(mimeType.indexOf('mp3')>=0 || mimeType.indexOf('mpeg')>=0){ext='.mp3';}
+    var uploadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o?uploadType=media&name='+encodeURIComponent((storagePath+ext).replace(/\//g,'/'));
+    var options={method:'post',contentType:mimeType,payload:blob.getBytes(),muteHttpExceptions:true,headers:{Authorization:'Bearer '+ScriptApp.getOAuthToken()}};
+    var response=UrlFetchApp.fetch(uploadUrl,options);var responseCode=response.getResponseCode();
+    if(responseCode>=200 && responseCode<300){var responseData=JSON.parse(response.getContentText());var downloadToken=responseData.downloadTokens;if(!downloadToken){downloadToken=Utilities.getUuid();}
+    var downloadUrl='https://firebasestorage.googleapis.com/v0/b/'+FIREBASE_STORAGE_BUCKET+'/o/'+encodeURIComponent((storagePath+ext).replace(/\//g,'/'))+'?alt=media&token='+downloadToken;Logger.log(' Uploaded to Firebase Storage: '+downloadUrl);return downloadUrl;}
+    Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getContentText());return null;
+  }catch(error){Logger.log(' Error uploading to Firebase Storage: '+error.toString());return null;}
+}
