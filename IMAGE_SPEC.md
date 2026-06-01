@@ -173,6 +173,45 @@ getDriveImageProxy(driveUrl) {
 
 ---
 
+## 音声ファイルの仕様
+
+### 概要
+
+音声ファイル（ボイス）のホスティングは、Google Driveの制約により注意が必要です。
+
+### Google Drive音声の制約
+
+- **2024年1月頃から外部サイトからの音声再生が制限**されています
+- `https://drive.google.com/file/d/{fileId}/view`形式はブラウザのセキュリティポリシーによりエラーになります
+- `https://drive.google.com/uc?export=download&id={fileId}`形式も、GoogleのCORS/認証制約により再生できないケースがあります
+
+### 推奨：Firebase Storageへの移行
+
+音声ファイルはFirebase Storageへアップロードすることを推奨します：
+
+| 方法 | URL形式 | 再生可否 | 備考 |
+|------|--------|---------|------|
+| Google Drive（view） | `drive.google.com/file/d/.../view` | ❌ | エラー表示のみ |
+| Google Drive（download） | `drive.google.com/uc?export=download&id=...` | ⚠️ | 制約により不安定 |
+| Firebase Storage | `firebasestorage.googleapis.com/.../o/...?alt=media` | ✅ | 推奨 |
+
+### Firebase Storageへの移行方法
+
+1. **GAS設定**: `config.gs`に`FIREBASE_STORAGE_BUCKET`を設定
+   ```javascript
+   var FIREBASE_STORAGE_BUCKET = 'toranomonvt-website.appspot.com';
+   ```
+
+2. **フォーム送信時**: Googleフォームから音声を送信すると、GASが自動的にFirebase Storageにアップロード
+
+3. **注意**: 既存の`drive.google.com/file/d/...`形式のURLは移行前のデータです。新規送信で上書きしてください。
+
+### 音声URL変換処理
+
+`firebase-member-loader.js`の`getVoiceStreamUrl()`は、Google Driveの制約により現在は使用していません。フォーム送信時にGAS側で`uc?export=download`形式に変換されます。
+
+---
+
 ## 関連ドキュメント
 
 - [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) - Firebase 設定

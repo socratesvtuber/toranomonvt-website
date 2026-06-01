@@ -821,9 +821,7 @@ if (window.firebaseMemberLoaderLoaded) {
      if (!container) return;
 
      if (voiceUrls && voiceUrls.length > 0) {
-       // Convert URLs for direct playback (audio needs uc?export=download format)
-       const convertedUrls = voiceUrls.map(url => this.getVoiceStreamUrl(url));
-       container.innerHTML = convertedUrls.slice(0, 10).map((url, i) =>
+       container.innerHTML = voiceUrls.slice(0, 10).map((url, i) =>
          `<button class="voice-individual-btn" data-voice-index="${i}" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
          ボイス${i + 1}
          </button>`
@@ -834,8 +832,8 @@ if (window.firebaseMemberLoaderLoaded) {
          voicePlayBtn.style.display = 'block';
        }
 
-       // Store converted voice URLs globally
-       window.memberVoiceFiles = convertedUrls;
+       // Store voice URLs globally (already converted by GAS to Firebase Storage or uc?download format)
+       window.memberVoiceFiles = voiceUrls;
      } else {
        container.innerHTML = '';
        window.memberVoiceFiles = [];
@@ -845,37 +843,6 @@ if (window.firebaseMemberLoaderLoaded) {
          voicePlayBtn.style.display = 'none';
        }
      }
-   },
-
-   /**
-    * Get Google Drive audio stream URL for direct playback
-    * Audio files need uc?export=download format to play in browser
-    */
-   getVoiceStreamUrl(driveUrl) {
-     if (!driveUrl) return '';
-
-     // Handle /file/d/FILE_ID/view format - convert to uc?export=download
-     const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-     if (fileMatch && fileMatch[1]) {
-       const fileId = fileMatch[1];
-       return `https://drive.google.com/uc?export=download&id=${fileId}`;
-     }
-
-     // Handle uc?export=FORMAT&id=FILE_ID format - ensure it's download format
-     const idMatch = driveUrl.match(/(uc\?export=[^&]+)&id=([a-zA-Z0-9_-]+)/);
-     if (idMatch) {
-       const fileId = idMatch[2];
-       return `https://drive.google.com/uc?export=download&id=${fileId}`;
-     }
-
-     // Handle uc?id=FILE_ID format - convert to download format
-     const simpleMatch = driveUrl.match(/uc\?id=([a-zA-Z0-9_-]+)/);
-     if (simpleMatch) {
-       const fileId = simpleMatch[1];
-       return `https://drive.google.com/uc?export=download&id=${fileId}`;
-     }
-
-     return driveUrl;
    },
   
   /**

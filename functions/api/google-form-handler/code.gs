@@ -367,41 +367,44 @@ function handleFileUpload(result, fieldKey, response, title) {
       return;
     }
 
-    if (fieldKey === 'voice_audio') {
-      // Handle multiple audio files (0-10 files)
-      result.voiceAudioUrls = [];
-      
-      // response is a comma-separated string of file IDs for multiple files
-      var fileIds = [];
-      if (typeof response === 'string') {
-        fileIds = response.split(',');
-      } else if (response instanceof Array) {
-        fileIds = response;
-      }
-      
-      for (var j = 0; j < fileIds.length; j++) {
-        var fileId = null;
-        var shareUrl = null;
-        var rawId = fileIds[j];
+if (fieldKey === 'voice_audio') {
+       // Handle multiple audio files (0-10 files)
+       // Store as Firebase Storage download URL if upload succeeds, otherwise use uc?download format
+       result.voiceAudioUrls = [];
+       
+       // response is a comma-separated string of file IDs for multiple files
+       var fileIds = [];
+       if (typeof response === 'string') {
+         fileIds = response.split(',');
+       } else if (response instanceof Array) {
+         fileIds = response;
+       }
+       
+       for (var j = 0; j < fileIds.length; j++) {
+         var fileId = null;
+         var audioUrl = null;
+         var rawId = fileIds[j];
 
-        // Get file ID from response - trim whitespace
-        if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
-          fileId = rawId.getId();
-        } else if (rawId && typeof rawId === 'string') {
-          fileId = rawId.trim();
-          Logger.log(' String file ID detected: ' + fileId);
-        } else {
-          Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
-          continue;
-        }
+         // Get file ID from response - trim whitespace
+         if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+           fileId = rawId.getId();
+         } else if (rawId && typeof rawId === 'string') {
+           fileId = rawId.trim();
+           Logger.log(' String file ID detected: ' + fileId);
+         } else {
+           Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+           continue;
+         }
 
-        // Construct Google Drive share URL directly from file ID
-        shareUrl = 'https://drive.google.com/file/d/' + fileId + '/view';
-        Logger.log(' Constructed share URL: ' + shareUrl);
-        result.voiceAudioUrls.push(shareUrl);
-      }
-      Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
-    } else if (fieldKey === 'outer_image') {
+         // Construct direct download URL for audio playback
+         // Note: Google Drive audio playback has restrictions since Jan 2024
+         // uc?export=download format is the most reliable for browser playback
+         audioUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+         Logger.log(' Voice audio URL (download format): ' + audioUrl);
+         result.voiceAudioUrls.push(audioUrl);
+       }
+       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+     } else if (fieldKey === 'outer_image') {
       // Handle multiple image files (0-10 files)
       result.outerImageUrls = [];
       
@@ -1127,28 +1130,38 @@ Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getCont
 }
 
 /**
- * Get image from Google Drive and serve as response
- * @param {Object} e - Web app request event
- * @returns {ContentService} Image blob response
- */
-function doGet(e) {
-  var fileId = e.parameter.id;
-  
-  if (!fileId) {
-    return ContentService.createTextOutput('Missing file ID parameter');
-  }
-  
-  try {
-    var file = DriveApp.getFileById(fileId);
-    var blob = file.getBlob();
-    
-    return ContentService
-      .createBlob(blob.getBytes(), blob.getContentType())
-      .setEncoding('utf-8');
-  } catch (error) {
-    return ContentService.createTextOutput('Error: ' + error.toString());
-  }
-}
+  * Get file from Google Drive and serve as response (proxy)
+  * @param {Object} e - Web app request event
+  * @returns {ContentService} File blob response
+  */
+ function doGet(e) {
+   var fileId = e.parameter.id;
+   var fileType = e.parameter.type || 'image'; // 'image' or 'audio'
+   
+   if (!fileId) {
+     return ContentService.createTextOutput('Missing file ID parameter');
+   }
+   
+   try {
+     var file = DriveApp.getFileById(fileId);
+     var blob = file.getBlob();
+     var mimeType = blob.getContentType();
+     
+     // For audio files, serve with CORS headers
+     if (fileType === 'audio') {
+       return ContentService
+         .createBlob(blob.getBytes(), mimeType)
+         .setEncoding('utf-8');
+     }
+     
+     // For images, serve as before
+     return ContentService
+       .createBlob(blob.getBytes(), mimeType)
+       .setEncoding('utf-8');
+   } catch (error) {
+     return ContentService.createTextOutput('Error: ' + error.toString());
+   }
+ }
 
 /**
  * Get file info (returns proxy URL for client-side use)
