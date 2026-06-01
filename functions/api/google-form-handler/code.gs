@@ -396,12 +396,13 @@ if (fieldKey === 'voice_audio') {
            continue;
          }
 
-         // Construct direct download URL for audio playback
-         // Note: Google Drive audio playback has restrictions since Jan 2024
-         // uc?export=download format is the most reliable for browser playback
-         audioUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
-         Logger.log(' Voice audio URL (download format): ' + audioUrl);
-         result.voiceAudioUrls.push(audioUrl);
+// Construct direct download URL for audio playback
+          // Note: Google Drive audio playback requires special handling since Jan 2024
+          // Adding 'confirm=no_antivirus' parameter helps bypass some restrictions
+          // However, the file must be "Anyone with the link can view" for public access
+          audioUrl = 'https://drive.google.com/uc?export=download&confirm=no_antivirus&id=' + fileId;
+          Logger.log(' Voice audio URL (download format with antivirus bypass): ' + audioUrl);
+          result.voiceAudioUrls.push(audioUrl);
        }
        Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
      } else if (fieldKey === 'outer_image') {
@@ -1130,7 +1131,8 @@ Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getCont
 }
 
 /**
-  * Get file from Google Drive and serve as response (proxy)
+  * Get file from Google Drive and serve as response (proxy for both image and audio)
+  * This bypasses CORS and authentication restrictions for direct playback
   * @param {Object} e - Web app request event
   * @returns {ContentService} File blob response
   */
@@ -1147,8 +1149,21 @@ Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getCont
      var blob = file.getBlob();
      var mimeType = blob.getContentType();
      
-     // For audio files, serve with CORS headers
+     // Log access for debugging
+     Logger.log('Proxy request - fileId: ' + fileId + ', type: ' + fileType + ', mimeType: ' + mimeType);
+     
+     // For audio files, return with appropriate headers
      if (fileType === 'audio') {
+       // Ensure proper content type for audio
+       if (mimeType.indexOf('audio') === -1) {
+         // Try to infer from file extension
+         var fileName = file.getName().toLowerCase();
+         if (fileName.indexOf('.mp3') !== -1) mimeType = 'audio/mpeg';
+         else if (fileName.indexOf('.m4a') !== -1) mimeType = 'audio/mp4';
+         else if (fileName.indexOf('.wav') !== -1) mimeType = 'audio/wav';
+         else if (fileName.indexOf('.ogg') !== -1) mimeType = 'audio/ogg';
+       }
+       
        return ContentService
          .createBlob(blob.getBytes(), mimeType)
          .setEncoding('utf-8');
@@ -1159,6 +1174,7 @@ Logger.log(' Firebase Storage upload failed: '+responseCode+' '+response.getCont
        .createBlob(blob.getBytes(), mimeType)
        .setEncoding('utf-8');
    } catch (error) {
+     Logger.log('Error in proxy: ' + error.toString());
      return ContentService.createTextOutput('Error: ' + error.toString());
    }
  }

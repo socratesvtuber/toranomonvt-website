@@ -208,7 +208,41 @@ getDriveImageProxy(driveUrl) {
 
 ### 音声URL変換処理
 
-`firebase-member-loader.js`の`getVoiceStreamUrl()`は、Google Driveの制約により現在は使用していません。フォーム送信時にGAS側で`uc?export=download`形式に変換されます。
+`firebase-member-loader.js`の`getVoiceStreamUrl()`は、Google Driveの制約により現在は使用していません。フォーム送信時にGAS側で`uc?export=download&confirm=no_antivirus`形式に変換されます。
+
+### Google Drive音声のベストプラクティス（2026年現在）
+
+Google Driveでは、2024年1月頃から以下の制約があります：
+
+1. **外部再生不可**: `drive.google.com/file/d/...`からの直接`<audio>`タグ再生はブロック
+2. **CORS制限**: `uc?export=download`もブラウザのCORSポリシーによりエラーになるケースが多い
+3. **認証必須**: 再生にはGoogle認証が必要な場合がある
+
+### 推奨される代替方法（Firebase Storage使用不可の場合）
+
+**方法1: GASサーバー側プロキシ（制限あり)**
+```
+https://script.google.com/macros/s/[SCRIPT_ID]/exec?type=audio&id=[FILE_ID]
+```
+- GASの`doGet`でファイルを配信
+- ただし、ContentServiceはCORSヘッダーを設定できないため、同一オリジン限定
+
+**方法2: GitHubリポジトリ無料ホスティング**
+1. 音声ファイルをGitHubリポジトリにアップロード
+2. Raw URLを使用: `https://raw.githubusercontent.com/[USER]/[REPO]/[BRANCH]/[PATH]/[FILENAME].mp3`
+3. ユーザー認証不要、CORS制限なし
+
+**方法3: Dropbox（無料プランあり)**
+- Dropboxの共有リンクを`dl=1`パラメータ付きで使用
+- `https://www.dropbox.com/s/[ID]/[FILENAME]?dl=1`
+
+**方法4: SoundCloud（音声専用)**
+- 音声ファイルをSoundCloudにアップロード
+- oEmbed APIや直接埋め込みで使用
+
+### 重要な制約
+
+Google Driveの音声ファイルは、「リンクを知っている全員」が閲覧可能な設定でも、外部サイトからの再生は制限されています。確実な方法は、GitHubや他の無料ホスティングサービスを使用することです。
 
 ---
 
