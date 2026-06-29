@@ -810,31 +810,39 @@ this.renderQa(member.qa);
   
 /**
     * Render voice buttons
+    * Supports up to 10 voice files with individual playback buttons
     */
     renderVoiceButtons(voiceUrls) {
       const container = document.getElementById('voice-player-container');
-      const iframe = document.getElementById('voice-iframe');
       
       if (voiceUrls && voiceUrls.length > 0) {
-        const voiceUrl = voiceUrls[0];
-        // Firebase Storage URL uses audio tag
-        if (this.isFirebaseStorageUrl(voiceUrl)) {
-          container.innerHTML = `<audio controls style="width: 100%; margin-top: 12px;">
-            <source src="${voiceUrl}" type="audio/mpeg">
-            <source src="${voiceUrl}" type="audio/mp4">
-            <source src="${voiceUrl}" type="audio/webm">
-            お使いのブラウザは音声再生に対応していません
-          </audio>`;
-        } else {
-          // For Google Drive, use iframe preview (preview format works for external playback)
-          const previewUrl = this.getVoicePreviewUrl(voiceUrl);
-          if (previewUrl) {
-            iframe.src = previewUrl;
+        let html = '';
+        const voiceCount = Math.min(voiceUrls.length, 10);
+        
+        for (let i = 0; i < voiceCount; i++) {
+          const voiceUrl = voiceUrls[i];
+          // Firebase Storage URL uses audio tag, Google Drive uses iframe preview
+          if (this.isFirebaseStorageUrl(voiceUrl)) {
+            html += `<div class="voice-item" style="margin-bottom: 8px;">
+              <audio controls style="width: 100%;" data-voice-index="${i}">
+                <source src="${voiceUrl}" type="audio/mpeg">
+                <source src="${voiceUrl}" type="audio/mp4">
+                <source src="${voiceUrl}" type="audio/webm">
+                お使いのブラウザは音声再生に対応していません
+              </audio>
+              <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0 0;">ボイス ${i + 1}</p>
+            </div>`;
           } else {
-            // Fallback to download URL if no preview URL available
-            iframe.src = voiceUrl;
+            const previewUrl = this.getVoicePreviewUrl(voiceUrl);
+            const iframeUrl = previewUrl || voiceUrl;
+            html += `<div class="voice-item" style="margin-bottom: 8px;">
+              <iframe src="${iframeUrl}" style="width: 100%; height: 80px; border: none; border-radius: 8px;" data-voice-index="${i}"></iframe>
+              <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0 0;">ボイス ${i + 1}</p>
+            </div>`;
           }
         }
+        
+        container.innerHTML = html;
         container.style.display = 'block';
       } else {
         if (container) {
