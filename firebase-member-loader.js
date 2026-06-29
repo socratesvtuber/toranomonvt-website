@@ -816,11 +816,26 @@ this.renderQa(member.qa);
       const iframe = document.getElementById('voice-iframe');
       
       if (voiceUrls && voiceUrls.length > 0) {
-        const previewUrl = this.getVoicePreviewUrl(voiceUrls[0]);
-        if (iframe && previewUrl) {
-          iframe.src = previewUrl;
-          container.style.display = 'block';
+        const voiceUrl = voiceUrls[0];
+        // Firebase Storage URL uses audio tag
+        if (this.isFirebaseStorageUrl(voiceUrl)) {
+          container.innerHTML = `<audio controls style="width: 100%; margin-top: 12px;">
+            <source src="${voiceUrl}" type="audio/mpeg">
+            <source src="${voiceUrl}" type="audio/mp4">
+            <source src="${voiceUrl}" type="audio/webm">
+            お使いのブラウザは音声再生に対応していません
+          </audio>`;
+        } else {
+          // For Google Drive, use iframe preview (preview format works for external playback)
+          const previewUrl = this.getVoicePreviewUrl(voiceUrl);
+          if (previewUrl) {
+            iframe.src = previewUrl;
+          } else {
+            // Fallback to download URL if no preview URL available
+            iframe.src = voiceUrl;
+          }
         }
+        container.style.display = 'block';
       } else {
         if (container) {
           container.style.display = 'none';
@@ -935,16 +950,33 @@ this.renderQa(member.qa);
     return driveUrl;
   },
 
-  /**
+/**
     * Get Google Drive voice preview URL (for iframe embedding)
+    * Handles both /file/d/FILE_ID/view and uc?export=download&id=FILE_ID formats
     */
   getVoicePreviewUrl(driveUrl) {
     if (!driveUrl) return '';
+    
+    // Handle /file/d/FILE_ID/view format (Google Drive share URL)
     const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (fileMatch && fileMatch[1]) {
       return `https://drive.google.com/file/d/${fileMatch[1]}/preview`;
     }
+    
+    // Handle uc?export=FORMAT&id=FILE_ID format (direct download URL)
+    const idMatch = driveUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idMatch && idMatch[1]) {
+      return `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+    }
+    
     return '';
+  },
+  
+  /**
+    * Check if URL is Firebase Storage format
+    */
+  isFirebaseStorageUrl(url) {
+    return url && url.includes('firebasestorage.googleapis.com');
   },
 
   /**
