@@ -2,10 +2,10 @@
   "rules": {
     "form_submissions": {
       ".read": true,
-      ".write": false,
+      ".write": true,
       "$submissionId": {
         ".read": true,
-        ".write": false,
+        ".write": true,
         "name_hiragana": {
           ".validate": "newData.isString()"
         },
@@ -21,12 +21,12 @@
       }
     },
     "form_errors": {
-      ".read": "auth != null",
-      ".write": false
+      ".read": true,
+      ".write": true
     },
     "public_members": {
       ".read": true,
-      ".write": false,
+      ".write": true,
       "$memberId": {
         ".read": true,
         ".indexOn": ["timestamp", "public_flag"]
