@@ -368,44 +368,58 @@ function handleFileUpload(result, fieldKey, response, title) {
     }
 
 if (fieldKey === 'voice_audio') {
-       // Handle multiple audio files (0-10 files)
-       // Store as Firebase Storage download URL if upload succeeds, otherwise use uc?download format
-       result.voiceAudioUrls = [];
-       
-       // response is a comma-separated string of file IDs for multiple files
-       var fileIds = [];
-       if (typeof response === 'string') {
-         fileIds = response.split(',');
-       } else if (response instanceof Array) {
-         fileIds = response;
-       }
-       
-       for (var j = 0; j < fileIds.length; j++) {
-         var fileId = null;
-         var audioUrl = null;
-         var rawId = fileIds[j];
+        // Handle multiple audio files (0-10 files)
+        // Try Firebase Storage upload first, fallback to Google Drive download URL
+        result.voiceAudioUrls = [];
+        
+        // response is a comma-separated string of file IDs for multiple files
+        var fileIds = [];
+        if (typeof response === 'string') {
+          fileIds = response.split(',');
+        } else if (response instanceof Array) {
+          fileIds = response;
+        }
+        
+        // Get member name for storage path
+        var memberName = (result.name_hiragana || result.name_romaji || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '');
+        
+        for (var j = 0; j < fileIds.length; j++) {
+          var fileId = null;
+          var audioUrl = null;
+          var rawId = fileIds[j];
 
-         // Get file ID from response - trim whitespace
-         if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
-           fileId = rawId.getId();
-         } else if (rawId && typeof rawId === 'string') {
-           fileId = rawId.trim();
-           Logger.log(' String file ID detected: ' + fileId);
-         } else {
-           Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
-           continue;
-         }
+          // Get file ID from response - trim whitespace
+          if (rawId && typeof rawId === 'object' && typeof rawId.getId === 'function') {
+            fileId = rawId.getId();
+          } else if (rawId && typeof rawId === 'string') {
+            fileId = rawId.trim();
+            Logger.log(' String file ID detected: ' + fileId);
+          } else {
+            Logger.log(' Warning: rawId is not a valid file object: ' + JSON.stringify(rawId));
+            continue;
+          }
 
-// Construct direct download URL for audio playback
-          // Note: Google Drive audio playback requires special handling since Jan 2024
-          // Adding 'confirm=no_antivirus' parameter helps bypass some restrictions
-          // However, the file must be "Anyone with the link can view" for public access
+          // Try Firebase Storage upload first
+          if (FIREBASE_STORAGE_BUCKET) {
+            var storagePath = 'voice/' + memberName + '_' + j;
+            audioUrl = uploadFileToFirebaseStorage(fileId, storagePath);
+            if (audioUrl) {
+              result.voiceAudioUrls.push(audioUrl);
+              Logger.log(' Voice audio URL (Firebase Storage): ' + audioUrl);
+              continue;
+            }
+            Logger.log(' Firebase Storage upload failed, falling back to Google Drive direct link');
+          }
+
+          // Fallback to Google Drive direct download URL
+          // Note: As of Jan 2024, Google Drive blocks audio playback from external sites
+          // This may not work due to CSP/CORS restrictions
           audioUrl = 'https://drive.google.com/uc?export=download&confirm=no_antivirus&id=' + fileId;
           Logger.log(' Voice audio URL (download format with antivirus bypass): ' + audioUrl);
           result.voiceAudioUrls.push(audioUrl);
-       }
-       Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
-     } else if (fieldKey === 'outer_image') {
+        }
+        Logger.log(' Processed ' + result.voiceAudioUrls.length + ' voice audio files');
+      } else if (fieldKey === 'outer_image') {
       // Handle multiple image files (0-10 files)
       result.outerImageUrls = [];
       

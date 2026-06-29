@@ -258,7 +258,31 @@ https://script.google.com/macros/s/[SCRIPT_ID]/exec?type=audio&id=[FILE_ID]
 
 ### 重要な制約
 
-Google Driveの音声ファイルは、「リンクを知っている全員」が閲覧可能な設定でも、外部サイトからの再生は制限されています。確実な方法は、GitHubや他の無料ホスティングサービスを使用することです。
+Google Driveの音声ファイルは、「リンクを知っている全員」が閲覧可能な設定でも、外部サイトからのiframe埋め込みはCSP（Content Security Policy）制限によりブロックされます。
+
+### 必須: Firebase Storageへの移行
+
+音声ファイルはFirebase Storageへアップロードすることを推奨します：
+
+1. **GAS設定**: `config.gs`の`FIREBASE_STORAGE_BUCKET`を設定
+   ```javascript
+   var FIREBASE_STORAGE_BUCKET = 'toranomonvt-website.appspot.com';
+   ```
+
+2. **Firebase Storageルール**: 下記を設定
+   ```
+   service firebase.storage {
+     match /b/{bucket}/o {
+       match /voice/{allPaths=**} {
+         allow read: if true;
+       }
+     }
+   }
+   ```
+
+3. フォーム送信時にGASが自動的にFirebase Storageにアップロード
+   - 成功: Firebase StorageのURL（`<audio>`タグで再生可能）
+   - 失敗: Google Drive download URL（制限あり）
 
 ---
 
