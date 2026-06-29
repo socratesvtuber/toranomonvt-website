@@ -810,44 +810,29 @@ this.renderQa(member.qa);
   
 /**
     * Render voice buttons
-    * Supports up to 10 voice files in a 2-column grid layout (5 rows max)
+    * Displays a single playback button that plays the first voice file
     */
     renderVoiceButtons(voiceUrls) {
       const container = document.getElementById('voice-player-container');
       
       if (voiceUrls && voiceUrls.length > 0) {
-        const voiceCount = Math.min(voiceUrls.length, 10);
-        let buttonsHtml = '';
+        const voiceUrl = voiceUrls[0]; // Use first voice file for main playback
         
-        for (let i = 0; i < voiceCount; i++) {
-          const voiceUrl = voiceUrls[i];
-          
-          if (this.isFirebaseStorageUrl(voiceUrl)) {
-            // Firebase Storage: use audio tag (works for playback)
-            buttonsHtml += `<div class="voice-grid-item" style="display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(255, 184, 77, 0.08); border: 1px solid rgba(255, 184, 77, 0.2); border-radius: 6px;">
-              <span style="color: var(--text); font-size: 0.85rem; min-width: 40px; text-align: center;">ボイス${i + 1}</span>
-              <audio controls style="flex: 1; height: 40px; border-radius: 4px;" data-voice-index="${i}">
-                <source src="${voiceUrl}" type="audio/mpeg">
-                <source src="${voiceUrl}" type="audio/mp4">
-                <source src="${voiceUrl}" type="audio/webm">
-                音声
-              </audio>
-            </div>`;
-          } else {
-            // Google Drive: use iframe preview
-            const previewUrl = this.getVoicePreviewUrl(voiceUrl);
-            const iframeUrl = previewUrl || voiceUrl;
-            buttonsHtml += `<div class="voice-grid-item" style="display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(255, 184, 77, 0.08); border: 1px solid rgba(255, 184, 77, 0.2); border-radius: 6px;">
-              <span style="color: var(--text); font-size: 0.85rem; min-width: 40px; text-align: center;">ボイス${i + 1}</span>
-              <iframe src="${iframeUrl}" style="flex: 1; height: 60px; border: none; border-radius: 4px;" loading="lazy"></iframe>
-            </div>`;
-          }
+        if (this.isFirebaseStorageUrl(voiceUrl)) {
+          // Firebase Storage: use audio tag (works for playback)
+          container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">音声再生</h4>
+            <audio controls style="width: 100%; height: 40px;">
+              <source src="${voiceUrl}" type="audio/mpeg">
+              <source src="${voiceUrl}" type="audio/mp4">
+              お使いのブラウザは音声再生に対応していません
+            </audio>`;
+        } else {
+          // Google Drive: use iframe preview
+          const previewUrl = this.getVoicePreviewUrl(voiceUrl);
+          const iframeUrl = previewUrl || voiceUrl;
+          container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">音声再生</h4>
+            <iframe src="${iframeUrl}" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>`;
         }
-        
-        container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">音声ファイル</h4>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 320px; overflow-y: auto;">
-            ${buttonsHtml}
-          </div>`;
         container.style.display = 'block';
       } else {
         if (container) {
