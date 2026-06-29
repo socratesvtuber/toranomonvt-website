@@ -511,27 +511,23 @@ if (window.firebaseMemberLoaderLoaded) {
     member.message_to_fans || '';
   
     // Q&A
-    this.renderQa(member.qa);
+this.renderQa(member.qa);
     
-// Navigation (prev/next member links)
-     this.renderNavigation(member);
-   
-     // Voice buttons
-     this.renderVoiceButtons(member.voiceAudioUrls);
-   
-     // Initialize voice playback after voice files are available
-     if (typeof initVoicePlayback === 'function') {
-       initVoicePlayback();
-     }
-     // Store costume/test-image URLs globally for nav click handling
-     window.memberCostumeNav = {
-       outerImageUrls: member.outerImageUrls || [],
-       threeViewImageUrl: member.threeViewImageUrl || '',
-       conceptImageUrl: member.conceptImageUrl || '',
-       fullbodyImageUrl: member.fullbodyImageUrl || '',
-       name_hiragana: member.name_hiragana || 'メンバー'
-     };
-    },
+    // Navigation (prev/next member links)
+    this.renderNavigation(member);
+    
+    // Voice buttons - render iframe player
+    this.renderVoiceButtons(member.voiceAudioUrls);
+    
+    // Store costume/test-image URLs globally for nav click handling
+    window.memberCostumeNav = {
+      outerImageUrls: member.outerImageUrls || [],
+      threeViewImageUrl: member.threeViewImageUrl || '',
+      conceptImageUrl: member.conceptImageUrl || '',
+      fullbodyImageUrl: member.fullbodyImageUrl || '',
+      name_hiragana: member.name_hiragana || 'メンバー'
+    };
+  },
   
   /**
    * Render SNS links
@@ -815,35 +811,29 @@ if (window.firebaseMemberLoaderLoaded) {
 /**
     * Render voice buttons
     */
-   renderVoiceButtons(voiceUrls) {
-     const container = document.getElementById('voice-buttons-container');
-     const voicePlayBtn = document.getElementById('voice-play-btn');
-     if (!container) return;
-
-     if (voiceUrls && voiceUrls.length > 0) {
-       container.innerHTML = voiceUrls.slice(0, 10).map((url, i) =>
-         `<button class="voice-individual-btn" data-voice-index="${i}" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-         ボイス${i + 1}
-         </button>`
-       ).join('');
-
-       // Show voice play button if hidden
-       if (voicePlayBtn) {
-         voicePlayBtn.style.display = 'block';
-       }
-
-       // Store voice URLs globally (already converted by GAS to Firebase Storage or uc?download format)
-       window.memberVoiceFiles = voiceUrls;
-     } else {
-       container.innerHTML = '';
-       window.memberVoiceFiles = [];
-
-       // Hide voice play button
-       if (voicePlayBtn) {
-         voicePlayBtn.style.display = 'none';
-       }
-     }
-   },
+    renderVoiceButtons(voiceUrls) {
+      const container = document.getElementById('voice-player-container');
+      const iframe = document.getElementById('voice-iframe');
+      const voicePlayBtn = document.getElementById('voice-play-btn');
+      
+      if (voiceUrls && voiceUrls.length > 0) {
+        const previewUrl = this.getVoicePreviewUrl(voiceUrls[0]);
+        if (iframe && previewUrl) {
+          iframe.src = previewUrl;
+          container.style.display = 'block';
+        }
+        if (voicePlayBtn) {
+          voicePlayBtn.style.display = 'none';
+        }
+      } else {
+        if (container) {
+          container.style.display = 'none';
+        }
+        if (voicePlayBtn) {
+          voicePlayBtn.style.display = 'none';
+        }
+      }
+    },
   
   /**
    * Render navigation between members
@@ -923,9 +913,9 @@ if (window.firebaseMemberLoaderLoaded) {
   },
   
 /**
-   * Get Google Drive image proxy URL
-   */
-getDriveImageProxy(driveUrl) {
+    * Get Google Drive image proxy URL
+    */
+  getDriveImageProxy(driveUrl) {
     if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
 
     // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
@@ -950,6 +940,18 @@ getDriveImageProxy(driveUrl) {
     }
 
     return driveUrl;
+  },
+
+  /**
+    * Get Google Drive voice preview URL (for iframe embedding)
+    */
+  getVoicePreviewUrl(driveUrl) {
+    if (!driveUrl) return '';
+    const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileMatch && fileMatch[1]) {
+      return `https://drive.google.com/file/d/${fileMatch[1]}/preview`;
+    }
+    return '';
   },
 
   /**

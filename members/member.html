@@ -79,7 +79,9 @@
   <button class="voice-play-btn" id="voice-play-btn" type="button" aria-label="再生">
     <i class="fas fa-play"></i>
   </button>
-  <div id="voice-buttons-container" class="voice-buttons-container"></div>
+  <div id="voice-player-container" class="voice-player-container" style="margin-top: 12px; display: none;">
+    <iframe id="voice-iframe" src="" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>
+  </div>
 </div>
 </div>
 </aside>
@@ -198,142 +200,54 @@
 </footer>
 
 <script src="../script.js"></script>
-<script src="../audio-voice-player.js"></script>
+<script src="../firebase-member-loader.js"></script>
 <script>
-let currentMemberAudio = null;
-let isPlaying = false;
-let currentVoiceIndex = -1;
-
-function updateVoiceButtonState(playing) {
-  const btn = document.getElementById('voice-play-btn');
-  if (!btn) return;
-  const icon = btn.querySelector('i');
-  if (playing) {
-    icon.className = 'fas fa-pause';
-    btn.setAttribute('aria-label', '一時停止');
-  } else {
-    icon.className = 'fas fa-play';
-    btn.setAttribute('aria-label', '再生');
-  }
-}
-
-function stopCurrentVoice() {
-  if (currentMemberAudio) {
-    currentMemberAudio.pause();
-    currentMemberAudio = null;
-  }
-  isPlaying = false;
-  currentVoiceIndex = -1;
-  updateVoiceButtonState(false);
-}
-
-function playVoiceByIndex(index) {
-  if (!window.memberVoiceFiles || index < 0 || index >= window.memberVoiceFiles.length) return;
-
-  if (isPlaying && currentVoiceIndex === index) {
-    stopCurrentVoice();
-    return;
-  }
-
-  stopCurrentVoice();
-
-  const src = window.memberVoiceFiles[index];
-  const audio = new Audio(src);
-  audio.volume = 0.5;
-  audio.preload = 'auto';
-  currentMemberAudio = audio;
-  currentVoiceIndex = index;
-  audio.play().then(() => {
-    isPlaying = true;
-    updateVoiceButtonState(true);
-  }).catch((err) => {
-    console.warn('Audio playback failed:', err);
-    stopCurrentVoice();
-  });
-
-  audio.onended = () => {
-    stopCurrentVoice();
-  };
-}
-
-function toggleVoicePlayback() {
-  if (!window.memberVoiceFiles || window.memberVoiceFiles.length === 0) return;
-
-  if (isPlaying) {
-    stopCurrentVoice();
-    return;
-  }
-
-  let index = currentVoiceIndex;
-  if (index < 0 || index >= window.memberVoiceFiles.length || !window.memberVoiceFiles[index]) {
-    index = Math.floor(Math.random() * window.memberVoiceFiles.length);
-  }
-  playVoiceByIndex(index);
-}
-
-function initVoicePlayback() {
-  const voicePlayBtn = document.getElementById('voice-play-btn');
-  if (!voicePlayBtn) return;
-
-  const standingIllustration = document.getElementById('member-avatar');
-  if (standingIllustration) {
-    standingIllustration.addEventListener('click', function(e) {
-      if (!window.memberVoiceFiles || window.memberVoiceFiles.length === 0) return;
-      const randomIndex = Math.floor(Math.random() * window.memberVoiceFiles.length);
-      playVoiceByIndex(randomIndex);
-    });
-  }
-
-  voicePlayBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggleVoicePlayback();
-  });
-}
-
-function initIndividualVoiceButtons() {
-  document.querySelectorAll('.voice-individual-btn').forEach((button) => {
-    button.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const index = parseInt(this.dataset.voiceIndex, 10);
-      if (!Number.isNaN(index)) {
-        playVoiceByIndex(index);
-      }
-    });
-  });
-}
-
+// Favorite button functionality
 document.addEventListener('DOMContentLoaded', function() {
-   initVoicePlayback();
-   initIndividualVoiceButtons();
-   updateVoiceButtonState(false);
- });
- </script>
+  const favoriteBtn = document.getElementById('favorite-btn');
+  if (!favoriteBtn) return;
+  
+  favoriteBtn.addEventListener('click', function() {
+    const memberId = this.dataset.memberId;
+    const memberName = this.dataset.name;
+    const memberImage = this.dataset.image;
+    const pageUrl = window.location.href;
+    
+    let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
+    const isFavorited = favorites.some(fav => fav.id === memberId);
+    
+    if (isFavorited) {
+      favorites = favorites.filter(fav => fav.id !== memberId);
+      this.classList.remove('active');
+      this.querySelector('i').classList.remove('fas');
+      this.querySelector('i').classList.add('far');
+    } else {
+      favorites.push({
+        id: memberId,
+        name: memberName,
+        url: pageUrl,
+        image: memberImage
+      });
+      this.classList.add('active');
+      this.querySelector('i').classList.remove('far');
+      this.querySelector('i').classList.add('fas');
+    }
+    
+    localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
+  });
+  
+  // Initialize Firebase config and Member Loader
+  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+    FirebaseConfig.init();
+  }
 
- <script>
- // Initialize Firebase config and Member Loader
- document.addEventListener('DOMContentLoaded', async function() {
- console.log('member.html: DOMContentLoaded - Starting initialization');
-
- // Initialize Firebase config first to set FIREBASE_DB_URL
- if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
- console.log('member.html: Initializing FirebaseConfig...');
- await FirebaseConfig.init();
- console.log('member.html: FirebaseConfig initialized');
- } else {
- console.log('member.html: FirebaseConfig not available or no init method');
- }
-
- // Check if FirebaseMemberLoader is available
- if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
- console.log('member.html: Calling FirebaseMemberLoader.init()...');
- // Wait a bit to ensure Firebase URL is set
- setTimeout(() => {
- window.FirebaseMemberLoader.init();
- }, 100);
- } else {
- console.error('member.html: FirebaseMemberLoader not available');
- }
- });
- </script>
- </body>
- </html>
+  // Check if FirebaseMemberLoader is available
+  if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
+    setTimeout(() => {
+      window.FirebaseMemberLoader.init();
+    }, 100);
+  }
+});
+</script>
+</body>
+</html>

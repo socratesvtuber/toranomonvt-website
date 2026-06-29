@@ -57,16 +57,8 @@
 <button class="voice-play-btn" data-voice="kaka">
 <i class="fas fa-play"></i>
 </button>
-<div class="voice-buttons-container" style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center;">
-<button class="voice-individual-btn" data-voice-index="0" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-ボイス 1
-</button>
-<button class="voice-individual-btn" data-voice-index="1" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-ボイス 2
-</button>
-<button class="voice-individual-btn" data-voice-index="2" style="padding: 6px 12px; font-size: 0.75rem; background: rgba(255, 184, 77, 0.15); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-ボイス 3
-</button>
+<div class="voice-player-container" style="margin-top: 12px;">
+<iframe src="https://drive.google.com/file/d/1ZmK9SvG3dV3MtM8PsmsAfxkwmutZfh21/preview" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>
 </div>
 </div>
 </div>
@@ -245,94 +237,6 @@
 
 <script src="../audio-voice-player.js"></script>
 <script>
-// Voice files for random playback
-const voiceFiles = [
-'../audio/voice/夜叉さんセリフ 1.m4a',
-'../audio/voice/kaka ちゃんセリフ 1.m4a',
-'../audio/voice/スーパーファン感謝_20251111_1.m4a'
-];
-
-// Current playing audio reference
-let currentMemberAudio = null;
-let isPlaying = false;
-
-// Function to update button icon
-function updateButtonIcon(playing) {
-const btn = document.querySelector('.voice-play-btn i');
-if (btn) {
-if (playing) {
-btn.classList.remove('fa-play');
-btn.classList.add('fa-pause');
-} else {
-btn.classList.remove('fa-pause');
-btn.classList.add('fa-play');
-}
-}
-}
-
-// Function to play voice
-function playVoice(src) {
-if (currentMemberAudio && isPlaying) {
-currentMemberAudio.pause();
-isPlaying = false;
-updateButtonIcon(false);
-if (currentMemberAudio.src === src) {
-return;
-}
-}
-
-if (currentMemberAudio && !isPlaying && currentMemberAudio.src === src) {
-currentMemberAudio.play().catch(() => {
-console.warn('Audio playback failed.');
-});
-isPlaying = true;
-updateButtonIcon(true);
-return;
-}
-
-if (currentMemberAudio) {
-currentMemberAudio.pause();
-currentMemberAudio.currentTime = 0;
-}
-
-const audio = new Audio(src);
-audio.volume = 0.5;
-audio.preload = 'auto';
-currentMemberAudio = audio;
-isPlaying = true;
-updateButtonIcon(true);
-
-audio.play().catch(() => {
-console.warn('Audio playback failed. User interaction may be required.');
-});
-
-audio.onended = () => {
-currentMemberAudio = null;
-isPlaying = false;
-updateButtonIcon(false);
-};
-}
-
-// Main button and illustration click - play random voice
-document.querySelectorAll('.voice-play-btn, .standing-illustration').forEach(element => {
-element.addEventListener('click', function(e) {
-e.stopPropagation();
-const randomIndex = Math.floor(Math.random() * voiceFiles.length);
-playVoice(voiceFiles[randomIndex]);
-});
-});
-
-// Individual voice buttons
-document.querySelectorAll('.voice-individual-btn').forEach(button => {
-button.addEventListener('click', function(e) {
-e.stopPropagation();
-const index = parseInt(this.dataset.voiceIndex);
-if (voiceFiles[index]) {
-playVoice(voiceFiles[index]);
-}
-});
-});
-
 // Favorite button functionality
 document.addEventListener('DOMContentLoaded', function() {
 const favoriteBtn = document.querySelector('.favorite-btn');

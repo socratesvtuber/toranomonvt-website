@@ -2,8 +2,8 @@
 
 このドキュメントでは、虎ノ門 VT 公式サイトで使用される画像の仕様について記載しています。
 
-**最終更新日**: 2026-05-31
-**バージョン**: 1.2.0
+**最終更新日**: 2026-06-29
+**バージョン**: 1.3.0
 
 ---
 
@@ -128,10 +128,14 @@ getDriveImageProxy(driveUrl) {
 | メンバーデータ読み込み | `firebase-member-loader.js` | L141-205 |
 | メンバー表示レンダリング | `firebase-member-loader.js` | L358-527 |
 | 画像 URL 変換（画像用） | `firebase-member-loader.js` | L966-991 |
-| 音声 URL 変換 | `firebase-member-loader.js` | L854-876 |
+| 音声 URL 変換（iframe用） | `firebase-member-loader.js` | L994-1002 |
 | トップページメンバーリスト | `index.html` | L258-310 |
 | トップページアバター変換 | `index.html` | L401-411 |
 | CSS アバタースタイル | `styles.css` | L504-525 |
+| Boise iframe 埋め込み | `members/member.html` | L82-84 |
+| Boise iframe 埋め込み | `members/kaka.html` | L57-65 |
+| Boise iframe 埋め込み | `members/yasahime.html` | L57-65 |
+| Boise iframe 埋め込み | `members/sokrates.html` | L57-65 |
 
 ---
 
@@ -170,6 +174,7 @@ getDriveImageProxy(driveUrl) {
 | 2026-05-20 | 1.0.0 | 初版作成 - メンバーサムネイル画像の仕様を文書化 | - |
 | 2026-05-21 | 1.1.0 | `name_select` による重複チェック機能追加の注記を追加 | - |
 | 2026-05-31 | 1.2.0 | 画像URLを`lh3.googleusercontent.com/d/{fileId}`形式に変換するよう修正。音声URLは`uc?export=download`形式を使用 | - |
+| 2026-06-29 | 1.3.0 | 音声再生をGoogle Drive iframe埋め込み形式に変更。個別ボイスボタンを廃止し、iframeプレイヤーを導入 | - |
 
 ---
 
@@ -185,17 +190,31 @@ getDriveImageProxy(driveUrl) {
 - `https://drive.google.com/file/d/{fileId}/view`形式はブラウザのセキュリティポリシーによりエラーになります
 - `https://drive.google.com/uc?export=download&id={fileId}`形式も、GoogleのCORS/認証制約により再生できないケースがあります
 
-### 推奨：Firebase Storageへの移行
+### 推奨：Google Drive iframe埋め込み形式
 
-音声ファイルはFirebase Storageへアップロードすることを推奨します：
+Google Driveの音声ファイルは、以下のiframe形式で埋め込むことで外部サイトからの再生が可能になります：
+
+```
+<iframe src="https://drive.google.com/file/d/{FILE_ID}/preview" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>
+```
+
+**例**:
+```html
+<iframe src="https://drive.google.com/file/d/1ZmK9SvG3dV3MtM8PsmsAfxkwmutZfh21/preview" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>
+```
+
+#### iframe埋め込みの利点
 
 | 方法 | URL形式 | 再生可否 | 備考 |
 |------|--------|---------|------|
 | Google Drive（view） | `drive.google.com/file/d/.../view` | ❌ | エラー表示のみ |
 | Google Drive（download） | `drive.google.com/uc?export=download&id=...` | ⚠️ | 制約により不安定 |
-| Firebase Storage | `firebasestorage.googleapis.com/.../o/...?alt=media` | ✅ | 推奨 |
+| Google Drive（iframe） | `drive.google.com/file/d/.../preview` | ✅ | 推奨方法（2026年現在） |
+| Firebase Storage | `firebasestorage.googleapis.com/.../o/...?alt=media` | ✅ | 推奨（別途設定要） |
 
 ### Firebase Storageへの移行方法
+
+音声ファイルはFirebase Storageへアップロードすることを推奨します：
 
 1. **GAS設定**: `config.gs`に`FIREBASE_STORAGE_BUCKET`を設定
    ```javascript
