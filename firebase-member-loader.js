@@ -810,7 +810,7 @@ this.renderQa(member.qa);
   
 /**
     * Render voice buttons
-    * Displays up to 10 voice buttons with play icons, shows player on click
+    * Displays up to 10 voice buttons with cropped play icons from Google Drive iframe
     */
     renderVoiceButtons(voiceUrls) {
       const container = document.getElementById('voice-player-container');
@@ -820,25 +820,30 @@ this.renderQa(member.qa);
         let buttonsHtml = '';
         
         for (let i = 0; i < voiceCount; i++) {
-          buttonsHtml += `<button class="voice-play-btn-custom" data-voice-index="${i}" style="width: 100%; padding: 8px 12px; margin-bottom: 6px; background: rgba(255, 184, 77, 0.12); border: 1px solid rgba(255, 184, 77, 0.3); border-radius: 6px; color: var(--text); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-play" style="font-size: 0.9rem;"></i>
-            <span>ボイス ${i + 1}</span>
-          </button>`;
+          const voiceUrl = voiceUrls[i];
+          const previewUrl = this.getVoicePreviewUrl(voiceUrl) || voiceUrl;
+          
+          buttonsHtml += `<div class="voice-btn-wrapper" style="display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px 12px 0;">
+            <div class="play-button-crop" data-voice-index="${i}" data-voice-url="${this.escapeHtml(previewUrl)}" style="width: 50px; height: 30px; overflow: hidden; position: relative; cursor: pointer; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background-color: #000;">
+              <iframe src="${previewUrl}" scrolling="no" style="position: absolute; width: 500px; height: 300px; top: -128px; left: -82px; border: none;"></iframe>
+            </div>
+            <span style="color: var(--muted); font-size: 0.8rem; margin-top: 4px;">ボイス${i + 1}</span>
+          </div>`;
         }
         
         container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">音声ファイル</h4>
-          <div class="voice-buttons-wrapper">${buttonsHtml}</div>
+          <div class="voice-buttons-row" style="display: flex; flex-wrap: wrap;">${buttonsHtml}</div>
           <div class="voice-player-dynamic" style="margin-top: 8px; display: none;"></div>`;
         container.style.display = 'block';
         
-        // Add click handlers for voice buttons
-        container.querySelectorAll('.voice-play-btn-custom').forEach(btn => {
+        // Add click handlers for play buttons
+        container.querySelectorAll('.play-button-crop').forEach(btn => {
           btn.addEventListener('click', function() {
             const idx = parseInt(this.dataset.voiceIndex);
-            const playerContainer = container.querySelector('.voice-player-dynamic');
             const voiceUrl = voiceUrls[idx];
+            const playerContainer = container.parentElement.querySelector('.voice-player-dynamic');
             
-            if (voiceUrl) {
+            if (playerContainer) {
               playerContainer.style.display = 'block';
               if (window.FirebaseMemberLoader.isFirebaseStorageUrl(voiceUrl)) {
                 playerContainer.innerHTML = `<audio controls style="width: 100%;" autoplay>
@@ -847,7 +852,7 @@ this.renderQa(member.qa);
                 </audio>`;
               } else {
                 const previewUrl = window.FirebaseMemberLoader.getVoicePreviewUrl(voiceUrl);
-                playerContainer.innerHTML = `<iframe src="${previewUrl || voiceUrl}" style="width: 100%; height: 80px; border: none; border-radius: 6px;"></iframe>`;
+                playerContainer.innerHTML = `<iframe src="${previewUrl || voiceUrl}" style="width: 100%; height: 80px; border: none; border-radius: 6px;" allowfullscreen></iframe>`;
               }
             }
           });
