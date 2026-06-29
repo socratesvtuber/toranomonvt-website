@@ -64,12 +64,12 @@ https://lh3.googleusercontent.com/d/[FILE_ID]
 - **画像URL**は必ず`https://lh3.googleusercontent.com/d/{ファイルID}`形式に変換してください
 - この形式はGoogleドライブの画像を直接表示できる代理URLです
 - `drive.google.com/file/d/...`形式のままでは、ブラウザのセキュリティポリシーにより表示エラーが発生する可能性があります
-- 音声ファイルの場合は`https://drive.google.com/uc?export=download&id={ファイルID}`形式を使用します
+- 音声ファイルは`<audio>`タグではなく、iframe埋め込みを使用してください
 
 ### ソースコード
 
 ```javascript
-// firebase-member-loader.js L966-991 より（画像用）
+// firebase-member-loader.js より（画像用）
 getDriveImageProxy(driveUrl) {
   if (!driveUrl) return '../img/虎ノ門ロゴ大本.png';
 
@@ -82,17 +82,14 @@ getDriveImageProxy(driveUrl) {
   return driveUrl;
 }
 
-// firebase-member-loader.js L854-876 より（音声用）
-getVoiceStreamUrl(driveUrl) {
+// firebase-member-loader.js より（音声iframe用）
+getVoicePreviewUrl(driveUrl) {
   if (!driveUrl) return '';
-
   const fileMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (fileMatch && fileMatch[1]) {
-    const fileId = fileMatch[1];
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    return `https://drive.google.com/file/d/${fileMatch[1]}/preview`;
   }
-
-  return driveUrl;
+  return '';
 }
 ```
 

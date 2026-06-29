@@ -814,7 +814,6 @@ this.renderQa(member.qa);
     renderVoiceButtons(voiceUrls) {
       const container = document.getElementById('voice-player-container');
       const iframe = document.getElementById('voice-iframe');
-      const voicePlayBtn = document.getElementById('voice-play-btn');
       
       if (voiceUrls && voiceUrls.length > 0) {
         const previewUrl = this.getVoicePreviewUrl(voiceUrls[0]);
@@ -822,15 +821,9 @@ this.renderQa(member.qa);
           iframe.src = previewUrl;
           container.style.display = 'block';
         }
-        if (voicePlayBtn) {
-          voicePlayBtn.style.display = 'none';
-        }
       } else {
         if (container) {
           container.style.display = 'none';
-        }
-        if (voicePlayBtn) {
-          voicePlayBtn.style.display = 'none';
         }
       }
     },
