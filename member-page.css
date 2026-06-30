@@ -13,7 +13,7 @@
 
 .member-page {
   min-height: 100vh;
-  padding: calc(var(--site-header-height) + 66px) clamp(24px, 4vw, 60px) 40px;
+  padding: 100px clamp(24px, 4vw, 60px) 40px;
 }
 
 .member-header {
@@ -21,7 +21,7 @@
   margin: 0 auto;
   text-align: center;
   position: fixed;
-  top: calc(var(--site-header-height) + 12px);
+  top: 12px;
   left: 0;
   right: 0;
   z-index: 20;
@@ -87,7 +87,7 @@
 /* Sidebar */
 .member-sidebar {
   position: fixed;
-  top: 200px;
+  top: 100px;
   left: clamp(24px, calc(50% - 340px), 24px);
   width: clamp(320px, 34vw, 420px);
   height: auto;
@@ -97,7 +97,7 @@
 .member-main {
   margin-left: calc(clamp(320px, 34vw, 420px) + 24px);
   max-width: clamp(320px, 34vw, 420px);
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .illustration-container {

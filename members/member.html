@@ -15,13 +15,13 @@
 <script src="../firebase-member-loader.js"></script>
 </head>
 <body>
-<header class="site-header">
+<header class="site-header" style="display: none;">
 <a href="../" class="brand-link">
 <div class="brand">
 <div class="brand-mark"><img src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" class="brand-logo"></div>
 <div>
 <p class="eyebrow">配信者コミュニティ</p>
-<h1>虎ノ門 〜Vtuber を仕事にしよう！〜</h1>
+<h1>虎ノ門 ～Vtuber を仕事にしよう！～</h1>
 </div>
 </div>
 </a>
@@ -32,6 +32,14 @@
 <a href="../#contact">Contact</a>
 </nav>
 </header>
+
+<!-- Brand logo fixed at top-left for member pages -->
+<div class="member-brand-overlay" style="position: fixed; top: 12px; left: 16px; z-index: 100; display: flex; align-items: center; gap: 8px; text-decoration: none;">
+  <a href="../" class="brand-link" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+    <img src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" style="height: 32px; width: auto;">
+    <span style="color: var(--muted); font-size: 0.9rem; font-weight: 500;">虎ノ門 VT</span>
+  </a>
+</div>
 
 <main class="member-page">
 <!-- Loading state -->
