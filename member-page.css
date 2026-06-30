@@ -208,8 +208,16 @@
 
 /* Main Content */
 .member-main {
-  display: grid;
-  gap: 24px;
+  margin-left: calc(clamp(320px, 34vw, 420px) + 24px);
+  max-width: clamp(320px, 34vw, 420px);
+  margin-top: 0;
+  padding-top: 100px !important;
+}
+
+/* Ensure profile section starts below header */
+#profile {
+  margin-top: 120px !important;
+  position: relative !important;
 }
 
 .member-section {
@@ -217,11 +225,23 @@
   border: 1px solid rgba(255, 184, 77, 0.08);
   border-radius: var(--radius-md);
   padding: 36px;
-  scroll-margin-top: 100px;
   box-shadow:
     var(--shadow-sm),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.member-section:hover {
+  box-shadow:
+    var(--shadow),
+    0 0 40px rgba(255, 184, 77, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Ensure profile section starts below header */
+#profile {
+  margin-top: 120px !important;
+  position: relative !important;
 }
 
 .member-section:hover {
