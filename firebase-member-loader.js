@@ -390,9 +390,26 @@ if (window.firebaseMemberLoaderLoaded) {
        }
      }
 
-     // Header text
-     document.getElementById('member-name-display').textContent = member.name_hiragana || '名前不明';
-     document.getElementById('member-name-romaji').textContent = member.name_romaji || '';
+// Header text - use name_select with prefix removed, fallback to name_hiragana
+      var displayName = '名前不明';
+      if (member.name_select) {
+        // Remove leading digits and underscore (e.g., "001_夜叉姫" -> "夜叉姫")
+        var nameSelectMatch = member.name_select.match(/^\d+_(.*)$/);
+        if (nameSelectMatch && nameSelectMatch[1]) {
+          displayName = nameSelectMatch[1];
+        } else {
+          displayName = member.name_select;
+        }
+      } else if (member.name_hiragana) {
+        displayName = member.name_hiragana;
+      }
+      document.getElementById('member-name-display').textContent = displayName;
+      
+      // Hide romaji as it's not needed
+      var romajiEl = document.getElementById('member-name-romaji');
+      if (romajiEl) {
+        romajiEl.style.display = 'none';
+      }
 
      // Avatar (from fullbodyImageUrl - Google Drive)
      const avatarEl = document.getElementById('member-avatar');
