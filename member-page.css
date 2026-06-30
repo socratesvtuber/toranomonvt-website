@@ -55,7 +55,7 @@
 
 .member-header h1 {
   font-size: clamp(2.2rem, 4.5vw, 3.2rem);
-  margin: 0 0 12px;
+  margin: 0 0 4px;
   background: linear-gradient(135deg, #ffb84d 0%, #ff9f66 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -791,13 +791,13 @@ transform: translateX(-4px);
 .favorite-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 12px;
+  padding: 16px 32px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 1.7rem;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 10px;
@@ -816,7 +816,7 @@ transform: translateX(-4px);
 }
 
 .favorite-btn i {
-  font-size: 1rem;
+  font-size: 2rem;
   transition: all 0.3s ease;
 }
 
