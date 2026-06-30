@@ -27,12 +27,17 @@
   z-index: 20;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px) saturate(200%);
-  padding: 12px 0 6px;
+  padding: 16px 0;
   border: 1px solid rgba(255, 184, 77, 0.15);
   box-shadow:
   0 1px 3px rgba(0, 0, 0, 0.02),
   0 8px 24px rgba(0, 0, 0, 0.04),
   0 0 40px rgba(255, 184, 77, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
 }
 
 .member-header-image-container {
