@@ -13,21 +13,21 @@
 
 .member-page {
   min-height: 100vh;
-  padding: 100px clamp(24px, 4vw, 60px) 40px;
+  padding: 80px clamp(24px, 4vw, 60px) 40px;
 }
 
 .member-header {
-  max-width: 1200px;
+  max-width: 1080px;
   margin: 0 auto;
   text-align: center;
   position: fixed;
-  top: 12px;
+  top: 4px;
   left: 0;
   right: 0;
   z-index: 20;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px) saturate(200%);
-  padding: 16px 0;
+  padding: 8px 0;
   border: 1px solid rgba(255, 184, 77, 0.15);
   box-shadow:
   0 1px 3px rgba(0, 0, 0, 0.02),
@@ -37,7 +37,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 80px;
+  min-height: 60px;
 }
 
 .member-header-image-container {
@@ -87,8 +87,8 @@
 /* Sidebar */
 .member-sidebar {
   position: fixed;
-  top: 100px;
-  left: clamp(24px, calc(50% - 340px), 24px);
+  top: 70px;
+  left: clamp(24px, calc(50% - 300px), 24px);
   width: clamp(320px, 34vw, 420px);
   height: auto;
   z-index: 18;
