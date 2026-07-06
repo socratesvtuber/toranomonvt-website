@@ -513,7 +513,7 @@ button, .button {
 }
 
 .avatar-1 {
-  background-image: url("img/夜叉さんアイコン_1080_1080.jpeg");
+  background-color: var(--color-primary);
 }
 
 .avatar-2 {
