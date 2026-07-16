@@ -545,6 +545,8 @@ button, .button {
     var(--shadow-sm),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .timeline-item:hover {

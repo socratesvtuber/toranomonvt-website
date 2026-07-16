@@ -99,28 +99,8 @@
 <p class="eyebrow">Projects</p>
 <h2>進行中のクリエイティブプロジェクト</h2>
 </div>
-<div class="timeline">
-<div class="timeline-item">
-<span class="timeline-date">05/20</span>
-<div>
-<h3>虎ノ門ナイトライブ</h3>
-<p>メンバー全員参加のスペシャルストリーム。視聴者参加型企画も実施。</p>
-</div>
-</div>
-<div class="timeline-item">
-<span class="timeline-date">06/03</span>
-<div>
-<h3>クリエイター交流イベント</h3>
-<p>新規デザイナー・VTuber 発掘、コラボ企画のためのオンライン会合。</p>
-</div>
-</div>
-<div class="timeline-item">
-<span class="timeline-date">06/18</span>
-<div>
-<h3>アートコラボ EP</h3>
-<p>ライブ配信で描くビジュアルアートと音楽のクロスオーバー作品。</p>
-</div>
-</div>
+<div class="timeline" id="hero-timeline">
+<!-- Timeline items will be loaded dynamically from Firebase -->
 </div>
 </section>
 
@@ -525,6 +505,48 @@ const HeroPanelLoader = {
     }
 
     container.innerHTML = panels.join('');
+
+    this.renderTimeline(data);
+  },
+
+  renderTimeline(data) {
+    const container = document.getElementById('hero-timeline');
+    if (!container) return;
+
+    const events = [];
+    for (let i = 1; i <= 3; i++) {
+      const date = data[`past_event${i}_date`] || '';
+      const headline = data[`past_event${i}_headline`] || '';
+      const content = data[`past_event${i}_content`] || '';
+      const url = data[`past_event${i}_url`] || '';
+
+      if (headline || content || date) {
+        events.push({ date, headline, content, url });
+      }
+    }
+
+    const html = events.map(event => {
+      const contentHtml = `
+        <div>
+          <h3>${this.escapeHtml(event.headline)}</h3>
+          <p>${this.escapeHtml(event.content)}</p>
+        </div>
+      `;
+
+      if (this.isValidUrl(event.url)) {
+        return `<a href="${this.escapeHtml(event.url)}" class="timeline-item" target="_blank" rel="noopener noreferrer">
+          <span class="timeline-date">${this.escapeHtml(event.date)}</span>
+          ${contentHtml}
+        </a>`;
+      }
+
+      return `<div class="timeline-item">
+        <span class="timeline-date">${this.escapeHtml(event.date)}</span>
+        ${contentHtml}
+      </div>`;
+    }).join('');
+
+    container.innerHTML = html;
   },
 
   createPanel(news, variant) {
