@@ -401,6 +401,12 @@ button, .button {
   font-size: 1.25rem;
 }
 
+.panel-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
 .section-grid,
 .section-dark,
 .contact-section {
