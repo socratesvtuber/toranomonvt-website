@@ -54,17 +54,8 @@
 <a class="button button-secondary" href="#contact">参加・お問い合わせ</a>
 </div>
 </div>
-<div class="hero-panel">
-<div class="panel-card panel-card-glow">
-<span class="panel-tag">最新ライブ</span>
-<h3>夜の虎ノ門ストリーム</h3>
-<p>次回放送：5 月 20 日 21:00 JST</p>
-</div>
-<div class="panel-card panel-card-dark">
-<span class="panel-tag">企画</span>
-<h3>アート x 音楽コラボ</h3>
-<p>次世代クリエイター同士のコラボ配信を実施中。</p>
-</div>
+<div class="hero-panel" id="hero-panel">
+<!-- Hero panels will be loaded dynamically from Firebase -->
 </div>
 </section>
 
@@ -398,19 +389,19 @@ getFirebaseUrl() {
     }, 30000);
   },
   
-  getDriveImageProxy(driveUrl) {
-    if (!driveUrl) return '';
-    
-    // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
-    const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) {
-      const fileId = match[1];
-      return `https://lh3.googleusercontent.com/d/${fileId}`;
-    }
-    
-    return driveUrl;
-  }
-};
+   getDriveImageProxy(driveUrl) {
+     if (!driveUrl) return '';
+     
+     // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
+     const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+     if (match && match[1]) {
+       const fileId = match[1];
+       return `https://lh3.googleusercontent.com/d/${fileId}`;
+     }
+     
+     return driveUrl;
+   }
+ };
 
 // Initialize on DOM ready after Firebase config is loaded
 document.addEventListener('DOMContentLoaded', async () => {
@@ -420,6 +411,160 @@ await FirebaseConfig.init();
 }
 // Then initialize member list loader
 FirebaseMemberListLoader.init();
+});
+</script>
+<script>
+// Hero Panel Loader from Firebase top_submissions
+const HeroPanelLoader = {
+  firebaseUrl: null,
+
+  async init() {
+    console.log('HeroPanelLoader: Initializing...');
+
+    let retries = 0;
+    while (retries < 20) {
+      this.firebaseUrl = this.getFirebaseUrl();
+      if (this.firebaseUrl && this.firebaseUrl.indexOf('%') === -1) {
+        console.log('HeroPanelLoader: Firebase URL ready:', this.firebaseUrl);
+        break;
+      }
+      retries++;
+      console.log('HeroPanelLoader: Waiting for Firebase config... (' + retries + '/20)');
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    if (!this.firebaseUrl || this.firebaseUrl.indexOf('%') !== -1) {
+      console.error('HeroPanelLoader: Firebase URL still not configured after retries');
+      return false;
+    }
+
+    await this.loadTopSubmission();
+    return true;
+  },
+
+  getFirebaseUrl() {
+    if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL && FIREBASE_DB_URL.indexOf('%') === -1) {
+      return FIREBASE_DB_URL;
+    }
+    const metaTag = document.querySelector('meta[name="env:FIREBASE_STORAGE_BUCKET"]');
+    if (metaTag) {
+      const bucket = metaTag.getAttribute('content');
+      if (bucket && bucket.indexOf('YOUR_') === -1 && bucket.indexOf('%') === -1) {
+        const projectId = bucket.replace('.firebaseio.com', '').replace('.appspot.com', '').replace('.firebasestorage.app', '');
+        return `https://${projectId}.firebaseio.com`;
+      }
+    }
+    if (typeof FirebaseCounter !== 'undefined' && FirebaseCounter.db && FirebaseCounter.db.indexOf('%') === -1) {
+      return FirebaseCounter.db;
+    }
+    return null;
+  },
+
+  async loadTopSubmission() {
+    const url = `${this.firebaseUrl}/top_submissions.json`;
+    console.log('HeroPanelLoader: Fetching from:', url);
+
+    try {
+      const response = await fetch(url);
+      console.log('HeroPanelLoader: Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch top submissions: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('HeroPanelLoader: Data received:', data ? Object.keys(data).length : 'null', 'submissions');
+
+      if (!data || Object.keys(data).length === 0) {
+        console.log('No top submissions found in Firebase');
+        return;
+      }
+
+      const submissions = Object.entries(data).map(([id, item]) => ({ id, ...item }));
+      submissions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      const latest = submissions[0];
+      if (!latest) return;
+
+      this.renderHeroPanel(latest);
+    } catch (error) {
+      console.error('HeroPanelLoader: Error loading top submission:', error);
+    }
+  },
+
+  renderHeroPanel(data) {
+    const container = document.getElementById('hero-panel');
+    if (!container) return;
+
+    const panels = [];
+
+    const news1 = {
+      genre: data.news1_genre || '',
+      headline: data.news1_headline || '',
+      content: data.news1_content || '',
+      url: data.news1_url || ''
+    };
+    panels.push(this.createPanel(news1, 'glow'));
+
+    const news2 = {
+      genre: data.news2_genre || '',
+      headline: data.news2_headline || '',
+      content: data.news2_content || '',
+      url: data.news2_url || ''
+    };
+    panels.push(this.createPanel(news2, 'dark'));
+
+    const news3Genre = data.news3_genre || '';
+    if (news3Genre) {
+      const news3 = {
+        genre: news3Genre,
+        headline: data.news3_headline || '',
+        content: data.news3_content || '',
+        url: data.news3_url || ''
+      };
+      panels.push(this.createPanel(news3, 'light'));
+    }
+
+    container.innerHTML = panels.join('');
+  },
+
+  createPanel(news, variant) {
+    const isValidUrl = (url) => {
+      try {
+        if (!url) return false;
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const tagHtml = `<span class="panel-tag">${this.escapeHtml(news.genre)}</span>`;
+    const h3Html = `<h3>${this.escapeHtml(news.headline)}</h3>`;
+    const pHtml = `<p>${this.escapeHtml(news.content)}</p>`;
+    const content = tagHtml + h3Html + pHtml;
+
+    if (isValidUrl(news.url)) {
+      return `<a href="${this.escapeHtml(news.url)}" class="panel-card panel-card-${variant}" target="_blank" rel="noopener noreferrer">${content}</a>`;
+    }
+
+    return `<div class="panel-card panel-card-${variant}">${content}</div>`;
+  },
+
+  escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+    await FirebaseConfig.init();
+  }
+  HeroPanelLoader.init();
 });
 </script>
 </body>
