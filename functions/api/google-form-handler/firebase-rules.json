@@ -24,6 +24,18 @@
       ".read": true,
       ".write": true
     },
+    "top_submissions": {
+      ".read": true,
+      ".write": true,
+      "$submissionId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "top_form_errors": {
+      ".read": true,
+      ".write": true
+    },
     "public_members": {
       ".read": true,
       ".write": true,
