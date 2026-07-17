@@ -22,6 +22,8 @@ var FIREBASE_PROJECT_ID = 'your-project-id';
 
 // Google Drive Folder ID for storing uploaded files
 // This is the folder where form file uploads will be stored
+// NOTE: Currently unused in the codebase. File uploads are saved to the form owner's Drive automatically,
+// and share URLs are generated directly from file IDs. Kept for potential future use.
 var GOOGLE_DRIVE_FOLDER_ID = 'your-drive-folder-id-here';
 
 // ============================================

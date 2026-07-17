@@ -94,6 +94,8 @@ Firebase コンソールの Realtime Database →「ルール」タブで以下�
 3. `folders/` 以降の部分がフォルダ ID
 4. この ID を控えてください
 
+> **注意:** 現在の実装では `GOOGLE_DRIVE_FOLDER_ID` は使用されていません。Google フォームのファイルアップロードはフォーム所有者の Drive に自動保存され、ファイル ID から直接共有 URL を生成しています。フォルダ ID は将来的な機能拡張のために設定ファイルに残されていますが、必須ではありません。
+
 ---
 
 ## Google Apps Script の設定
@@ -115,6 +117,9 @@ var FIREBASE_DB_URL = 'https://あなたのプロジェクト ID.firebaseio.com'
 var FIREBASE_PROJECT_ID = 'あなたのプロジェクト ID';
 
 // Google Drive 設定
+// NOTE: 現在の実装では GOOGLE_DRIVE_FOLDER_ID は使用されていません。
+// Google フォームのファイルアップロードはフォーム所有者の Drive に自動保存され、
+// ファイル ID から直接 URL を生成しています。
 var GOOGLE_DRIVE_FOLDER_ID = 'あなたのドライブフォルダ ID';
 ```
 

@@ -34,6 +34,8 @@ This module provides Google Apps Script (GAS) code to handle Google Form submiss
    - URL format: `https://drive.google.com/drive/folders/1ABC123...xyz`
    - Folder ID: `1ABC123...xyz`
 
+> **Note:** `GOOGLE_DRIVE_FOLDER_ID` is currently unused in the codebase. File uploads are saved to the form owner's Drive automatically, and share URLs are generated directly from file IDs. The folder ID variable is kept for potential future use.
+
 ### Step 3: Set up Google Apps Script
 
 1. Open your Google Form
