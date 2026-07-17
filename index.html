@@ -550,26 +550,26 @@ const HeroPanelLoader = {
   },
 
   createPanel(news, variant) {
-    const isValidUrl = (url) => {
-      try {
-        if (!url) return false;
-        new URL(url);
-        return true;
-      } catch {
-        return false;
-      }
-    };
-
     const tagHtml = `<span class="panel-tag">${this.escapeHtml(news.genre)}</span>`;
     const h3Html = `<h3>${this.escapeHtml(news.headline)}</h3>`;
     const pHtml = `<p>${this.escapeHtml(news.content)}</p>`;
     const content = tagHtml + h3Html + pHtml;
 
-    if (isValidUrl(news.url)) {
+    if (this.isValidUrl(news.url)) {
       return `<a href="${this.escapeHtml(news.url)}" class="panel-card panel-card-${variant}" target="_blank" rel="noopener noreferrer">${content}</a>`;
     }
 
     return `<div class="panel-card panel-card-${variant}">${content}</div>`;
+  },
+
+  isValidUrl(url) {
+    try {
+      if (!url) return false;
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   escapeHtml(str) {
