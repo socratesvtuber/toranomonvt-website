@@ -18,7 +18,7 @@
 <header class="site-header" style="display: none;">
 <a href="../" class="brand-link">
 <div class="brand">
-<div class="brand-mark"><img src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" class="brand-logo"></div>
+<div class="brand-mark"><img id="page-logo-1" src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" class="brand-logo"></div>
 <div>
 <p class="eyebrow">配信者コミュニティ</p>
 <h1>虎ノ門 ～Vtuber を仕事にしよう！～</h1>
@@ -36,7 +36,7 @@
 <!-- Brand logo fixed at top-left for member pages -->
 <div class="member-brand-overlay" style="position: fixed; top: 12px; left: 16px; z-index: 100; display: flex; align-items: center; gap: 8px; text-decoration: none;">
   <a href="../" class="brand-link" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
-    <img src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" style="height: 32px; width: auto;">
+    <img id="page-logo-2" src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" style="height: 32px; width: auto;">
   </a>
 </div>
 
@@ -82,7 +82,7 @@
 </ul>
 </div>
 <div class="illustration-box">
-  <img id="member-avatar" src="" alt="メンバー画像" class="standing-illustration" onerror="this.src='../img/虎ノ門ロゴ大本.png'">
+  <img id="member-avatar" class="standing-illustration page-logo-3" src="" alt="メンバー画像">
   <div id="voice-player-container" class="voice-player-container" style="margin-top: 12px; display: none;">
     <iframe id="voice-iframe" src="" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>
   </div>
@@ -206,51 +206,95 @@
 <script src="../script.js"></script>
 <script src="../firebase-member-loader.js"></script>
 <script>
-// Favorite button functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const favoriteBtn = document.getElementById('favorite-btn');
-  if (!favoriteBtn) return;
-  
-  favoriteBtn.addEventListener('click', function() {
-    const memberId = this.dataset.memberId;
-    const memberName = this.dataset.name;
-    const memberImage = this.dataset.image;
-    const pageUrl = window.location.href;
-    
-    let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
-    const isFavorited = favorites.some(fav => fav.id === memberId);
-    
-    if (isFavorited) {
-      favorites = favorites.filter(fav => fav.id !== memberId);
-      this.classList.remove('active');
-      this.querySelector('i').classList.remove('fas');
-      this.querySelector('i').classList.add('far');
-    } else {
-      favorites.push({
-        id: memberId,
-        name: memberName,
-        url: pageUrl,
-        image: memberImage
-      });
-      this.classList.add('active');
-      this.querySelector('i').classList.remove('far');
-      this.querySelector('i').classList.add('fas');
-    }
-    
-    localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
-  });
-  
-  // Initialize Firebase config and Member Loader
-  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
-    FirebaseConfig.init();
+async function loadTopLogo() {
+  let firebaseUrl = null;
+  if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL && !FIREBASE_DB_URL.includes('%')) {
+    firebaseUrl = FIREBASE_DB_URL;
   }
 
-  // Check if FirebaseMemberLoader is available
+  if (!firebaseUrl) return;
+
+  try {
+    const response = await fetch(`${firebaseUrl}/top_submissions.json`);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    if (!data) return;
+
+    const submissions = Object.entries(data).map(([id, item]) => ({ id, ...item }));
+    submissions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const latest = submissions[0];
+    if (!latest || !latest.logoImageUrls || !latest.logoImageUrls.logo_1) return;
+
+    const logoUrl = latest.logoImageUrls.logo_1;
+
+    const img1 = document.getElementById('page-logo-1');
+    const img2 = document.getElementById('page-logo-2');
+    const img3 = document.querySelector('.page-logo-3');
+
+    if (img1) img1.src = logoUrl;
+    if (img2) img2.src = logoUrl;
+    if (img3) {
+      img3.src = logoUrl;
+      const observer = new MutationObserver(() => {
+        if (img3.getAttribute('src') !== logoUrl) {
+          img3.src = logoUrl;
+        }
+      });
+      observer.observe(img3, { attributes: true, attributeFilter: ['src'] });
+    }
+
+  } catch (error) {
+    console.error('Failed to load top logo:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const favoriteBtn = document.getElementById('favorite-btn');
+  if (favoriteBtn) {
+    favoriteBtn.addEventListener('click', function() {
+      const memberId = this.dataset.memberId;
+      const memberName = this.dataset.name;
+      const memberImage = this.dataset.image;
+      const pageUrl = window.location.href;
+
+      let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
+      const isFavorited = favorites.some(fav => fav.id === memberId);
+
+      if (isFavorited) {
+        favorites = favorites.filter(fav => fav.id !== memberId);
+        this.classList.remove('active');
+        this.querySelector('i').classList.remove('fas');
+        this.querySelector('i').classList.add('far');
+      } else {
+        favorites.push({
+          id: memberId,
+          name: memberName,
+          url: pageUrl,
+          image: memberImage
+        });
+        this.classList.add('active');
+        this.querySelector('i').classList.remove('far');
+        this.querySelector('i').classList.add('fas');
+      }
+
+      localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
+    });
+  }
+
+  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+    await FirebaseConfig.init();
+  }
+
   if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
     setTimeout(() => {
       window.FirebaseMemberLoader.init();
     }, 100);
   }
+
+  setTimeout(() => {
+    loadTopLogo();
+  }, 2000);
 });
 </script>
 </body>
