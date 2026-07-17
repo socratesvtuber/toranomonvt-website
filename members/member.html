@@ -224,9 +224,9 @@ async function loadTopLogo() {
     const submissions = Object.entries(data).map(([id, item]) => ({ id, ...item }));
     submissions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     const latest = submissions[0];
-    if (!latest || !latest.logoImageUrls || !latest.logoImageUrls.logo_1) return;
+    if (!latest || !latest.logoImageUrls) return;
 
-    const logoUrl = latest.logoImageUrls.logo_1;
+    const logoUrl = this.getHighestLogo(latest.logoImageUrls);
     console.log('loadTopLogo: logoUrl=', logoUrl);
 
     const img1 = document.getElementById('page-logo-1');
@@ -240,6 +240,17 @@ async function loadTopLogo() {
   } catch (error) {
     console.error('Failed to load top logo:', error);
   }
+}
+
+function getHighestLogo(logoImageUrls) {
+  if (!logoImageUrls) return '';
+  for (let i = 5; i >= 1; i--) {
+    const key = `logo_${i}`;
+    if (logoImageUrls[key]) {
+      return logoImageUrls[key];
+    }
+  }
+  return '';
 }
 
 function getDriveImageProxy(driveUrl) {
