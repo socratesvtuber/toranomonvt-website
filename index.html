@@ -19,7 +19,7 @@
 <body>
 <header class="site-header">
 <div class="brand">
-<div class="brand-mark"><img src="img/虎ノ門ロゴ大本.png" alt="虎ノ門ロゴ" class="brand-logo"></div>
+<div class="brand-mark"><img id="page-logo" src="img/虎ノ門ロゴ大本.png" alt="虎ノ門ロゴ" class="brand-logo" onerror="this.src='img/虎ノ門ロゴ大本.png'"></div>
 <div>
 <p class="eyebrow">配信者コミュニティ</p>
 <h1>虎ノ門 ～Vtuber を仕事にしよう！～</h1>
@@ -358,19 +358,50 @@ getFirebaseUrl() {
     }, 30000);
   },
   
-   getDriveImageProxy(driveUrl) {
-     if (!driveUrl) return '';
-     
-     // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
-     const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-     if (match && match[1]) {
-       const fileId = match[1];
-       return `https://lh3.googleusercontent.com/d/${fileId}`;
-     }
-     
-     return driveUrl;
-   }
- };
+  getDriveImageProxy(driveUrl) {
+    if (!driveUrl) return '';
+    
+    // Handle /file/d/FILE_ID/view format - convert to lh3.googleusercontent.com proxy format
+    const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+    
+    return driveUrl;
+  },
+
+  getHighestLogo(logoImageUrls) {
+    if (!logoImageUrls) return '';
+    for (let i = 5; i >= 1; i--) {
+      const key = `logo_${i}`;
+      if (logoImageUrls[key]) {
+        return logoImageUrls[key];
+      }
+    }
+    return '';
+  },
+
+  async loadLogo() {
+    const url = `${this.firebaseUrl}/top_submissions.json`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data) return;
+      const submissions = Object.entries(data).map(([id, item]) => ({ id, ...item }));
+      submissions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      const latest = submissions[0];
+      if (!latest || !latest.logoImageUrls) return;
+      const logoUrl = this.getHighestLogo(latest.logoImageUrls);
+      if (!logoUrl) return;
+      const img = document.getElementById('page-logo');
+      if (img) img.src = this.getDriveImageProxy(logoUrl);
+    } catch (error) {
+      console.error('HeroPanelLoader: Failed to load logo:', error);
+    }
+  }
+};
 
 // Initialize on DOM ready after Firebase config is loaded
 document.addEventListener('DOMContentLoaded', async () => {
@@ -604,7 +635,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
     await FirebaseConfig.init();
   }
-  HeroPanelLoader.init();
+  await HeroPanelLoader.init();
+  HeroPanelLoader.loadLogo();
 });
 </script>
 </body>
