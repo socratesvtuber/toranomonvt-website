@@ -275,6 +275,112 @@ var GOOGLE_DRIVE_FOLDER_ID = 'あなたのドライブフォルダ ID';
 
 ---
 
+## トップページ用 Google フォームの設定
+
+トップページ（`index.html`）のヒーローパネルとタイムラインは、別の Google フォームから Firebase の `top_submissions` ノードへ保存されたデータを使用します。
+
+### Firebase セキュリティルール
+
+トップページ用のノードに対するルールを追加してください：
+
+```json
+{
+  "rules": {
+    "top_submissions": {
+      ".read": true,
+      ".write": true,
+      "$submissionId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "top_form_errors": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
+```
+
+### トップページ用のフィールド定義
+
+トップページ用フォームには、以下の質問を追加してください（`code_top.gs` の `FIELD_DEFINITIONS` に対応）：
+
+#### ニュースセクション（ヒーパネル用）
+
+| Firebase フィールド | 質問タイトル例 |
+|---|---|
+| `news1_genre` | ニュース１_ジャンル |
+| `news1_headline` | ニュース１_見出し |
+| `news1_content` | ニュース１_内容 |
+| `news1_url` | ニュース１_URL |
+| `news2_genre` | ニュース２_ジャンル |
+| `news2_headline` | ニュース２_見出し |
+| `news2_content` | ニュース２_内容 |
+| `news2_url` | ニュース２_URL |
+| `news3_genre` | ニュース３_ジャンル |
+| `news3_headline` | ニュース３_見出し |
+| `news3_content` | ニュース３_内容 |
+| `news3_url` | ニュース３_URL |
+
+#### 過去のイベント・実績セクション（タイムライン用）
+
+| Firebase フィールド | 質問タイトル例 |
+|---|---|
+| `past_event1_date` | 過去のイベント、実績１_日付 |
+| `past_event1_headline` | 過去のイベント、実績１_見出し |
+| `past_event1_content` | 過去のイベント、実績１_内容 |
+| `past_event1_url` | 過去のイベント、実績１_URL |
+| `past_event2_date` | 過去のイベント、実績２_日付 |
+| `past_event2_headline` | 過去のイベント、実績２_見出し |
+| `past_event2_content` | 過去のイベント、実績２_内容 |
+| `past_event2_url` | 過去のイベント、実績２_URL |
+| `past_event3_date` | 過去のイベント、実績３_日付 |
+| `past_event3_headline` | 過去のイベント、実績３_見出し |
+| `past_event3_content` | 過去のイベント、実績３_内容 |
+| `past_event3_url` | 過去のイベント、実績３_URL |
+
+#### 画像・SNSセクション
+
+| Firebase フィールド | 質問タイトル例 |
+|---|---|
+| `logo_image_1` 〜 `logo_image_5` | ロゴ画像アップロード１〜５ |
+| `header_image_1` 〜 `header_image_5` | ヘッダ画像アップロード１〜５ |
+| `normal_image_1` 〜 `normal_image_5` | 通常画像アップロード１〜５ |
+| `email` | メール |
+| `x_twitter` | X（旧ツイッター） |
+| `tiktok` | TikTok |
+| `youtube` | YouTube |
+| `twitch` | Twitch |
+| `discord_invite` | Discord招待リンク |
+
+### トップページ用スクリプトの構成
+
+トップページ用の Google Apps Script には、以下のファイルを使用してください：
+
+- `config.gs` - Firebase 設定
+- `code_top.gs` - メインスクリプト（`onFormSubmit`、`storeInFirebase` など）
+- `appsscript.json` - マニフェスト
+
+### トリガー設定
+
+トップページ用フォームのトリガーも同様に設定してください：
+
+| 項目 | 設定値 |
+|------|--------|
+| 実行する関数 | `onFormSubmit` |
+| 実行者 | 自分 |
+| イベントのソース | フォームから |
+| イベントの種類 | フォーム送信時 |
+
+### 動作確認
+
+1. トップページ用フォームを送信
+2. Firebase コンソール → Realtime Database → `top_submissions` ノードが作成されていることを確認
+3. Web サイトのヒーローパネルとタイムラインにデータが反映されていることを確認
+
+---
+
 ## サポート
 
 問題が発生した場合は：
