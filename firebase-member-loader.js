@@ -838,9 +838,12 @@ this.renderQa(member.qa);
         
         for (let i = 0; i < voiceCount; i++) {
           const voiceUrl = voiceUrls[i];
+          const previewUrl = this.getVoicePreviewUrl(voiceUrl) || voiceUrl;
           
           buttonsHtml += `<div class="voice-btn-wrapper" style="display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px 12px 0;">
-            <button class="voice-play-btn" data-voice-index="${i}" data-voice-url="${this.escapeHtml(voiceUrl)}" style="width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--accent-gradient); color: #fff; font-size: 18px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">▶</button>
+            <div class="play-button-crop" data-voice-index="${i}" data-voice-url="${this.escapeHtml(previewUrl)}" style="width: 50px; height: 30px; overflow: hidden; position: relative; cursor: pointer; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background-color: #000;">
+              <iframe src="${previewUrl}" scrolling="no" style="position: absolute; width: 500px; height: 300px; top: -128px; left: -82px; border: none;"></iframe>
+            </div>
             <span style="color: var(--muted); font-size: 0.8rem; margin-top: 4px;">ボイス${i + 1}</span>
           </div>`;
         }
@@ -851,7 +854,7 @@ this.renderQa(member.qa);
         container.style.display = 'block';
         
         // Add click handlers for play buttons
-        container.querySelectorAll('.voice-play-btn').forEach(btn => {
+        container.querySelectorAll('.play-button-crop').forEach(btn => {
           btn.addEventListener('click', function() {
             const idx = parseInt(this.dataset.voiceIndex);
             const voiceUrl = voiceUrls[idx];
@@ -859,10 +862,15 @@ this.renderQa(member.qa);
             
             if (playerContainer) {
               playerContainer.style.display = 'block';
-              playerContainer.innerHTML = `<audio controls style="width: 100%;" autoplay>
-                <source src="${voiceUrl}" type="audio/mpeg">
-                <source src="${voiceUrl}" type="audio/mp4">
-              </audio>`;
+              if (window.FirebaseMemberLoader.isFirebaseStorageUrl(voiceUrl)) {
+                playerContainer.innerHTML = `<audio controls style="width: 100%;" autoplay>
+                  <source src="${voiceUrl}" type="audio/mpeg">
+                  <source src="${voiceUrl}" type="audio/mp4">
+                </audio>`;
+              } else {
+                const previewUrl = window.FirebaseMemberLoader.getVoicePreviewUrl(voiceUrl);
+                playerContainer.innerHTML = `<iframe src="${previewUrl || voiceUrl}" style="width: 100%; height: 80px; border: none; border-radius: 6px;" allowfullscreen></iframe>`;
+              }
             }
           });
         });
