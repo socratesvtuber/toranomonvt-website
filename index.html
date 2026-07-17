@@ -628,6 +628,46 @@ const HeroPanelLoader = {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  },
+
+  getDriveImageProxy(driveUrl) {
+    if (!driveUrl) return '';
+    const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    }
+    return driveUrl;
+  },
+
+  getHighestLogo(logoImageUrls) {
+    if (!logoImageUrls) return '';
+    for (let i = 5; i >= 1; i--) {
+      const key = `logo_${i}`;
+      if (logoImageUrls[key]) {
+        return logoImageUrls[key];
+      }
+    }
+    return '';
+  },
+
+  async loadLogo() {
+    const url = `${this.firebaseUrl}/top_submissions.json`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data) return;
+      const submissions = Object.entries(data).map(([id, item]) => ({ id, ...item }));
+      submissions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      const latest = submissions[0];
+      if (!latest || !latest.logoImageUrls) return;
+      const logoUrl = this.getHighestLogo(latest.logoImageUrls);
+      if (!logoUrl) return;
+      const img = document.getElementById('page-logo');
+      if (img) img.src = this.getDriveImageProxy(logoUrl);
+    } catch (error) {
+      console.error('HeroPanelLoader: Failed to load logo:', error);
+    }
   }
 };
 
