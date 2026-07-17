@@ -232,14 +232,24 @@ async function loadTopLogo() {
     const img1 = document.getElementById('page-logo-1');
     const img2 = document.getElementById('page-logo-2');
 
-    console.log('loadTopLogo: img1=', img1 ? img1.tagName + '#' + img1.id : 'null');
-    console.log('loadTopLogo: img2=', img2 ? img2.tagName + '#' + img2.id : 'null');
-
-    if (img1) img1.src = logoUrl;
-    if (img2) img2.src = logoUrl;
+    if (img1) img1.src = this.getDriveImageProxy(logoUrl);
+    if (img2) img2.src = this.getDriveImageProxy(logoUrl);
 
     console.log('loadTopLogo: img1.src after set=', img1 ? img1.src : 'N/A');
     console.log('loadTopLogo: img2.src after set=', img2 ? img2.src : 'N/A');
+  } catch (error) {
+    console.error('Failed to load top logo:', error);
+  }
+}
+
+function getDriveImageProxy(driveUrl) {
+  if (!driveUrl) return '';
+  const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+  }
+  return driveUrl;
+}
 
   } catch (error) {
     console.error('Failed to load top logo:', error);
