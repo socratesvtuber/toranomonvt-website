@@ -597,6 +597,15 @@ button, .button {
   letter-spacing: 0.12em;
 }
 
+.contact-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.contact-link:hover {
+  color: var(--accent);
+}
+
 .milestone-notification {
   position: fixed;
   top: 20px;

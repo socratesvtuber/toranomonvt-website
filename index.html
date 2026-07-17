@@ -110,19 +110,8 @@
 <h2>虎ノ門に参加して、一緒に未来をつくろう。</h2>
 <p>新規加入、コラボ・案件相談、メディア問い合わせなど。いつでもお気軽にご連絡ください。</p>
 </div>
-<div class="contact-card">
-<div>
-<p class="contact-label">メール</p>
-<p>toranomonvt@gmail.com</p>
-</div>
-<div>
-<p class="contact-label">Twitter</p>
-<p>@toranomonvt</p>
-</div>
-<div>
-<p class="contact-label">Discord</p>
-<p>非公開（コミュニティメンバーのみに公開）</p>
-</div>
+<div class="contact-card" id="hero-contact">
+<!-- Contact info will be loaded dynamically from Firebase -->
 </div>
 </section>
 </main>
@@ -507,6 +496,7 @@ const HeroPanelLoader = {
     container.innerHTML = panels.join('');
 
     this.renderTimeline(data);
+    this.renderContact(data);
   },
 
   renderTimeline(data) {
@@ -570,6 +560,34 @@ const HeroPanelLoader = {
     } catch {
       return false;
     }
+  },
+
+  renderContact(data) {
+    const container = document.getElementById('hero-contact');
+    if (!container) return;
+
+    const email = data.email || '';
+    const twitter = data.x_twitter || '';
+    const discord = data.discord_invite || '';
+
+    const emailLink = email ? `<a href="mailto:${this.escapeHtml(email)}" class="contact-link">${this.escapeHtml(email)}</a>` : '';
+    const twitterLink = twitter ? `<a href="https://twitter.com/${this.escapeHtml(twitter.replace(/^@/, ''))}" class="contact-link" target="_blank" rel="noopener noreferrer">${this.escapeHtml(twitter)}</a>` : '';
+    const discordLink = discord ? `<a href="${this.escapeHtml(discord)}" class="contact-link" target="_blank" rel="noopener noreferrer">Discord招待リンク</a>` : '';
+
+    container.innerHTML = `
+      <div>
+        <p class="contact-label">メール</p>
+        <p>${emailLink || '未設定'}</p>
+      </div>
+      <div>
+        <p class="contact-label">Twitter</p>
+        <p>${twitterLink || '未設定'}</p>
+      </div>
+      <div>
+        <p class="contact-label">Discord</p>
+        <p>${discordLink || '未設定'}</p>
+      </div>
+    `;
   },
 
   escapeHtml(str) {
