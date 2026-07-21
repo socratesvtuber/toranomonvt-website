@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>メンバー - 虎ノ門</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../member-page.css">
+<!-- Firebase Configuration -->
+<script src="../firebase-config.js"></script>
+<script src="../firebase-member-loader.js"></script>
+</head>
+<body>
+<header class="site-header" style="display: none;">
+<a href="../" class="brand-link">
+<div class="brand">
+<div class="brand-mark"><img id="page-logo-1" src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" class="brand-logo" onerror="this.src='../img/虎ノ門ロゴ分割 1.png'"></div>
+<div>
+<p class="eyebrow">配信者コミュニティ</p>
+<h1>虎ノ門 ～Vtuber を仕事にしよう！～</h1>
+</div>
+</div>
+</a>
+<nav class="site-nav">
+<a href="../#about">About</a>
+<a href="../#members">Members</a>
+<a href="../#projects">Projects</a>
+<a href="../#contact">Contact</a>
+</nav>
+</header>
+
+<!-- Brand logo fixed at top-left for member pages -->
+<div class="member-brand-overlay" style="position: fixed; top: 12px; left: 16px; z-index: 100; display: flex; align-items: center; gap: 8px; text-decoration: none;">
+  <a href="../" class="brand-link" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+    <img id="page-logo-2" src="../img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" style="height: 32px; width: auto;" onerror="this.src='../img/虎ノ門ロゴ分割 1.png'">
+  </a>
+</div>
+
+<main class="member-page">
+<!-- Loading state -->
+<div id="loading-state" class="loading-container">
+<div class="loading-spinner"></div>
+<p>データを読み込んでいます...</p>
+</div>
+
+<!-- Error state -->
+<div id="error-state" class="error-container" style="display: none;">
+<div class="error-icon">
+<i class="fas fa-exclamation-triangle"></i>
+</div>
+<p>エラーが発生しました</p>
+<p id="error-message" class="error-detail"></p>
+</div>
+
+<!-- Member content (dynamically rendered) -->
+<div id="member-root" style="display: none;">
+<section class="member-header">
+  <div class="member-header-image-container">
+    <img id="member-header-image" src="" alt="ヘッダー画像" class="member-header-image" onerror="this.style.display='none'">
+  </div>
+  <h1 id="member-name-display">メンバー名</h1>
+  <p class="member-subtitle" id="member-name-romaji" style="display: none;">Member Name</p>
+  <button class="favorite-btn" id="favorite-btn">
+    <i class="far fa-heart"></i>
+    <span>お気に入り</span>
+  </button>
+</section>
+
+<div class="member-content">
+<aside class="member-sidebar">
+<div class="illustration-container">
+<div class="costume-nav">
+<h4>衣装・資料</h4>
+<ul>
+<li><a href="#profile">プロフィール</a></li>
+<li><a href="#schedule">配信予定</a></li>
+<li><a href="#message">メッセージ</a></li>
+</ul>
+</div>
+<div class="illustration-box">
+  <img id="member-avatar" class="standing-illustration" src="" alt="メンバー画像" onerror="this.src='../img/虎ノ門ロゴ大本.png'">
+  <div id="voice-player-container" class="voice-player-container" style="margin-top: 12px; display: none;">
+    <iframe id="voice-iframe" src="" style="width: 100%; height: 80px; border: none; border-radius: 8px;"></iframe>
+  </div>
+</div>
+</div>
+</aside>
+
+<article class="member-main">
+<section class="member-section" id="profile">
+<h2>SNS リンク</h2>
+<div class="sns-links" id="sns-links">
+<!-- SNS links will be inserted here -->
+</div>
+</section>
+
+<section class="member-section">
+<h2>基本情報</h2>
+<dl class="member-info-grid" id="member-info-grid">
+<!-- Basic info will be inserted here -->
+</dl>
+</section>
+
+<section class="member-section">
+<h2>キャッチコピー</h2>
+<div class="section-content">
+<p id="member-catchcopy">キャッチコピーが表示されます</p>
+</div>
+</section>
+
+<section class="member-section">
+<h2>夢・目標</h2>
+<p id="member-dream">夢・目標が表示されます</p>
+</section>
+
+<section class="member-section">
+<h2>推しマーク</h2>
+<p id="member-sushi-mark">推しマーク</p>
+</section>
+
+<section class="member-section">
+<h2>配信用語</h2>
+<ul class="term-list" id="streaming-terms">
+<!-- Streaming terms will be inserted here -->
+</ul>
+</section>
+
+<section class="member-section">
+<h2>ユニット・プロジェクト</h2>
+<p id="member-unit-project">ユニット・プロジェクト</p>
+</section>
+
+<section class="member-section">
+<h2>クリエイター情報</h2>
+<dl class="creator-info" id="creator-info">
+<!-- Creator info will be inserted here -->
+</dl>
+</section>
+
+<section class="member-section">
+<h2>ファン・コミュニティ</h2>
+<dl class="community-info" id="community-info">
+<!-- Fan name and hashtag -->
+</dl>
+</section>
+
+<section class="member-section" id="schedule">
+<h2>配信予定</h2>
+<div class="schedule-info" id="schedule-info">
+<p>配信予定が表示されます</p>
+</div>
+</section>
+
+<section class="member-section">
+<h2>オススメ動画</h2>
+<ul class="video-list" id="recommended-videos">
+<!-- Video links -->
+</ul>
+</section>
+
+<section class="member-section">
+<h2>お知らせ・イベント予定</h2>
+<div class="announcement-box" id="announcement-box">
+<p>お知らせが表示されます</p>
+</div>
+</section>
+
+<section class="member-section">
+<h2>グッズ・音楽リンク</h2>
+<div class="links-grid" id="goods-music-links">
+<!-- Links -->
+</div>
+</section>
+
+<section class="member-section" id="message">
+<h2>ファンへ一言</h2>
+<blockquote class="message-box" id="message-box">
+ファンへのメッセージ
+</blockquote>
+</section>
+
+<section class="member-section">
+<h2>Q＆A</h2>
+<div class="qa-section" id="qa-section">
+<!-- Q&A items -->
+</div>
+</section>
+
+</article>
+</div>
+
+<div class="member-nav" id="member-nav">
+<!-- Navigation buttons will be inserted here -->
+</div>
+</div>
+</main>
+
+<footer class="site-footer">
+<p>&copy; 2026 虎ノ門 Community. All rights reserved.</p>
+</footer>
+
+<script src="../script.js"></script>
+<script src="../firebase-member-loader.js"></script>
+<script>
+async function loadTopLogo() {
+  let firebaseUrl = null;
+  if (typeof FIREBASE_DB_URL !== 'undefined' && FIREBASE_DB_URL && !FIREBASE_DB_URL.includes('%')) {
+    firebaseUrl = FIREBASE_DB_URL;
+  }
+
+  if (!firebaseUrl) return;
+
+  try {
+    const response = await fetch(`${firebaseUrl}/top_submissions.json`);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    if (!data) return;
+
+    const submissions = Object.entries(data).map(([id, item]) => ({ id, ...item }));
+    submissions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const latest = submissions[0];
+    if (!latest || !latest.logoImageUrls) return;
+
+    const logoUrl = this.getHighestLogo(latest.logoImageUrls);
+    console.log('loadTopLogo: logoUrl=', logoUrl);
+
+    const img1 = document.getElementById('page-logo-1');
+    const img2 = document.getElementById('page-logo-2');
+
+    if (img1) img1.src = this.getDriveImageProxy(logoUrl);
+    if (img2) img2.src = this.getDriveImageProxy(logoUrl);
+
+    console.log('loadTopLogo: img1.src after set=', img1 ? img1.src : 'N/A');
+    console.log('loadTopLogo: img2.src after set=', img2 ? img2.src : 'N/A');
+  } catch (error) {
+    console.error('Failed to load top logo:', error);
+  }
+}
+
+function getHighestLogo(logoImageUrls) {
+  if (!logoImageUrls) return '';
+  for (let i = 5; i >= 1; i--) {
+    const key = `logo_${i}`;
+    if (logoImageUrls[key]) {
+      return logoImageUrls[key];
+    }
+  }
+  return '';
+}
+
+function getDriveImageProxy(driveUrl) {
+  if (!driveUrl) return '';
+  const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+  }
+  return driveUrl;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const favoriteBtn = document.getElementById('favorite-btn');
+  if (favoriteBtn) {
+    favoriteBtn.addEventListener('click', function() {
+      const memberId = this.dataset.memberId;
+      const memberName = this.dataset.name;
+      const memberImage = this.dataset.image;
+      const pageUrl = window.location.href;
+
+      let favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
+      const isFavorited = favorites.some(fav => fav.id === memberId);
+
+      if (isFavorited) {
+        favorites = favorites.filter(fav => fav.id !== memberId);
+        this.classList.remove('active');
+        this.querySelector('i').classList.remove('fas');
+        this.querySelector('i').classList.add('far');
+      } else {
+        favorites.push({
+          id: memberId,
+          name: memberName,
+          url: pageUrl,
+          image: memberImage
+        });
+        this.classList.add('active');
+        this.querySelector('i').classList.remove('far');
+        this.querySelector('i').classList.add('fas');
+      }
+
+      localStorage.setItem('toranomon_favorites', JSON.stringify(favorites));
+    });
+  }
+
+  if (typeof FirebaseConfig !== 'undefined' && FirebaseConfig.init) {
+    await FirebaseConfig.init();
+  }
+
+  if (typeof window.FirebaseMemberLoader !== 'undefined' && window.FirebaseMemberLoader.init) {
+    setTimeout(() => {
+      window.FirebaseMemberLoader.init();
+    }, 100);
+  }
+
+  setTimeout(() => {
+    loadTopLogo();
+  }, 2000);
+});
+</script>
+</body>
+</html>

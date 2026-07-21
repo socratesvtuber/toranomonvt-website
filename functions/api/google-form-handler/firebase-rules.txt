@@ -1,0 +1,37 @@
+{
+  "rules": {
+    "form_submissions": {
+      ".read": true,
+      ".write": true,
+      "$submissionId": {
+        ".read": true,
+        ".write": true,
+        ".indexOn": ["timestamp", "public_flag"]
+      }
+    },
+    "form_errors": {
+      ".read": true,
+      ".write": true
+    },
+    "top_submissions": {
+      ".read": true,
+      ".write": true,
+      "$submissionId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "top_form_errors": {
+      ".read": true,
+      ".write": true
+    },
+    "public_members": {
+      ".read": true,
+      ".write": true,
+      "$memberId": {
+        ".read": true,
+        ".indexOn": ["timestamp", "public_flag"]
+      }
+    }
+  }
+}

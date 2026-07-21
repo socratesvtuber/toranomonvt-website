@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裏ノ門 - 虎ノ門 VT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="member-page.css">
+<style>
+.uranomon-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 40px 20px;
+}
+
+.uranomon-header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px #9f57ff, 0 0 20px #9f57ff, 0 0 30px #9f57ff;
+  }
+  to {
+    text-shadow: 0 0 20px #ff4466, 0 0 30px #ff4466, 0 0 40px #ff4466;
+  }
+}
+
+.uranomon-header h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin: 0 0 10px;
+  background: linear-gradient(45deg, #9f57ff, #ff4466, #ffb84d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.uranomon-subtitle {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.secret-message {
+  max-width: 800px;
+  margin: 0 auto 40px;
+  padding: 30px;
+  background: rgba(159, 87, 255, 0.1);
+  border: 1px solid rgba(159, 87, 255, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.secret-message h2 {
+  color: #9f57ff;
+  margin-top: 0;
+}
+
+.secret-message p {
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.secret-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.secret-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.secret-card:hover {
+  background: rgba(159, 87, 255, 0.15);
+  border-color: rgba(159, 87, 255, 0.5);
+  transform: translateY(-4px);
+}
+
+.secret-card h3 {
+  color: #ffb84d;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.secret-card p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.secret-card .icon {
+  font-size: 1.5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  margin-top: 40px;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.easter-egg-section {
+  margin-top: 60px;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(255, 184, 77, 0.1), rgba(255, 68, 102, 0.1));
+  border: 1px solid rgba(255, 184, 77, 0.2);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.easter-egg-section h3 {
+  color: #ffb84d;
+  margin-top: 0;
+}
+
+.easter-egg-section p {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.secret-code {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #9f57ff;
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+}
+
+/* Member favorites section */
+.favorites-section {
+  margin-top: 40px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+}
+
+.favorites-section h3 {
+  color: var(--accent);
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.favorites-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.favorite-member-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.favorite-member-card:hover {
+  background: rgba(255, 184, 77, 0.1);
+  border-color: rgba(255, 184, 77, 0.3);
+}
+
+.favorite-member-card a {
+  color: var(--text);
+  text-decoration: none;
+  display: block;
+}
+
+.favorite-member-card .member-avatar-small {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  background-size: cover;
+  background-position: center;
+}
+
+.favorite-member-card h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.empty-favorites {
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+<a href="./" class="brand-link">
+<div class="brand">
+<div class="brand-mark"><img src="img/虎ノ門ロゴ分割 1.png" alt="虎ノ門ロゴ" class="brand-logo"></div>
+<div>
+<p class="eyebrow">配信者コミュニティ</p>
+<h1>虎ノ門 ～Vtuber を仕事にしよう！～</h1>
+</div>
+</div>
+</a>
+<nav class="site-nav">
+<a href="index.html#about">About</a>
+<a href="index.html#members">Members</a>
+<a href="index.html#projects">Projects</a>
+<a href="index.html#contact">Contact</a>
+</nav>
+</header>
+
+<main class="uranomon-page">
+<section class="uranomon-header">
+<h1>裏ノ門</h1>
+<p class="uranomon-subtitle">Ura-no-mon - Secret Gate</p>
+</section>
+
+<div class="secret-message">
+<h2>🔐 ここは「裏ノ門」- あなただけの特別ページ</h2>
+<p>このページに辿り着いたあなた、おめでとうございます！ここは虎ノ門 VT の隠しページ。メンバーの裏話や、ここでしか見られない特別コンテンツを楽しんでください。</p>
+</div>
+
+<div class="secret-content">
+<div class="secret-card">
+<h3><span class="icon">🎭</span> メンバーの裏設定</h3>
+<p>実は夜叉姫、寝る前に必ずホラーゲームをプレイしている。かかには「寝る前に怖いのはやめよう」と言われている。</p>
+</div>
+
+<div class="secret-card">
+<h3><span class="icon">🎤</span> 次回のサプライズ</h3>
+<p>6 月 1 日、新メンバーが電撃デビュー予定！お楽しみに。このページでしか教えません。</p>
+</div>
+
+<div class="secret-card">
+<h3><span class="icon">🎁</span> 特別プレゼント</h3>
+<p>このページの URL を見つけた方限定で、オリジナル壁紙をプレゼント！Discord で「裏ノ門見た！」と伝えて。</p>
+</div>
+
+<div class="secret-card">
+<h3><span class="icon">🔑</span> 隠しコマンド</h3>
+<p>トップページのフッターにある「虎」のマークを 5 回連続クリックすると…？試したことは内緒だよ。</p>
+</div>
+</div>
+
+<section class="favorites-section" id="favorites">
+<h3><i class="fas fa-heart"></i> お気に入りメンバー</h3>
+<p style="color: var(--muted); margin-bottom: 0;">あなたがお気に入りに追加したメンバーです。</p>
+<div class="favorites-list" id="favorites-list">
+<div class="empty-favorites">
+<p>お気に入りメンバーはまだいません。</p>
+<p>メンバーページからハートマークをクリックして追加してください。</p>
+</div>
+</div>
+</section>
+
+<section class="easter-egg-section">
+<h3>🥚 Easter Egg</h3>
+<p>この秘密コードを Discord で入力すると、特別なロールがもらえます。</p>
+<p class="secret-code">TORANO2026SECRET</p>
+</section>
+
+<a href="index.html" class="back-link">
+<i class="fas fa-arrow-left"></i>
+トップページに戻る
+</a>
+</main>
+
+<footer class="site-footer">
+<p>© 2026 TORANOMON VT | 虎ノ門 VTer コミュニティ</p>
+</footer>
+
+<script>
+// Load favorites from localStorage
+function loadFavorites() {
+  const favorites = JSON.parse(localStorage.getItem('toranomon_favorites') || '[]');
+  const favoritesList = document.getElementById('favorites-list');
+  
+  if (favorites.length === 0) {
+    return;
+  }
+  
+  favoritesList.innerHTML = favorites.map(fav => `
+    <div class="favorite-member-card">
+      <a href="${fav.url}">
+        <div class="member-avatar-small" style="background-image: url('${fav.image}')"></div>
+        <h4>${fav.name}</h4>
+      </a>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadFavorites);
+</script>
+</body>
+</html>
