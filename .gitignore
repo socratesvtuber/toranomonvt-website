@@ -1,5 +1,9 @@
-# Google Apps Script configuration
-config.gs
+# Investigation scripts
+kensho/
+
+# Google Apps Script configuration (local only, not for GitHub)
+functions/api/google-form-handler/config.gs
+functions/api/google-form-handler/config_honban.gs
 
 # Local environment files
 .env
