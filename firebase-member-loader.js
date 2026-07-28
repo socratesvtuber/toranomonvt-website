@@ -844,11 +844,11 @@ this.renderQa(member.qa);
             <div class="play-button-crop" data-voice-index="${i}" data-voice-url="${this.escapeHtml(previewUrl)}" style="width: 50px; height: 30px; overflow: hidden; position: relative; cursor: pointer; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background-color: #000;">
               <iframe src="${previewUrl}" scrolling="no" style="position: absolute; width: 500px; height: 300px; top: -128px; left: -82px; border: none;"></iframe>
             </div>
-            <span style="color: var(--muted); font-size: 0.8rem; margin-top: 4px;">ボイス${i + 1}</span>
+            <span style="color: var(--muted); font-size: 0.8rem; margin-top: 4px;">Voice${i + 1}</span>
           </div>`;
         }
         
-        container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">音声ファイル</h4>
+        container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">Sound</h4>
           <div class="voice-buttons-row" style="display: flex; flex-wrap: wrap;">${buttonsHtml}</div>
           <div class="voice-player-dynamic" style="margin-top: 8px; display: none;"></div>`;
         container.style.display = 'block';
