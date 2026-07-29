@@ -110,6 +110,8 @@
   padding: 16px;
   width: auto;
   min-width: min-content;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .costume-nav h4 {
