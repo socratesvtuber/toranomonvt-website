@@ -838,31 +838,27 @@ this.renderQa(member.qa);
         
         for (let i = 0; i < voiceCount; i++) {
           const voiceUrl = voiceUrls[i];
-          const previewUrl = this.getVoicePreviewUrl(voiceUrl) || voiceUrl;
           
           buttonsHtml += `<div class="voice-btn-wrapper" style="display: inline-flex; flex-direction: column; align-items: center; margin: 0 8px 12px 0;">
-            <div class="play-button-crop" data-voice-index="${i}" data-voice-url="${this.escapeHtml(previewUrl)}" style="width: 50px; height: 30px; overflow: hidden; position: relative; cursor: pointer; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background-color: #000;">
-              <iframe src="${previewUrl}" scrolling="no" style="position: absolute; width: 500px; height: 300px; top: -128px; left: -82px; border: none;"></iframe>
-            </div>
+            <button class="voice-play-btn" data-voice-url="${this.escapeHtml(voiceUrl)}" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #ffb84d, #ff8b61); color: #08101f; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 14px rgba(255, 184, 77, 0.35); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+              ▶
+            </button>
             <span style="color: var(--muted); font-size: 0.8rem; margin-top: 4px;">Voice${i + 1}</span>
           </div>`;
         }
         
         container.innerHTML = `<h4 style="color: var(--accent); margin: 8px 0 6px 0; font-size: 0.95rem;">Sound</h4>
-          <div class="voice-buttons-row" style="display: flex; flex-wrap: wrap;">${buttonsHtml}</div>
-          <div class="voice-player-dynamic" style="margin-top: 8px; display: none;"></div>`;
+          <div class="voice-buttons-row" style="display: flex; flex-wrap: wrap;">${buttonsHtml}</div>`;
         container.style.display = 'block';
         
-        // Add click handlers for play buttons - open audio file in new window
-        container.querySelectorAll('.play-button-crop').forEach(btn => {
+        container.querySelectorAll('.voice-play-btn').forEach(btn => {
           btn.addEventListener('click', function() {
-            const idx = parseInt(this.dataset.voiceIndex);
-            const voiceUrl = voiceUrls[idx];
+            const voiceUrl = this.dataset.voiceUrl;
             const url = window.FirebaseMemberLoader.isFirebaseStorageUrl(voiceUrl)
               ? voiceUrl
               : window.FirebaseMemberLoader.getVoicePreviewUrl(voiceUrl) || voiceUrl;
             if (url) {
-              window.open(url, '_blank');
+              window.open(url, 'voicePlayer', 'width=400,height=200,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=yes');
             }
           });
         });
