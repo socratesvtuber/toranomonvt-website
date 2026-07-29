@@ -853,24 +853,16 @@ this.renderQa(member.qa);
           <div class="voice-player-dynamic" style="margin-top: 8px; display: none;"></div>`;
         container.style.display = 'block';
         
-        // Add click handlers for play buttons
+        // Add click handlers for play buttons - open audio file in new window
         container.querySelectorAll('.play-button-crop').forEach(btn => {
           btn.addEventListener('click', function() {
             const idx = parseInt(this.dataset.voiceIndex);
             const voiceUrl = voiceUrls[idx];
-            const playerContainer = container.parentElement.querySelector('.voice-player-dynamic');
-            
-            if (playerContainer) {
-              playerContainer.style.display = 'block';
-              if (window.FirebaseMemberLoader.isFirebaseStorageUrl(voiceUrl)) {
-                playerContainer.innerHTML = `<audio controls style="width: 100%;" autoplay>
-                  <source src="${voiceUrl}" type="audio/mpeg">
-                  <source src="${voiceUrl}" type="audio/mp4">
-                </audio>`;
-              } else {
-                const previewUrl = window.FirebaseMemberLoader.getVoicePreviewUrl(voiceUrl);
-                playerContainer.innerHTML = `<iframe src="${previewUrl || voiceUrl}" style="width: 100%; height: 80px; border: none; border-radius: 6px;" allowfullscreen></iframe>`;
-              }
+            const url = window.FirebaseMemberLoader.isFirebaseStorageUrl(voiceUrl)
+              ? voiceUrl
+              : window.FirebaseMemberLoader.getVoicePreviewUrl(voiceUrl) || voiceUrl;
+            if (url) {
+              window.open(url, '_blank');
             }
           });
         });

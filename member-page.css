@@ -202,7 +202,42 @@
 }
 
 .voice-play-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
+}
+
+/* Chromium (Chrome / Edge) 専用：Google Drive 再生ボタン位置補正 */
+.chromium-browser .play-button-crop {
+  --window-size: 41px;
+  --iframe-width: 620px;
+  --iframe-height: 400px;
+  --offset-left: -35px;
+  --offset-top: -147px;
+}
+
+.play-button-crop {
+  --window-size: 41px;
+  --iframe-width: 620px;
+  --iframe-height: 400px;
+  --offset-left: -35px;
+  --offset-top: -147px;
+  width: var(--window-size);
+  height: var(--window-size);
+  overflow: hidden;
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #000;
+  margin: 0 auto;
+}
+
+.play-button-crop iframe {
+  position: absolute;
+  width: var(--iframe-width);
+  height: var(--iframe-height);
+  top: var(--offset-top);
+  left: var(--offset-left);
+  border: none;
+  pointer-events: none;
 }
 
 /* Main Content */
