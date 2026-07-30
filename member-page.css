@@ -100,7 +100,7 @@
    display: grid;
    grid-template-columns: 1fr 4fr;
    gap: 20px;
-   align-items: start;
+   align-items: stretch;
 }
 
 .costume-nav {
@@ -154,7 +154,7 @@
    width: 100%;
    padding: 20px;
    margin: 0;
-   align-self: stretch;
+   height: 100%;
 }
 
 .standing-illustration {
