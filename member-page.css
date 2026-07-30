@@ -38,7 +38,7 @@
 
 .member-header-image-container {
   position: fixed;
-  top: 12px;
+  top: 0;
   left: 0;
   right: 0;
   width: 100%;
