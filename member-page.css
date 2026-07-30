@@ -98,6 +98,7 @@
 
 .illustration-container {
   display: flex;
+  flex-direction: column;
   gap: 20px;
   align-items: stretch;
 }
@@ -113,7 +114,7 @@
     white-space: nowrap;
     flex-shrink: 0;
     flex: 0 0 auto;
-    height: 55vh;
+    height: 58vh;
 }
 
 .costume-nav h4 {
@@ -158,7 +159,7 @@
     padding: 0;
     margin: 0;
     flex: 0 0 auto;
-    height: 55vh;
+    height: 58vh;
 }
 
 .standing-illustration {
@@ -187,7 +188,7 @@
     margin: 0;
     width: auto;
     flex: 1 1 auto;
-    height: 55vh;
+    height: 58vh;
     align-content: start;
 }
 
