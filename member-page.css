@@ -179,13 +179,15 @@ display: flex;
 .voice-player-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto;
+    grid-auto-rows: auto;
+    grid-auto-flow: row;
     gap: 12px;
     overflow-y: auto;
     margin: 0;
     width: auto;
     flex: 1 1 auto;
     height: 70vh;
+    align-content: start;
 }
 
 .voice-play-btn {
