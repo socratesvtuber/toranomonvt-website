@@ -100,6 +100,10 @@
   display: flex;
   gap: 20px;
   align-items: stretch;
+  width: 100%;
+  max-width: 1200px;
+  height: 62vh;
+  box-sizing: border-box;
 }
 
 .costume-nav {
